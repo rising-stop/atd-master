@@ -1,22 +1,22 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1.10)
-project(test)
+project(ShmService)
 
 #set include files: *.h, *.hpp, *.hh in this project
-FILE(GLOB_RECURSE PROJECT_HEADERS  
+file(GLOB_RECURSE PROJECT_HEADERS  
   "../test_unit/*.h")
 #set source files:*.cpp, *.c, *.cc in this project
-FILE(GLOB_RECURSE PROJECT_SOURCES  
+file(GLOB_RECURSE PROJECT_SOURCES  
   "main.cc")
 #set library files: *.lib in this project
 
 
 if (USE_CC_PEGASUS)
-    FILE(GLOB_RECURSE PROJECT_LIBRARIES
-    "../../bin_aarch64_pegasus/nodes/libplanning_common.so"
+    file(GLOB_RECURSE PROJECT_LIBRARIES
+    "../../upload_files/lib/libcommon.so"
     )
 else()
-    FILE(GLOB_RECURSE PROJECT_LIBRARIES
-    "../../bin/nodes/libplanning_common.so"
+    file(GLOB_RECURSE PROJECT_LIBRARIES
+    "../../bin/lib/libcommon.so"
     )
 endif()
 

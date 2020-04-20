@@ -1,8 +1,8 @@
 /*
  * \File
- * producer.c
+ * consumer.c
  * \Brief
- * Test shared-memory and message-queue
+ *
  */
 #include <errno.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@
 #include "modules/common/io/ipc/shm_com.h"
 
 int main(char argc, char* argv[]) {
-  FILE* fp_in = NULL;
+  FILE* fp_out = NULL;
   frame_t frame;
   int frame_cnt = 0;
 
@@ -27,10 +27,11 @@ int main(char argc, char* argv[]) {
   int shm_id;  // shared-memory id
   void* shared_memory = (void*)0;
   shared_use_st* shared_stuff;
+  int end_flag = 0;
 
-  /* Open input file */
-  if ((fp_in = fopen(TEST_FILE, "rb")) < 0) {
-    printf("Open input file failed: %s\n", TEST_FILE);
+  /* Open output file */
+  if ((fp_out = fopen(OUTPUT_FILE, "wb")) < 0) {
+    printf("Open output file failed: %s\n", OUTPUT_FILE);
     exit(EXIT_FAILURE);
   }
 
@@ -38,7 +39,7 @@ int main(char argc, char* argv[]) {
   init_frame(&frame, FYUV_WIDTH, FYUV_HEIGHT, YUV420);
   printf("FRAME: w = %d, h = %d\n", frame.frm_w, frame.frm_h);
 
-  /* Create and init semaphore */
+  /* Create semaphore */
   sem_id = semget((key_t)SEM_SEED, 1, 0666 | IPC_CREAT);
   if (sem_id == -1) {
     fprintf(stderr, "semget failed.\n");
@@ -58,34 +59,35 @@ int main(char argc, char* argv[]) {
     fprintf(stderr, "shmat failed.\n");
     exit(EXIT_FAILURE);
   }
-
   shared_stuff = (shared_use_st*)shared_memory;
-  shared_stuff->end_flag = 0;
 
   printf("FRAME_CNT: %d\n", frame_cnt);
-  set_semvalue(sem_id, 1);
+  /*
+   * 必须先置0，
+   * 否则会因生产者进程的异常退出未释放信号量而导致程序出错
+   */
+  set_semvalue(sem_id, 0);
 
-  while (read_frame_from_file(&frame, fp_in) == 0) {
+  do {
     semaphore_p(sem_id);
 
-    /* Write it into shared memory */
-    write_frame_into_shm(shared_stuff, &frame);
-    shared_stuff->end_flag = 0;
+    /* Read frame from shared-memory */
+    read_frame_from_shm(&frame, shared_stuff);
+    end_flag = shared_stuff->end_flag;
+
+    crop_frame(&frame, 10, 10, 40, 40);
+    write_frame_into_file(fp_out, &frame);
 
     semaphore_v(sem_id);
 
     frame_cnt++;
     printf("FRAME_CNT: %d\n", frame_cnt);
-  }
-  semaphore_p(sem_id);
-  shared_stuff->end_flag = 1;
-  semaphore_v(sem_id);
+  } while (!end_flag);
 
-  /* over */
-  printf("\nProducer over!\n");
-  fclose(fp_in);
+  /* Over */
+  printf("\nConsumer over!\n");
+  fclose(fp_out);
   free_frame(&frame);
-  del_semvalue(sem_id);
   if (shmdt(shared_memory) == -1) {
     fprintf(stderr, "shmdt failed.\n");
     exit(EXIT_FAILURE);
