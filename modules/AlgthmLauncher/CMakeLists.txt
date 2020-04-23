@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1.10)
-project(ShmService)
+project(AlgthmLauncher)
 
 #set include files: *.h, *.hpp, *.hh in this project
 #file(GLOB_RECURSE PROJECT_HEADERS  "")

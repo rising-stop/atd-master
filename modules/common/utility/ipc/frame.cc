@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <iostream>
+
 /*
  * \Brief
  * init frame
@@ -64,33 +66,24 @@ int free_frame(frame_p frame) {
  * \Brief
  * read a frame from file
  */
-int read_frame_from_file(frame_p frame, FILE* fp) {
+int read_frame(frame_p frame) {
   int ret;
-  assert(frame != NULL && fp != NULL);
+  assert(frame != NULL);
 
-  if (ret = (fread(frame->frm_comps, sizeof(char), frame->frm_size, fp)) !=
-            frame->frm_size) {
-    fprintf(stderr, "read_frame_from_file failed. %d\n", ret);
-    return 1;
+  for (int index4loop = 0; index4loop < frame->frm_size; index4loop++) {
+    if (index4loop == frame->frm_size - 1) {
+      frame->frm_comps[index4loop] = '\0';
+    } else {
+      frame->frm_comps[index4loop] = 'a';
+    }
   }
 
   return 0;
 }
 
-/*
- * \Brief
- * write a frame into file
- */
-int write_frame_into_file(FILE* fp, frame_p frame) {
-  assert(frame != NULL && fp != NULL);
-
-  if (fwrite(frame->frm_comps, sizeof(char), frame->frm_size, fp) !=
-      frame->frm_size) {
-    fprintf(stderr, "write_frame_into_file failed.\n");
-    return 1;
-  }
-
-  return 0;
+void write_frame(frame_p frame) {
+  std::cout << "frame length = " << frame->frm_size
+            << ", 10th element contents: " << frame->frm_comps[10] << std::endl;
 }
 
 /*

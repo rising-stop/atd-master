@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "modules/common/io/file_parser/xml_parser.h"
+#include "modules/common/utility/file_parser/xml_parser.h"
 #include "modules/common/common_support/observer/ObservingLogging.h"
 #include "modules/common/math/NumericalComputing/interpolation.h"
 

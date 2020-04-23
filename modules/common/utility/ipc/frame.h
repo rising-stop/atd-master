@@ -25,8 +25,8 @@ typedef struct {
 int init_frame(frame_p frame, int width, int height, frame_type_e type);
 int free_frame(frame_p frame);
 
-int read_frame_from_file(frame_p frame, FILE* fp);
-int write_frame_into_file(FILE* fp, frame_p frame);
+int read_frame(frame_p frame);
+void write_frame(frame_p frame);
 
 int read_frame_from_shm(frame_p frame, shared_use_st* shm);
 int write_frame_into_shm(shared_use_st* shm, frame_p frame);
