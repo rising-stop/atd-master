@@ -103,7 +103,7 @@ class Runtime_Counter {
 
 /* class : runtime observer */
 
-class Runtime_Observer : public Runtime_Calculator<milliseconds>,
+class Runtime_Observer : public Runtime_Calculator<microseconds>,
                          public Runtime_Counter {
  private:
   Runtime_Observer() { set_BeginStick(NODE_LAUNCH_STICK_ID); }

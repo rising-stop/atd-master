@@ -12,12 +12,16 @@
 #include <sys/shm.h>
 #include <unistd.h>
 
+#include <iostream>
 #include <thread>
 
+#include "modules/common/common_support/timer/timer.h"
 #include "modules/common/utility/ipc/common.h"
 #include "modules/common/utility/ipc/frame.h"
 #include "modules/common/utility/ipc/semaphore.h"
 #include "modules/common/utility/ipc/shm_com.h"
+
+#define SEM_SEED 1000
 
 int main(int argc, char* argv[]) {
   frame_t frame;
@@ -50,8 +54,12 @@ int main(int argc, char* argv[]) {
 
   printf("FRAME_CNT: %d\n", frame_cnt);
 
+  TIMER->set_BeginStick("counter");
   do {
-    sem_mutex.shared_unlock();
+    TIMER->set_EndStick("counter");
+    TIMER->set_BeginStick("counter");
+    atd::common::utility::shared_lock<atd::common::utility::Shared_SemMutex>
+        auto_lock(sem_mutex);
 
     /* Read frame from shared-memory */
     read_frame_from_shm(&frame, shared_stuff);
@@ -61,11 +69,12 @@ int main(int argc, char* argv[]) {
     write_frame(&frame);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    sem_mutex.shared_unlock();
 
     frame_cnt++;
     printf("FRAME_CNT: %d\n", frame_cnt);
-
+    std::cout << "last step elapse "
+              << static_cast<double>(TIMER->get_TimeGap("counter")) / 1000
+              << "ms" << std::endl;
   } while (!end_flag);
 
   /* Over */
