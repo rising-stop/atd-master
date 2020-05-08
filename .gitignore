@@ -2,3 +2,4 @@ build/*
 .vscode/
 bin/
 upload_files/
+3rd_party/
