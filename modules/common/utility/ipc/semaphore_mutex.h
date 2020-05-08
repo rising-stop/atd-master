@@ -1,5 +1,6 @@
-#ifndef _SEMAPHORE_H_
-#define _SEMAPHORE_H_
+/* Created by Liangle */
+
+#pragma once
 
 #include <sys/sem.h>
 
@@ -205,5 +206,3 @@ class shared_lock {
 }  // namespace utility
 }  // namespace common
 }  // namespace atd
-
-#endif
