@@ -1,10 +1,10 @@
+#ifndef _SEMAPHORE_H_
+#define _SEMAPHORE_H_
+
 #include <sys/sem.h>
 
 #include <type_traits>
 #include <unordered_map>
-
-#ifndef __SEMAPHORE_H__
-#define __SEMAPHORE_H__
 
 #define MAX_PROCESS_NUM 1000
 
@@ -33,7 +33,7 @@ namespace utility {
 class SemMutex {
  public:
   ::key_t get_Key() const;
-  int get_ShmID() const;
+  int get_SemID() const;
 
   /**
    * @brief general lock & unlock operation for Class SemMutex

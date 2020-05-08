@@ -1,4 +1,4 @@
-#include "semaphore.h"
+#include "semaphore_mutex.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -35,6 +35,8 @@ void SemMutex::Release_Sem() {
 }
 
 ::key_t SemMutex::get_Key() const { return key_; }
+
+int SemMutex::get_SemID() const { return semid_; }
 
 SemMutex::SemMutex(::key_t key) : key_(key) {}
 
@@ -86,7 +88,6 @@ Dual_SemMutex::Dual_SemMutex(::key_t key) : SemMutex(key) {
   auto res = Register_Sem(1);
 }
 Dual_SemMutex::~Dual_SemMutex() {}
-
 
 Shared_SemMutex::Shared_SemMutex(::key_t key) : SemMutex(key) {
   auto res = Register_Sem(1);
