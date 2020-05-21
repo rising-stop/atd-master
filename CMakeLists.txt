@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.14.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 project(atd-master)
 
 # predefined symbol : USE_CC_PEGASUS(OFF)

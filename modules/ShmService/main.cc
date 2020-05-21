@@ -1,9 +1,3 @@
-/*
- * \File
- * producer.c
- * \Brief
- * Test shared-memory and message-queue
- */
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -19,7 +13,7 @@
 #include "modules/common/common_support/timer/timer.h"
 #include "modules/common/utility/ipc/common.h"
 #include "modules/common/utility/ipc/frame.h"
-#include "modules/common/utility/ipc/semaphore.h"
+#include "modules/common/utility/ipc/semaphore_mutex.h"
 #include "modules/common/utility/ipc/shm_com.h"
 
 #define SEM_SEED 1000

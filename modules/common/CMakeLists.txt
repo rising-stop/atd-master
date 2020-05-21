@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.14.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 project(common)
 
 #set include files: *.h, *.hpp, *.hh in this project

@@ -3,3 +3,4 @@ build/*
 bin/
 upload_files/
 3rd_party/
+cmake_build.sh

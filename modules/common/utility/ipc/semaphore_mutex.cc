@@ -9,7 +9,7 @@ namespace utility {
 
 std::unordered_map<::key_t, std::pair<int, int>> SemMutex::registered_sems_;
 
-std::pair<int, int> SemMutex::Register_Sem(int sgnl_num) {
+std::pair<int, int> SemMutex::register_sem(int sgnl_num) {
   semid_ = semget(key_, sgnl_num, 0666 | IPC_CREAT | IPC_EXCL);
   if (semid_ != -1) {
     init();
@@ -24,23 +24,34 @@ std::pair<int, int> SemMutex::Register_Sem(int sgnl_num) {
       std::make_pair(key_, std::make_pair(semid_, sgnl_num)));
 }
 
-void SemMutex::Release_Sem() {
+void SemMutex::release_all_sem() {
   semun sem_union;
   for (auto sem4loop : registered_sems_) {
     for (int index4loop = 0; index4loop < sem4loop.second.second;
          index4loop++) {
-      semctl(sem4loop.second.first, index4loop, IPC_RMID, sem_union);
+      semctl(sem4loop.second.first, sem4loop.second.second, IPC_RMID,
+             sem_union);
     }
+  }
+  registered_sems_.clear();
+}
+
+void SemMutex::release_sem() {
+  semun sem_union;
+  auto itr_sem = registered_sems_.find(key_);
+  if (itr_sem != registered_sems_.end()) {
+    semctl(itr_sem->second.first, itr_sem->second.second, IPC_RMID, sem_union);
+    registered_sems_.erase(itr_sem);
   }
 }
 
-::key_t SemMutex::get_Key() const { return key_; }
+::key_t SemMutex::get_key() const { return key_; }
 
-int SemMutex::get_SemID() const { return semid_; }
+int SemMutex::get_semID() const { return semid_; }
 
 SemMutex::SemMutex(::key_t key) : key_(key) {}
 
-SemMutex::~SemMutex() { Release_Sem(); }
+SemMutex::~SemMutex() {}
 
 void Dual_SemMutex::lock() {
   if (is_locked_) {
@@ -85,12 +96,12 @@ void Dual_SemMutex::init() {
 }
 
 Dual_SemMutex::Dual_SemMutex(::key_t key) : SemMutex(key) {
-  auto res = Register_Sem(1);
+  auto res = register_sem(1);
 }
 Dual_SemMutex::~Dual_SemMutex() {}
 
 Shared_SemMutex::Shared_SemMutex(::key_t key) : SemMutex(key) {
-  auto res = Register_Sem(1);
+  auto res = register_sem(1);
 }
 
 void Shared_SemMutex::init() {

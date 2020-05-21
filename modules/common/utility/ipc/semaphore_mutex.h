@@ -33,8 +33,8 @@ namespace utility {
  */
 class SemMutex {
  public:
-  ::key_t get_Key() const;
-  int get_SemID() const;
+  ::key_t get_key() const;
+  int get_semID() const;
 
   /**
    * @brief general lock & unlock operation for Class SemMutex
@@ -56,7 +56,13 @@ class SemMutex {
    * @brief static member used for cleaning all sems
    * @note all sems will be cleared so it just supposed to run only once
    */
-  static void Release_Sem();
+  static void release_all_sem() noexcept;
+
+  /**
+   * @brief cleaning current sem
+   * @note normally should not be used
+   */
+  void release_sem() noexcept;
 
  protected:
   /**
@@ -69,7 +75,7 @@ class SemMutex {
    *     -res_pair.first: semid
    *     -res_pair.second: numbers of sem in this semid_
    */
-  std::pair<int, int> Register_Sem(int);
+  std::pair<int, int> register_sem(int);
 
   static std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal

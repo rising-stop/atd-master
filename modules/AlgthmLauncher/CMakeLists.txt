@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.10)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 project(AlgthmLauncher)
 
 #set include files: *.h, *.hpp, *.hh in this project
