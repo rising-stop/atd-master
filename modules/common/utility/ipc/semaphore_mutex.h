@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "modules/common/utility/utility.h"
+
 #define MAX_PROCESS_NUM 1000
 
 /**
@@ -24,33 +26,7 @@ namespace atd {
 namespace common {
 namespace utility {
 
-/**
- * @brief common base class SemMutex
- *   1. provide lock and unlock virtual method
- *   2. provide registration pool of all sem locks
- *   3. provide common register method Register_Sem
- *   4. provide common unregister method Release_Sem
- */
-class SemMutex {
- public:
-  ::key_t get_key() const;
-  int get_semID() const;
-
-  /**
-   * @brief general lock & unlock operation for Class SemMutex
-   */
-  virtual void lock() = 0;
-  virtual void unlock() = 0;
-
- protected:
-  /**
-   * @brief virtual method init for Class SemMutex
-   * usually setting sem value as 1
-   */
-  virtual void init() = 0;
-  ::key_t key_;    /* unique key value for sem */
-  int semid_ = -1; /* sem id generate by semget function */
-
+class SemDispather {
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -80,6 +56,33 @@ class SemMutex {
   static std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal
                            number*/
+  SINGLETON(SemDispather)
+};
+
+/**
+ * @brief common base class SemMutex
+ *   1. provide lock and unlock virtual method
+ *   2. provide registration pool of all sem locks
+ *   3. provide common register method Register_Sem
+ *   4. provide common unregister method Release_Sem
+ */
+class SemMutex {
+ public:
+  int get_SemID() const;
+
+  /**
+   * @brief general lock & unlock operation for Class SemMutex
+   */
+  virtual void lock() = 0;
+  virtual void unlock() = 0;
+
+ protected:
+  /**
+   * @brief virtual method init for Class SemMutex
+   * usually setting sem value as 1
+   */
+  virtual void init() = 0;
+  int sem_id_ = -1; /* sem id generate by semget function */
 
  public:
   SemMutex() = delete;
@@ -88,7 +91,7 @@ class SemMutex {
    * mutex
    * @param int key, unique key value
    */
-  explicit SemMutex(::key_t);
+  explicit SemMutex(int);
   /**
    * @brief virtual deconstructor, clear all registered semid_
    */
@@ -116,7 +119,7 @@ class Dual_SemMutex : public SemMutex {
 
  public:
   Dual_SemMutex() = delete;
-  explicit Dual_SemMutex(::key_t);
+  explicit Dual_SemMutex(int);
   virtual ~Dual_SemMutex();
 };
 
@@ -147,7 +150,7 @@ class Shared_SemMutex : public SemMutex {
 
  public:
   Shared_SemMutex() = delete;
-  explicit Shared_SemMutex(::key_t);
+  explicit Shared_SemMutex(int);
   ~Shared_SemMutex();
 };
 
