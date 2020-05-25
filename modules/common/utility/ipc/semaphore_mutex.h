@@ -26,7 +26,7 @@ namespace atd {
 namespace common {
 namespace utility {
 
-class SemDispather {
+class SemDispatcher {
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -58,7 +58,7 @@ class SemDispather {
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal
                            number*/
-  SINGLETON(SemDispather)
+  SINGLETON(SemDispatcher)
 };
 
 /**
@@ -101,10 +101,10 @@ class SemMutex {
 };
 
 /**
- * @brief Dual_SemMutex, provide dual mutex between different process
+ * @brief DualSemMutex, provide dual mutex between different process
  *   1. provide dual mutex lock and unlock virtual method
  */
-class Dual_SemMutex : public SemMutex {
+class DualSemMutex : public SemMutex {
  public:
   /**
    * @brief overloaded lock & unlock operation for Dual_Mutex
@@ -120,17 +120,17 @@ class Dual_SemMutex : public SemMutex {
   bool is_locked_ = false; /* mutex flag for lock and unlock operatiion */
 
  public:
-  Dual_SemMutex() = delete;
-  explicit Dual_SemMutex(int);
-  virtual ~Dual_SemMutex();
+  DualSemMutex() = delete;
+  explicit DualSemMutex(int);
+  virtual ~DualSemMutex();
 };
 
 /**
- * @brief Shared_SemMutex, read lock will not be blocked by other read locks
+ * @brief SharedSemMutex, read lock will not be blocked by other read locks
  *   1. provide shared mutex lock and unlock virtual method
  *   2. provide shared mutex shared_lock and shared_unlock method
  */
-class Shared_SemMutex : public SemMutex {
+class SharedSemMutex : public SemMutex {
  public:
   virtual void lock() override;
   virtual void unlock() override;
@@ -151,9 +151,9 @@ class Shared_SemMutex : public SemMutex {
       false; /* mutex flag for shared_lock and shared_unlock */
 
  public:
-  Shared_SemMutex() = delete;
-  explicit Shared_SemMutex(int);
-  ~Shared_SemMutex();
+  SharedSemMutex() = delete;
+  explicit SharedSemMutex(int);
+  ~SharedSemMutex();
 };
 
 /**
@@ -191,7 +191,7 @@ class lock_guard {
 template <typename LOCK_TYPE>
 class shared_lock {
   typedef typename std::enable_if<
-      std::is_base_of<Shared_SemMutex, LOCK_TYPE>::value, LOCK_TYPE>::type
+      std::is_base_of<SharedSemMutex, LOCK_TYPE>::value, LOCK_TYPE>::type
       SHARED_LOCK;
 
  public:

@@ -3,7 +3,9 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <mutex>
+#include <sstream>
 #include <unordered_map>
 
 #include "exceptions.h"
@@ -34,9 +36,9 @@ namespace utility {
   TYPE(const TYPE &) = delete;                       \
   TYPE(TYPE &&) = delete;
 
-#define SINGLETON_MEMBER_REGISTER(TYPE)   \
-  TYPE *TYPE::instance_ = nullptr; \
-  std::once_flag TYPE::flag_init_; \
+#define SINGLETON_MEMBER_REGISTER(TYPE) \
+  TYPE *TYPE::instance_ = nullptr;      \
+  std::once_flag TYPE::flag_init_;      \
   std::mutex TYPE::instance_mutex_;
 
 /**
@@ -70,7 +72,7 @@ class Factory {
    * the registered class
    * @return True iff the key id is still available
    */
-  bool register(const IdentifierType &id, ProductCreator creator) {
+  bool product_register(const IdentifierType &id, ProductCreator creator) {
     return producers_.insert(std::make_pair(id, creator)).second;
   }
 
@@ -78,7 +80,7 @@ class Factory {
    * @brief Unregisters the class with the given identifier
    * @param id The identifier of the class to be unregistered
    */
-  bool unregister(const IdentifierType &id) {
+  bool product_unregister(const IdentifierType &id) {
     return producers_.erase(id) == 1;
   }
 
@@ -113,7 +115,9 @@ class Factory {
                                                 Args &&... args) {
     auto result = CreateObjectOrNull(id, args...);
     if (!result) {
-      throw CommonException("not found "s + id + " in factory"s);
+      std::stringstream sstm;
+      sstm << "not found " << id << " in factory";
+      throw CommonException(sstm.str());
     }
     return result;
   }

@@ -9,9 +9,9 @@ namespace atd {
 namespace common {
 namespace utility {
 
-SINGLETON_MEMBER_REGISTER(SemDispather)
+SINGLETON_MEMBER_REGISTER(SemDispatcher)
 
-int SemDispather::register_sem(::key_t key, int sgnl_num) {
+int SemDispatcher::register_sem(::key_t key, int sgnl_num) {
   auto semid = semget(key, sgnl_num, 0666 | IPC_CREAT | IPC_EXCL);
   if (semid == -1) {
     semid = semget(key, sgnl_num, 0666 | IPC_CREAT);
@@ -19,20 +19,20 @@ int SemDispather::register_sem(::key_t key, int sgnl_num) {
   if (semid == -1) {
     std::stringstream error_msg;
     error_msg << "semget error, errno: " << errno;
-    throw SemDispatcherException(key, SemDispatcherException::KEY_INVALID,
-                                 error_msg.str());
+    throw DispatcherException(key, DispatcherException::KEY_INVALID,
+                              error_msg.str());
   }
 
   registered_sems_.insert(std::make_pair(key, std::make_pair(semid, sgnl_num)));
 }
 
-void SemDispather::release_all_sem() {
+void SemDispatcher::release_all_sem() {
   for (auto item4loop : registered_sems_) {
     release_sem(item4loop.first);
   }
 }
 
-void SemDispather::release_sem(::key_t key) {
+void SemDispatcher::release_sem(::key_t key) {
   semun sem_union;
   auto itr_sem = registered_sems_.find(key);
   if (itr_sem != registered_sems_.end()) {
@@ -41,20 +41,20 @@ void SemDispather::release_sem(::key_t key) {
     if (res_semctl == -1) {
       std::stringstream error_msg;
       error_msg << "semctl error, errno: " << errno;
-      throw SemDispatcherException(
-          key, SemDispatcherException::SEM_RELEASE_ERROR, error_msg.str());
+      throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
+                                error_msg.str());
     }
     registered_sems_.erase(itr_sem);
   }
 }
 
-std::pair<int, int> SemDispather::get_SemInfo(::key_t key) const {
+std::pair<int, int> SemDispatcher::get_SemInfo(::key_t key) const {
   if (registered_sems_.find(key) != registered_sems_.end()) {
     return registered_sems_.at(key);
   } else {
     std::stringstream error_msg;
     error_msg << "key " << key << " not found";
-    throw SemDispatcherException(key, SemDispatcherException::KEY_NOT_EXIST,
+    throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
                                  error_msg.str());
   }
 }
@@ -65,7 +65,7 @@ SemMutex::SemMutex(int sem_id) : sem_id_(sem_id) {}
 
 SemMutex::~SemMutex() {}
 
-void Dual_SemMutex::lock() {
+void DualSemMutex::lock() {
   if (is_locked_) {
     throw SemException(sem_id_, SemException::DUAL_DOUBLE_LOCK, "double lock");
   }
@@ -82,7 +82,7 @@ void Dual_SemMutex::lock() {
   is_locked_ = true;
 }
 
-void Dual_SemMutex::unlock() {
+void DualSemMutex::unlock() {
   if (!is_locked_) {
     throw SemException(sem_id_, SemException::DUAL_DOUBLE_FREE, "double free");
   }
@@ -99,7 +99,7 @@ void Dual_SemMutex::unlock() {
   is_locked_ = false;
 }
 
-void Dual_SemMutex::init() {
+void DualSemMutex::init() {
   semun sem_union;
   sem_union.val = 1;
   if (semctl(sem_id_, 0, SETVAL, sem_union) == -1) {
@@ -109,12 +109,12 @@ void Dual_SemMutex::init() {
   }
 }
 
-Dual_SemMutex::Dual_SemMutex(int id) : SemMutex(id) {}
-Dual_SemMutex::~Dual_SemMutex() {}
+DualSemMutex::DualSemMutex(int id) : SemMutex(id) {}
+DualSemMutex::~DualSemMutex() {}
 
-Shared_SemMutex::Shared_SemMutex(int id) : SemMutex(id) {}
+SharedSemMutex::SharedSemMutex(int id) : SemMutex(id) {}
 
-void Shared_SemMutex::init() {
+void SharedSemMutex::init() {
   semun sem_union_write;
   sem_union_write.val = MAX_PROCESS_NUM;
   if (semctl(sem_id_, 0, SETVAL, sem_union_write) == -1) {
@@ -124,9 +124,9 @@ void Shared_SemMutex::init() {
   }
 }
 
-Shared_SemMutex::~Shared_SemMutex() {}
+SharedSemMutex::~SharedSemMutex() {}
 
-void Shared_SemMutex::lock() {
+void SharedSemMutex::lock() {
   if (is_locked_) {
     throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_LOCK,
                        "double lock");
@@ -144,7 +144,7 @@ void Shared_SemMutex::lock() {
   is_locked_ = true;
 }
 
-void Shared_SemMutex::unlock() {
+void SharedSemMutex::unlock() {
   if (!is_locked_) {
     throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_FREE,
                        "double free");
@@ -162,7 +162,7 @@ void Shared_SemMutex::unlock() {
   is_locked_ = false;
 }
 
-void Shared_SemMutex::shared_lock() {
+void SharedSemMutex::shared_lock() {
   if (is_shared_locked_) {
     throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_LOCK,
                        "double lock");
@@ -180,7 +180,7 @@ void Shared_SemMutex::shared_lock() {
   is_shared_locked_ = true;
 }
 
-void Shared_SemMutex::shared_unlock() {
+void SharedSemMutex::shared_unlock() {
   if (is_shared_locked_) {
     throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_FREE,
                        "double free");

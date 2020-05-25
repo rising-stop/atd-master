@@ -6,49 +6,71 @@
 
 #include <unordered_map>
 
-#define SHM_SEED 1001
-#define SINGLE_SHM_PIECE 2048 * 2048
+#include "modules/common/utility/utility.h"
 
-typedef struct {
-  int end_flag_;  //用来标记进程间的内存共享是否结束: 0, 未结束； 1， 结束
-  int embeded_space_;
-  char shm_space_[SINGLE_SHM_PIECE];  //共享内存的空间
-} shm_piece;
+#define SHM_SEED 1001
 
 namespace atd {
 namespace common {
 namespace utility {
 
-class SharedMemory {
+class ShmDispatcher {
  public:
-  ::key_t get_key() const;
-  int get_shmID() const;
-  int get_shm_size() const;
+  /**
+   * @brief static member used for cleaning all sems
+   * @note all sems will be cleared so it just supposed to run only once
+   */
+  void release_all_shm();
 
-  void* get_assigned_addr() const;
+  /**
+   * @brief cleaning current sem
+   * @note throw no exception, clear sem forcely
+   */
+  void release_shm(::key_t);
+
+  /**
+   * @brief sem register funtion
+   * using key to generate unique sem firstly, if successed, initialize sem
+   * values and return semid. If failed, try to get exising sem used same key.
+   * If all operation above failed, return -1
+   * @param ::key_t shm key_
+   *        int shm size
+   * @return int semid
+   * @note register throw no exceptions, when the key is occupied, the sem will
+   * be reset forcely
+   */
+  int register_shm(::key_t, int);
+
+  std::pair<int, int> get_ShmInfo(::key_t) const;
 
  private:
-  ::key_t key_;
+  std::unordered_map<::key_t, std::pair<int, int>>
+      registered_shms_; /* static member for restore all semid and its size*/
+  SINGLETON(ShmDispatcher)
+};
+
+class SharedMemory {
+ public:
+  int get_ShmID() const;
+  int get_ShmSize() const;
+
+  void* get_AssignedAddr() const;
+
+  void send_Msg(const std::string&);
+  void read_Msg(std::string&, int);
+
+ private:
+  void mount_Shm();
+  void unmount_Shm();
+
   int shmid_ = -1;
   int shmsize_ = -1;
   void* addr_;
 
  public:
-  static void release_all_shm();
-
-  void release_shm();
-
- private:
-  std::pair<int, int> register_shm(int);
-
-  void release_shm();
-
-  static std::unordered_map<::key_t, std::pair<int, int>> registered_shm_;
-
- public:
   SharedMemory() = delete;
-  SharedMemory(::key_t);
-  ~SharedMemory();
+  SharedMemory(int, int);
+  ~SharedMemory() = default;
 };
 
 // ShmSyncLink

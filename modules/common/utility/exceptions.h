@@ -78,12 +78,12 @@ class SemException : CommonException {
  * @brief Class SemDispatcherException
  * containing messages from class SemDispatcher
  */
-class SemDispatcherException : CommonException {
+class DispatcherException : CommonException {
  public:
   enum INVALID_PARTERN : int {
     UNKNOW = 0,
     KEY_INVALID = 1,
-    SEM_RELEASE_ERROR = 2,
+    UNABLE_RELEASE = 2,
     KEY_NOT_EXIST = 3
   };
 
@@ -95,15 +95,54 @@ class SemDispatcherException : CommonException {
   /**
    * @brief constructor:
    * @param
-   *   1. int key: sem id
+   *   1. int key: sem key
    *   2. INVALID_PARTERN error_code:  some invalid partern code
    *   3. const string&: error message
    */
-  SemDispatcherException(int key, INVALID_PARTERN error_code,
+  DispatcherException(int key, INVALID_PARTERN error_code,
                          const std::string& str)
       : key_(key), error_code_(error_code) {
     std::stringstream sstr;
     sstr << "key " << key << " throw error code "
+         << static_cast<int>(error_code_) << ": ";
+    set_Message(sstr.str() + str);
+  };
+};
+
+/**
+ * @brief Class SemDispatcherException
+ * containing messages from class SemDispatcher
+ */
+class ShmException : CommonException {
+ public:
+  enum INVALID_PARTERN : int {
+    UNKNOW = 0,
+    MSG_OVERFLOW = 1,
+    UNABLE_TO_READ = 2,
+    UNABLE_TO_WRITE = 3,
+    INVALID_ID = 4,
+    INVALID_SIZE = 5,
+    MEMORY_ASSIGN_ERROR = 6,
+    UNABLE_DETACH = 7
+  };
+
+ private:
+  int shm_id_;
+  INVALID_PARTERN error_code_;
+
+ public:
+  /**
+   * @brief constructor:
+   * @param
+   *   1. int key: sem id
+   *   2. INVALID_PARTERN error_code:  some invalid partern code
+   *   3. const string&: error message
+   */
+  ShmException(int id, INVALID_PARTERN error_code,
+                         const std::string& str)
+      : shm_id_(id), error_code_(error_code) {
+    std::stringstream sstr;
+    sstr << "id " << shm_id_ << " throw error code "
          << static_cast<int>(error_code_) << ": ";
     set_Message(sstr.str() + str);
   };
