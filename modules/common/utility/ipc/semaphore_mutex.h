@@ -32,28 +32,30 @@ class SemDispather {
    * @brief static member used for cleaning all sems
    * @note all sems will be cleared so it just supposed to run only once
    */
-  static void release_all_sem() noexcept;
+  void release_all_sem();
 
   /**
    * @brief cleaning current sem
-   * @note normally should not be used
+   * @note throw no exception, clear sem forcely
    */
-  void release_sem() noexcept;
+  void release_sem(::key_t);
 
- protected:
   /**
    * @brief sem register funtion
    * using key to generate unique sem firstly, if successed, initialize sem
    * values and return semid. If failed, try to get exising sem used same key.
    * If all operation above failed, return -1
    * @param int number of sems in semid_
-   * @return std::pair<int, int> res_pair
-   *     -res_pair.first: semid
-   *     -res_pair.second: numbers of sem in this semid_
+   * @return int semid
+   * @note register throw no exceptions, when the key is occupied, the sem will
+   * be reset forcely
    */
-  std::pair<int, int> register_sem(int);
+  int register_sem(::key_t, int);
 
-  static std::unordered_map<::key_t, std::pair<int, int>>
+  std::pair<int, int> get_SemInfo(::key_t) const;
+
+ private:
+  std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal
                            number*/
   SINGLETON(SemDispather)

@@ -11,42 +11,52 @@ namespace utility {
 
 SINGLETON_MEMBER_REGISTER(SemDispather)
 
-std::unordered_map<::key_t, std::pair<int, int>> SemDispather::registered_sems_;
+int SemDispather::register_sem(::key_t key, int sgnl_num) {
+  auto semid = semget(key, sgnl_num, 0666 | IPC_CREAT | IPC_EXCL);
+  if (semid == -1) {
+    semid = semget(key, sgnl_num, 0666 | IPC_CREAT);
+  }
+  if (semid == -1) {
+    std::stringstream error_msg;
+    error_msg << "semget error, errno: " << errno;
+    throw SemDispatcherException(key, SemDispatcherException::KEY_INVALID,
+                                 error_msg.str());
+  }
 
-std::pair<int, int> SemDispather::register_sem(int sgnl_num) {
-  // semid_ = semget(key_, sgnl_num, 0666 | IPC_CREAT | IPC_EXCL);
-  // if (semid_ != -1) {
-  //   init();
-  // } else {
-  //   semid_ = semget(key_, sgnl_num, 0666 | IPC_CREAT);
-  // }
-  // if (semid_ == -1) {
-  //   std::runtime_error("SemMutex::Register_Sem: sem register failed");
-  // }
-
-  // registered_sems_.insert(
-  //     std::make_pair(key_, std::make_pair(semid_, sgnl_num)));
+  registered_sems_.insert(std::make_pair(key, std::make_pair(semid, sgnl_num)));
 }
 
 void SemDispather::release_all_sem() {
-  // semun sem_union;
-  // for (auto sem4loop : registered_sems_) {
-  //   for (int index4loop = 0; index4loop < sem4loop.second.second;
-  //        index4loop++) {
-  //     semctl(sem4loop.second.first, sem4loop.second.second, IPC_RMID,
-  //            sem_union);
-  //   }
-  // }
-  // registered_sems_.clear();
+  for (auto item4loop : registered_sems_) {
+    release_sem(item4loop.first);
+  }
 }
 
-void SemDispather::release_sem() {
-  // semun sem_union;
-  // auto itr_sem = registered_sems_.find(key_);
-  // if (itr_sem != registered_sems_.end()) {
-  //   semctl(itr_sem->second.first, itr_sem->second.second, IPC_RMID,
-  //   sem_union); registered_sems_.erase(itr_sem);
-  // }
+void SemDispather::release_sem(::key_t key) {
+  semun sem_union;
+  auto itr_sem = registered_sems_.find(key);
+  if (itr_sem != registered_sems_.end()) {
+    auto res_semctl = semctl(itr_sem->second.first, itr_sem->second.second,
+                             IPC_RMID, sem_union);
+    if (res_semctl == -1) {
+      std::stringstream error_msg;
+      error_msg << "semctl error, errno: " << errno;
+      throw SemDispatcherException(
+          key, SemDispatcherException::SEM_RELEASE_ERROR, error_msg.str());
+    }
+    registered_sems_.erase(itr_sem);
+  }
+}
+
+std::pair<int, int> SemDispather::get_SemInfo(::key_t key) const {
+  if (registered_sems_.find(key) != registered_sems_.end()) {
+    return registered_sems_.at(key);
+  } else {
+    std::stringstream error_msg;
+    error_msg << "key " << key << " not found";
+    throw SemDispatcherException(key, SemDispatcherException::KEY_NOT_EXIST,
+                                 error_msg.str());
+  }
 }
 
 int SemMutex::get_SemID() const { return sem_id_; }

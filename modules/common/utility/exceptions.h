@@ -74,6 +74,41 @@ class SemException : CommonException {
   };
 };
 
+/**
+ * @brief Class SemDispatcherException
+ * containing messages from class SemDispatcher
+ */
+class SemDispatcherException : CommonException {
+ public:
+  enum INVALID_PARTERN : int {
+    UNKNOW = 0,
+    KEY_INVALID = 1,
+    SEM_RELEASE_ERROR = 2,
+    KEY_NOT_EXIST = 3
+  };
+
+ private:
+  int key_;
+  INVALID_PARTERN error_code_;
+
+ public:
+  /**
+   * @brief constructor:
+   * @param
+   *   1. int key: sem id
+   *   2. INVALID_PARTERN error_code:  some invalid partern code
+   *   3. const string&: error message
+   */
+  SemDispatcherException(int key, INVALID_PARTERN error_code,
+                         const std::string& str)
+      : key_(key), error_code_(error_code) {
+    std::stringstream sstr;
+    sstr << "key " << key << " throw error code "
+         << static_cast<int>(error_code_) << ": ";
+    set_Message(sstr.str() + str);
+  };
+};
+
 }  // namespace utility
 }  // namespace common
 }  // namespace atd
