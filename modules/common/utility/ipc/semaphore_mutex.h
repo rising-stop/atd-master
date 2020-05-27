@@ -60,6 +60,7 @@ class SemDispatcher {
                            number*/
   SINGLETON(SemDispatcher)
 };
+#define GET_SEMDISPATCHER atd::common::utility::SemDispatcher::instance()
 
 /**
  * @brief common base class SemMutex
@@ -190,9 +191,9 @@ class lock_guard {
  */
 template <typename LOCK_TYPE>
 class shared_lock {
-  typedef typename std::enable_if<
-      std::is_base_of<SharedSemMutex, LOCK_TYPE>::value, LOCK_TYPE>::type
-      SHARED_LOCK;
+  typedef
+      typename std::enable_if<std::is_base_of<SharedSemMutex, LOCK_TYPE>::value,
+                              LOCK_TYPE>::type SHARED_LOCK;
 
  public:
   void unlock() { lock_.shared_unlock(); }

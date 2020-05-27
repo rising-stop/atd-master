@@ -94,7 +94,7 @@ class Factory {
    * @param args the object construction arguments
    */
   template <typename... Args>
-  std::unique_ptr<AbstractProduct> CreateObjectOrNull(
+  std::unique_ptr<AbstractProduct> create_ObjectOrNull(
       const IdentifierType &id, Args &&... args) noexcept {
     auto id_iter = producers_.find(id);
     if (id_iter != producers_.end()) {
@@ -111,7 +111,7 @@ class Factory {
    * @param args the object construction arguments
    */
   template <typename... Args>
-  std::unique_ptr<AbstractProduct> CreateObject(const IdentifierType &id,
+  std::unique_ptr<AbstractProduct> create_Object(const IdentifierType &id,
                                                 Args &&... args) {
     auto result = CreateObjectOrNull(id, args...);
     if (!result) {

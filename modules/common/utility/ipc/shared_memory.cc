@@ -94,14 +94,14 @@ void SharedMemory::send_Msg(const std::string& str) {
          << shmsize_;
     throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
   }
-  auto res_ptr = memcpy(addr_, str.c_str(), msg_size);
+  auto res_ptr = memcpy(addr_, static_cast<const void*>(str.c_str()), msg_size);
   if (!res_ptr) {
     throw ShmException(shmid_, ShmException::UNABLE_TO_WRITE,
                        "memcpy returns a nullptr");
   }
 }
 
-void SharedMemory::read_Msg(std::string& str, int size) {
+void SharedMemory::read_Msg(std::string& str, size_t size) {
   if (size > shmsize_) {
     std::stringstream sstm;
     sstm << "shm message overflow, required size " << size << " shm size "
@@ -119,6 +119,11 @@ void SharedMemory::read_Msg(std::string& str, int size) {
 }
 
 SharedMemory::SharedMemory(int id, int size) : shmid_(id), shmsize_(size) {
+  mount_Shm();
+}
+
+SharedMemory::SharedMemory(std::pair<int, int> info)
+    : shmid_(info.first), shmsize_(info.second) {
   mount_Shm();
 }
 

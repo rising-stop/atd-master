@@ -8,8 +8,6 @@
 
 #include "modules/common/utility/utility.h"
 
-#define SHM_SEED 1001
-
 namespace atd {
 namespace common {
 namespace utility {
@@ -48,6 +46,7 @@ class ShmDispatcher {
       registered_shms_; /* static member for restore all semid and its size*/
   SINGLETON(ShmDispatcher)
 };
+#define GET_SHMDISPATCHER atd::common::utility::ShmDispatcher::instance()
 
 class SharedMemory {
  public:
@@ -57,19 +56,25 @@ class SharedMemory {
   void* get_AssignedAddr() const;
 
   void send_Msg(const std::string&);
-  void read_Msg(std::string&, int);
+  void read_Msg(std::string&, size_t);
+
+  template <typename TYPE>
+  void send_Msg(const TYPE&, size_t);
+  template <typename TYPE>
+  void read_Msg(TYPE&, size_t);
 
  private:
   void mount_Shm();
   void unmount_Shm();
 
-  int shmid_ = -1;
-  int shmsize_ = -1;
-  void* addr_;
+  int shmid_ = -1;   /* registered shm's id */
+  int shmsize_ = -1; /* registered shm's size */
+  void* addr_;       /* pointer that shared memory mapped */
 
  public:
   SharedMemory() = delete;
   SharedMemory(int, int);
+  SharedMemory(std::pair<int, int>);
   ~SharedMemory() = default;
 };
 
