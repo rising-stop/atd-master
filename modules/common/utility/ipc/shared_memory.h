@@ -44,7 +44,26 @@ class ShmDispatcher {
  private:
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_shms_; /* static member for restore all semid and its size*/
-  SINGLETON(ShmDispatcher)
+
+ public:
+  static ShmDispatcher* instance() {
+    std::lock_guard<std::mutex> lk(instance_mutex_);
+    std::call_once(flag_init_, &init);
+    // if (!instance_) {
+    //   instance_ = new ShmDispatcher();
+    // }
+    return instance_;
+  }
+
+ private:
+  static void init() { instance_ = new ShmDispatcher(); }
+  static ShmDispatcher* instance_;
+  static std::once_flag flag_init_;
+  static std::mutex instance_mutex_;
+  ShmDispatcher() = default;
+  ~ShmDispatcher() = default;
+  ShmDispatcher(const ShmDispatcher&) = delete;
+  ShmDispatcher(ShmDispatcher&&) = delete;
 };
 #define GET_SHMDISPATCHER atd::common::utility::ShmDispatcher::instance()
 
@@ -84,3 +103,5 @@ class SharedMemory {
 }  // namespace utility
 }  // namespace common
 }  // namespace atd
+
+#include "shared_memory.tcc"

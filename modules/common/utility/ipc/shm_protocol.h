@@ -35,12 +35,47 @@ typedef struct {
 
 typedef std::string UNIT_ID;
 
-typedef std::unordered_map<UNIT_ID, SHM_MODULE> COM_COMPONENT;
+typedef struct {
+  void clear() { com_compnents_.clear(); }
+
+  SHM_MODULE* add_ID(const UNIT_ID& id) {
+    if (com_compnents_.find(id) == com_compnents_.end()) {
+      com_compnents_.insert(std::make_pair(id, SHM_MODULE()));
+    }
+    return &com_compnents_[id];
+  }
+
+  bool try_get_ID(const UNIT_ID& id, SHM_MODULE& mdl) const {
+    if (com_compnents_.find(id) == com_compnents_.end()) {
+      return false;
+    }
+    mdl = com_compnents_.at(id);
+    return true;
+  }
+
+  std::unordered_map<UNIT_ID, SHM_MODULE> com_compnents_;
+} COM_COMPONENT;
 
 typedef std::unordered_map<UNIT_ID, COM_COMPONENT> COM_CONTAINER;
 
 typedef struct {
-  bool is_init_ = false;
+  void clear() { com_container_.clear(); }
+
+  COM_COMPONENT* add_ID(const UNIT_ID& id) {
+    if (com_container_.find(id) == com_container_.end()) {
+      com_container_.insert(std::make_pair(id, COM_COMPONENT()));
+    }
+    return &com_container_[id];
+  }
+
+  bool try_get_ID(const UNIT_ID& id, COM_COMPONENT& comp) const {
+    if (com_container_.find(id) == com_container_.end()) {
+      return false;
+    }
+    comp = com_container_.at(id);
+    return true;
+  }
+
   COM_CONTAINER com_container_;
 } SHM_DISTRIBUTOR;
 

@@ -1,16 +1,23 @@
 #include "shared_memory.h"
 
 #include <cstring>
+#include <iostream>
 #include <sstream>
 
 namespace atd {
 namespace common {
 namespace utility {
 
-SINGLETON_MEMBER_REGISTER(ShmDispatcher)
+// SINGLETON_MEMBER_REGISTER(ShmDispatcher)
+
+ShmDispatcher* ShmDispatcher::instance_ = nullptr;
+std::once_flag ShmDispatcher::flag_init_;
+std::mutex ShmDispatcher::instance_mutex_;
 
 int ShmDispatcher::register_shm(::key_t key, int size) {
+  std::cout << "ready to create shm" << std::endl;
   auto shmid = shmget(key, size, 0666 | IPC_CREAT | IPC_EXCL);
+  std::cout << "shmid = " << shmid << std::endl;
   if (shmid == -1) {
     shmid = shmget(key, size, 0666 | IPC_CREAT);
   }

@@ -12,4 +12,4 @@ endif()
 
 add_subdirectory(common)
 # add_subdirectory(AlgthmLauncher)
-# add_subdirectory(ShmService)
+add_subdirectory(ShmService)
