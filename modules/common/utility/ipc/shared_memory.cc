@@ -8,11 +8,7 @@ namespace atd {
 namespace common {
 namespace utility {
 
-// SINGLETON_MEMBER_REGISTER(ShmDispatcher)
-
-ShmDispatcher* ShmDispatcher::instance_ = nullptr;
-std::once_flag ShmDispatcher::flag_init_;
-std::mutex ShmDispatcher::instance_mutex_;
+SINGLETON_MEMBER_REGISTER(ShmDispatcher)
 
 int ShmDispatcher::register_shm(::key_t key, int size) {
   std::cout << "ready to create shm" << std::endl;

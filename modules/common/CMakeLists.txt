@@ -18,7 +18,7 @@ FILE(GLOB_RECURSE PROJECT_SOURCES
 # endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} -pthread)
 
 #add_executable(app_${PROJECT_NAME} "src/main.cc" ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 #target_link_libraries(app_${PROJECT_NAME} ${PROJECT_LIBRARIES} protobuf-lite lcm pthread)

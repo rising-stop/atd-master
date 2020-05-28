@@ -112,7 +112,7 @@ class Factory {
    */
   template <typename... Args>
   std::unique_ptr<AbstractProduct> create_Object(const IdentifierType &id,
-                                                Args &&... args) {
+                                                 Args &&... args) {
     auto result = CreateObjectOrNull(id, args...);
     if (!result) {
       std::stringstream sstm;
@@ -125,6 +125,43 @@ class Factory {
  private:
   MapContainer producers_;
 };
+
+/**
+ * @class Singleton
+ * @brief declare base class singleton
+ */
+// class Singleton {
+//  public:
+//   typedef std::string SGLTN_ID;
+//   template <typename SINGLETON_DERIVED>
+//   static typename std::enable_if<
+//       std::is_base_of<Singleton, SINGLETON_DERIVED>::value,
+//       SINGLETON_DERIVED>::type *
+//   instance(const SGLTN_ID &id) {
+//     std::call_once(flag_init_, &init);
+//     return dynamic_cast<SINGLETON_DERIVED *>(registry_[id]);
+//   }
+
+//  protected:
+//   template <typename SINGLETON_DERIVED>
+//   bool try_register(const SGLTN_ID &id, SINGLETON_DERIVED *ptr_instnc) {
+//     auto insrt_res = registry_.insert(std::make_pair(id, ptr_instnc));
+//     if (!insrt_res.second) {
+//       return false;
+//     }
+//     return true;
+//   }
+
+//  private:
+//   static std::once_flag flag_init_;
+//   static std::unordered_map<SGLTN_ID, Singleton *> registry_;
+
+//  protected:
+//   Singleton() = default;
+//   ~Singleton() = default;
+//   Singleton(const Singleton &) = delete;
+//   Singleton(Singleton &&) = delete;
+// };
 
 }  // namespace utility
 }  // namespace common

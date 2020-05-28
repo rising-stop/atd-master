@@ -12,6 +12,7 @@
 #define MAX_PROCESS_NUM 1000
 
 /**
+ * @union semun
  * @brief union semun
  * union struct for sem, used for setting value of single sem
  * general style used in sem for linux
@@ -26,6 +27,11 @@ namespace atd {
 namespace common {
 namespace utility {
 
+/**
+ * @class SemDispatcher
+ * @brief static member used for cleaning all sems
+ * @note all sems will be cleared so it just supposed to run only once
+ */
 class SemDispatcher {
  public:
   /**
