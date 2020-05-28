@@ -50,10 +50,11 @@ class ShmDispatcher {
 
 class SharedMemory {
  public:
-  int get_ShmID() const;
-  int get_ShmSize() const;
+  static std::pair<int, size_t> try_get_ShmID(::key_t, size_t);
 
-  void* get_AssignedAddr() const;
+  int get_ShmID() const;
+  size_t get_ShmSize() const;
+  const void* get_AssignedAddr() const;
 
   void send_Msg(const std::string&);
   void read_Msg(std::string&, size_t);
@@ -67,14 +68,14 @@ class SharedMemory {
   void mount_Shm();
   void unmount_Shm();
 
-  int shmid_ = -1;   /* registered shm's id */
-  int shmsize_ = -1; /* registered shm's size */
-  void* addr_;       /* pointer that shared memory mapped */
+  int shmid_ = -1;      /* registered shm's id */
+  size_t shmsize_ = -1; /* registered shm's size */
+  void* addr_;          /* pointer that shared memory mapped */
 
  public:
   SharedMemory() = delete;
-  SharedMemory(int, int);
-  SharedMemory(std::pair<int, int>);
+  SharedMemory(int, size_t);
+  SharedMemory(std::pair<int, size_t>);
   ~SharedMemory() = default;
 };
 

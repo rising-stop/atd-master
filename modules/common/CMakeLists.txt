@@ -3,10 +3,12 @@ project(common)
 
 #set include files: *.h, *.hpp, *.hh in this project
 FILE(GLOB_RECURSE PROJECT_HEADERS  
-  "../common/*.h")
+  "../common/*.h"
+  "../protobuf_msg/*.h")
 #set source files:*.cpp, *.c, *.cc in this project
 FILE(GLOB_RECURSE PROJECT_SOURCES  
-  "../common/*.cc")
+  "../common/*.cc"
+  "../protobuf_msg/*.cc")
 
 #set library files: *.lib in this project
 # if (USE_CC_PEGASUS)

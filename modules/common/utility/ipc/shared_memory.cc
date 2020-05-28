@@ -1,7 +1,6 @@
 #include "shared_memory.h"
 
 #include <cstring>
-#include <iostream>
 #include <sstream>
 
 namespace atd {
@@ -11,9 +10,7 @@ namespace utility {
 SINGLETON_MEMBER_REGISTER(ShmDispatcher)
 
 int ShmDispatcher::register_shm(::key_t key, int size) {
-  std::cout << "ready to create shm" << std::endl;
   auto shmid = shmget(key, size, 0666 | IPC_CREAT | IPC_EXCL);
-  std::cout << "shmid = " << shmid << std::endl;
   if (shmid == -1) {
     shmid = shmget(key, size, 0666 | IPC_CREAT);
   }
@@ -57,6 +54,10 @@ std::pair<int, int> ShmDispatcher::get_ShmInfo(::key_t key) const {
                               error_msg.str());
   }
 }
+
+int SharedMemory::get_ShmID() const { return shmid_; }
+size_t SharedMemory::get_ShmSize() const { return shmsize_; }
+const void* SharedMemory::get_AssignedAddr() const { return addr_; }
 
 void SharedMemory::mount_Shm() {
   if (shmid_ < 0) {
@@ -121,13 +122,25 @@ void SharedMemory::read_Msg(std::string& str, size_t size) {
   str.copy(ptr_char, size);
 }
 
-SharedMemory::SharedMemory(int id, int size) : shmid_(id), shmsize_(size) {
+SharedMemory::SharedMemory(int id, size_t size) : shmid_(id), shmsize_(size) {
   mount_Shm();
 }
 
-SharedMemory::SharedMemory(std::pair<int, int> info)
+SharedMemory::SharedMemory(std::pair<int, size_t> info)
     : shmid_(info.first), shmsize_(info.second) {
   mount_Shm();
+}
+
+std::pair<int, size_t> SharedMemory::try_get_ShmID(::key_t key, size_t size) {
+  int shmid = shmget(key, size, 0666);
+  if (shmid == -1) {
+    std::stringstream error_msg;
+    error_msg << "semget error, errno: " << errno
+              << " waiting DISPATCHER to be created, DISPATCHER key: "
+              << key;
+    throw ShmException(0, ShmException::DISPATCHER_DENIED, error_msg.str());
+  }
+  return std::make_pair(shmid, size);
 }
 
 }  // namespace utility

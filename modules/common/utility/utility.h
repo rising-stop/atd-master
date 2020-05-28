@@ -145,11 +145,7 @@ class Factory {
 //  protected:
 //   template <typename SINGLETON_DERIVED>
 //   bool try_register(const SGLTN_ID &id, SINGLETON_DERIVED *ptr_instnc) {
-//     auto insrt_res = registry_.insert(std::make_pair(id, ptr_instnc));
-//     if (!insrt_res.second) {
-//       return false;
-//     }
-//     return true;
+//     return registry_.insert(std::make_pair(id, ptr_instnc)).second;
 //   }
 
 //  private:
