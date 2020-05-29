@@ -8,14 +8,14 @@ set(PROTOBUF_SRC_DIR ${ATD_MASTER_ROOT}/protobuf_msg)
 
 message("start generating protobuf message")
 execute_process(COMMAND sh protobuf_generate_cpp.sh ${PROTOBUF_LIB_DIR} ${PROTOC_PATH} ${PROTOBUF_HEADER_DIR} ${PROTOBUF_SRC_DIR}
-				WORKING_DIRECTORY ${PROTOBUF_HEADER_DIR}
-				RESULT_VARIABLE RES
-				OUTPUT_VARIABLE OUT_RES
-				ERROR_VARIABLE ERROR_RES)
+	WORKING_DIRECTORY ${PROTOBUF_HEADER_DIR}
+	RESULT_VARIABLE RES
+	OUTPUT_VARIABLE OUT_RES
+	ERROR_VARIABLE ERROR_RES)
 
-if( NOT "${RES}" STREQUAL "" )
-	message("${RES}")
-endif()
+#if( NOT "${RES}" STREQUAL "" )
+#	message("${RES}")
+#endif()
 if( NOT "${OUT_RES}" STREQUAL "" )
 	message("${OUT_RES}")
 endif()

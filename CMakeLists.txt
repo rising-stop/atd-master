@@ -10,8 +10,9 @@ set(ATD_MASTER_ROOT ${PROJECT_SOURCE_DIR})
 include_directories(${ATD_MASTER_ROOT})
 
 set(ATD_MASTER_3RDPARTY_LIBS_DIR ${ATD_MASTER_ROOT}/3rd_party)
-
 set(PROTOBUF_INSTALL_PATH ${ATD_MASTER_3RDPARTY_LIBS_DIR}/protobuf-3.3.0)
+set(PROTO_MSG_PATH ${ATD_MASTER_ROOT}/protobuf_msg)
+include_directories(${PROTO_MSG_PATH})
 
 if (USE_CC_PEGASUS)
 

@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package atd.common.msg;
+
+message shminfo {
+	enum shmmode{
+		READ_ONLY = 0;
+		WRITE_AVAILABLE = 1;
+	}
+	uint32 shm_id = 1;
+	uint64 shm_size = 2;
+	shmmode mode = 3;
+	uint32 sem_id = 4;
+	uint32 sem_num = 5;
+}
+
+message shm_channel {
+	map<string, shminfo> channal = 1;
+}
+
+message shm_package {
+	map<string, shm_channel> package = 1;
+}

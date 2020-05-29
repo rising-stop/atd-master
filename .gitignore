@@ -4,3 +4,5 @@ bin/
 upload_files/
 3rd_party/
 cmake_build.sh
+protobuf_msg/*h
+protobuf_msg/*cc
