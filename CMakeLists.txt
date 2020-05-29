@@ -34,4 +34,4 @@ message("ATD_MASTER_ROOT: ${ATD_MASTER_ROOT}")
 message("PROTOBUF_INSTALL_PATH: ${PROTOBUF_INSTALL_PATH}")
 
 add_subdirectory(protobuf_msg)
-# add_subdirectory(modules)
+add_subdirectory(modules)

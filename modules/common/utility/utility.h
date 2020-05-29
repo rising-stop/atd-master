@@ -137,24 +137,32 @@ class Singleton {
   static typename std::enable_if<
       std::is_base_of<Singleton, SINGLETON_DERIVED>::value,
       SINGLETON_DERIVED>::type *
-  instance(const SGLTN_ID &id) {
-    std::call_once(flag_init_, &init);
-    return dynamic_cast<SINGLETON_DERIVED *>(registry_[id]);
+  instance() {
+    SGLTN_ID id = typeid(SINGLETON_DERIVED).name();
+    auto itr_flag = once_flags_.find(id);
+    if (itr_flag == once_flags_.end()) {
+      once_flags_.insert(
+          {id, std::shared_ptr<std::once_flag>(new std::once_flag())});
+    }
+    std::call_once(*once_flags_[id], &try_register<SINGLETON_DERIVED>, id);
+    auto ptr = registry_[id];
+    return dynamic_cast<SINGLETON_DERIVED *>(ptr);
   }
 
  protected:
-  template <typename SINGLETON_DERIVED, typename... ARGS>
-  bool try_register(const SGLTN_ID &id, ARGS &&... args) {
-    return registry_.insert(std::make_pair(id, new ).second;
+  template <typename SINGLETON_DERIVED>
+  static void try_register(const SGLTN_ID &id) {
+    registry_.insert(std::make_pair(id, new SINGLETON_DERIVED()));
   }
 
  private:
-  static std::once_flag flag_init_;
+  static std::unordered_map<SGLTN_ID, std::shared_ptr<std::once_flag>>
+      once_flags_;
   static std::unordered_map<SGLTN_ID, Singleton *> registry_;
 
  protected:
   Singleton() = default;
-  ~Singleton() = default;
+  virtual ~Singleton() = default;
   Singleton(const Singleton &) = delete;
   Singleton(Singleton &&) = delete;
 };
