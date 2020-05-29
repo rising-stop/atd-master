@@ -7,8 +7,6 @@ namespace atd {
 namespace common {
 namespace utility {
 
-SINGLETON_MEMBER_REGISTER(ShmDispatcher)
-
 int ShmDispatcher::register_shm(::key_t key, int size) {
   auto shmid = shmget(key, size, 0666 | IPC_CREAT | IPC_EXCL);
   if (shmid == -1) {
@@ -87,7 +85,7 @@ void SharedMemory::unmount_Shm() {
   }
 }
 
-void SharedMemory::send_Msg(const std::string& str) {
+void SharedMemory::write_Msg(const std::string& str) {
   if (str.empty()) {
     return;
   }
@@ -136,11 +134,21 @@ std::pair<int, size_t> SharedMemory::try_get_ShmID(::key_t key, size_t size) {
   if (shmid == -1) {
     std::stringstream error_msg;
     error_msg << "semget error, errno: " << errno
-              << " waiting DISPATCHER to be created, DISPATCHER key: "
-              << key;
+              << " waiting DISPATCHER to be created, DISPATCHER key: " << key;
     throw ShmException(0, ShmException::DISPATCHER_DENIED, error_msg.str());
   }
   return std::make_pair(shmid, size);
+}
+
+std::unique_ptr<SharedMemory> ShmFactory::get_Shm(int id, size_t size) {
+  return shm_factory_.create_Object("shm", id, size);
+}
+
+ShmFactory::ShmFactory() {
+  shm_factory_.product_register("shm",
+                                [](int id, size_t size) -> SharedMemory* {
+                                  return new SharedMemory(id, size);
+                                });
 }
 
 }  // namespace utility

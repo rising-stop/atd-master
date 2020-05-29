@@ -9,24 +9,29 @@
 #include "modules/common/utility/ipc/shared_memory.h"
 #include "modules/common/utility/ipc/shm_protocol.h"
 
+using namespace atd::common::utility;
+
 void CtlC_Handler(int sig) {
-  GET_SHMDISPATCHER->release_all_shm();
-  GET_SEMDISPATCHER->release_all_sem();
+  Singleton::instance<ShmDispatcher>()->release_all_shm();
+  Singleton::instance<SemDispatcher>()->release_all_sem();
   exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char* argv[]) {
   signal(SIGINT, CtlC_Handler);
-  GET_SHMDISPATCHER->register_shm(SHM_DIRECTOR_SEED, SHM_DIRECTOR_SIZE);
+  Singleton::instance<ShmDispatcher>()->register_shm(SHM_DIRECTOR_SEED,
+                                                     SHM_DIRECTOR_SIZE);
 
   atd::common::utility::SHM_DIRECTOR dir;
   dir.flag_init_ = true;
-  dir.dispatcher_id = GET_SHMDISPATCHER->get_ShmInfo(SHM_DIRECTOR_SEED).first;
+  dir.dispatcher_id = Singleton::instance<ShmDispatcher>()
+                          ->get_ShmInfo(SHM_DIRECTOR_SEED)
+                          .first;
   dir.dispatcher_size = SHM_DIRECTOR_SIZE;
 
   atd::common::utility::SharedMemory test_mem(
-      GET_SHMDISPATCHER->get_ShmInfo(SHM_DIRECTOR_SEED));
-  test_mem.send_Msg(dir, SHM_DIRECTOR_SIZE);
+      Singleton::instance<ShmDispatcher>()->get_ShmInfo(SHM_DIRECTOR_SEED));
+  test_mem.write_Msg(dir, SHM_DIRECTOR_SIZE);
 
   TIMER->set_BeginStick("counter");
 

@@ -7,7 +7,7 @@ namespace common {
 namespace utility {
 
 template <typename TYPE>
-void SharedMemory::send_Msg(const TYPE& msg, size_t size) {
+void SharedMemory::write_Msg(const TYPE& msg, size_t size) {
   if (size < 1) {
     return;
   }

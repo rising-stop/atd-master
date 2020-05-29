@@ -1,27 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 project(ShmService)
 
-#set include files: *.h, *.hpp, *.hh in this project
-#file(GLOB_RECURSE PROJECT_HEADERS  "")
-#set source files:*.cpp, *.c, *.cc in this project
+file(GLOB_RECURSE PROJECT_HEADERS)
 file(GLOB_RECURSE PROJECT_SOURCES  
-  "main.cc")
-#set library files: *.lib in this project
+	"main.cc")
 
-
-if (USE_CC_PEGASUS)
-    file(GLOB_RECURSE PROJECT_LIBRARIES
-    "../../upload_files/lib/libcommon.so"
-    )
-else()
-    file(GLOB_RECURSE PROJECT_LIBRARIES
-    "../../bin/lib/libcommon.so"
-    )
-endif()
-
-# add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-# target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES} protobuf-lite lcm pthread)
+file(GLOB_RECURSE PROJECT_LIBRARIES
+	"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libcommon.so")
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBRARIES})
-

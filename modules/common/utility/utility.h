@@ -167,6 +167,13 @@ class Singleton {
   Singleton(Singleton &&) = delete;
 };
 
+#define SINGLETON_DERIVED(TYPE)                 \
+  friend class atd::common::utility::Singleton; \
+                                                \
+ protected:                                     \
+  TYPE() = default;                             \
+  virtual ~TYPE() = default;
+
 }  // namespace utility
 }  // namespace common
 }  // namespace atd

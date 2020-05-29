@@ -32,7 +32,7 @@ namespace utility {
  * @brief static member used for cleaning all sems
  * @note all sems will be cleared so it just supposed to run only once
  */
-class SemDispatcher {
+class SemDispatcher : public Singleton {
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -64,9 +64,8 @@ class SemDispatcher {
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal
                            number*/
-  SINGLETON(SemDispatcher)
+  SINGLETON_DERIVED(SemDispatcher)
 };
-#define GET_SEMDISPATCHER atd::common::utility::SemDispatcher::instance()
 
 /**
  * @brief common base class SemMutex

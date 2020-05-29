@@ -12,7 +12,7 @@ namespace atd {
 namespace common {
 namespace utility {
 
-class ShmDispatcher {
+class ShmDispatcher : public Singleton {
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -44,9 +44,9 @@ class ShmDispatcher {
  private:
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_shms_; /* static member for restore all semid and its size*/
-  SINGLETON(ShmDispatcher)
+
+  SINGLETON_DERIVED(ShmDispatcher)
 };
-#define GET_SHMDISPATCHER atd::common::utility::ShmDispatcher::instance()
 
 class SharedMemory {
  public:
@@ -56,11 +56,11 @@ class SharedMemory {
   size_t get_ShmSize() const;
   const void* get_AssignedAddr() const;
 
-  void send_Msg(const std::string&);
+  void write_Msg(const std::string&);
   void read_Msg(std::string&, size_t);
 
   template <typename TYPE>
-  void send_Msg(const TYPE&, size_t);
+  void write_Msg(const TYPE&, size_t);
   template <typename TYPE>
   void read_Msg(TYPE&, size_t);
 
@@ -77,6 +77,22 @@ class SharedMemory {
   SharedMemory(int, size_t);
   SharedMemory(std::pair<int, size_t>);
   ~SharedMemory() = default;
+  SharedMemory(const SharedMemory&) = delete;
+  SharedMemory& operator=(const SharedMemory&) = delete;
+};
+
+class ShmFactory : public Singleton {
+  friend class atd::common::utility::Singleton;
+
+ public:
+  std::unique_ptr<SharedMemory> get_Shm(int, size_t);
+
+ protected:
+  ShmFactory();
+  virtual ~ShmFactory() = default;
+
+ private:
+  Factory<std::string, SharedMemory, SharedMemory*(int, size_t)> shm_factory_;
 };
 
 // ShmSyncLink

@@ -20,6 +20,9 @@
 /**
  * ipc functions
  */
+#include "modules/common/utility/ipc/semaphore_mutex.h"
+#include "modules/common/utility/ipc/shared_memory.h"
+#include "modules/common/utility/ipc/shm_protocol.h"
 
 /**
  * observer functions

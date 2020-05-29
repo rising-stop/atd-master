@@ -1,37 +1,38 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 project(atd-master)
 
-# BUILD_TYPE(Debug)
+set(ATD_MASTER_ROOT ${PROJECT_SOURCE_DIR})
+set(PROTOBUF_PROTOC_PATH ${ATD_MASTER_ROOT}/3rd_party/protobuf-3.3.0/x86/bin)
+set(PROTOBUF_INCLUDE_PATH ${ATD_MASTER_ROOT}/3rd_party/protobuf-3.3.0/x86/include)
+set(PROTO_MSG_PATH ${ATD_MASTER_ROOT}/protobuf_msg)
+set(PROTO_MSG_IMPLEMENT_PATH ${ATD_MASTER_ROOT}/protobuf_msg)
+set(PROTOBUF_LIBRARY_X86_PATH ${ATD_MASTER_ROOT}/3rd_party/protobuf-3.3.0/x86/lib)
+set(PROTOBUF_LIBRARY_ARM_PATH ${ATD_MASTER_ROOT}/3rd_party/protobuf-3.3.0/pegasus/lib)
+if (USE_CC_PEGASUS)
+	message(STATUS "================  -] Config for PEGASUS-AARACH64-linux [-  ================")
+	set(PROTOBUF_LIBRARY_PATH ${PROTOBUF_LIBRARY_ARM_PATH})
+else()
+	message(STATUS "================  -] Config for x86-64 [-  ================")
+	set(PROTOBUF_LIBRARY_PATH ${PROTOBUF_LIBRARY_X86_PATH})
+endif()
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
-set(ATD_MASTER_ROOT ${PROJECT_SOURCE_DIR})
 include_directories(${ATD_MASTER_ROOT})
+include_directories(${PROTOBUF_INCLUDE_PATH})
+include_directories(${PROTO_MSG_IMPLEMENT_PATH})
 
-set(ATD_MASTER_3RDPARTY_LIBS_DIR ${ATD_MASTER_ROOT}/3rd_party)
-set(PROTOBUF_INSTALL_PATH ${ATD_MASTER_3RDPARTY_LIBS_DIR}/protobuf-3.3.0)
-set(PROTO_MSG_PATH ${ATD_MASTER_ROOT}/protobuf_msg)
-include_directories(${PROTO_MSG_PATH})
+link_directories(${PROTOBUF_LIBRARY_PATH})
 
-if (USE_CC_PEGASUS)
+message(STATUS "ATD_MASTER_ROOT: ${ATD_MASTER_ROOT}")
+message(STATUS "PROTOBUF_INCLUDE_PATH: ${PROTOBUF_INCLUDE_PATH}")
+message(STATUS "PROTOBUF_PROTOC_PATH: ${PROTOBUF_PROTOC_PATH}")
+message(STATUS "PROTOBUF_LIBRARY_PATH: ${PROTOBUF_LIBRARY_PATH}")
+message(STATUS "PROTO_MSG_PATH: ${PROTO_MSG_PATH}")
+message(STATUS "PROTO_MSG_IMPLEMENT_PATH: ${PROTO_MSG_IMPLEMENT_PATH}")
 
-    message(STATUS "================  -] building PEGASUS-AARACH64-linux [-  ================")
-
-    include_directories(${PROTOBUF_INSTALL_PATH}/pegasus/include)
-	link_directories(${PROTOBUF_INSTALL_PATH}/pegasus/lib)
- 
-else()
-
-    message(STATUS "================  -] building x86-64 [-  ================")
-
-    include_directories(${PROTOBUF_INSTALL_PATH}/x86/include)
-	link_directories(${PROTOBUF_INSTALL_PATH}/x86/lib)
-
-endif()
-
-message("ATD_MASTER_ROOT: ${ATD_MASTER_ROOT}")
-message("PROTOBUF_INSTALL_PATH: ${PROTOBUF_INSTALL_PATH}")
 
 add_subdirectory(protobuf_msg)
 add_subdirectory(modules)

@@ -9,8 +9,6 @@ namespace atd {
 namespace common {
 namespace utility {
 
-SINGLETON_MEMBER_REGISTER(SemDispatcher)
-
 int SemDispatcher::register_sem(::key_t key, int sgnl_num) {
   auto semid = semget(key, sgnl_num, 0666 | IPC_CREAT | IPC_EXCL);
   if (semid == -1) {
