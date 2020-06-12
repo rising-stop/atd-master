@@ -148,6 +148,36 @@ class ShmException : public CommonException {
   };
 };
 
+/**
+ * @brief Class FileException
+ * containing messages from class ReadWriteableFile and its derives
+ */
+class FileException : public CommonException {
+ public:
+  enum INVALID_PARTERN : int {
+    UNKNOW = 0,
+    UNABLE_TO_OPEN = 1,
+    GOOD_CHECK_FAIL = 2
+  };
+
+ private:
+  INVALID_PARTERN error_code_;
+
+ public:
+  /**
+   * @brief constructor:
+   * @param
+   *   1. INVALID_PARTERN error_code:  some invalid partern code
+   *   2. const string&: error message
+   */
+  FileException(INVALID_PARTERN error_code, const std::string& str)
+      : error_code_(error_code) {
+    std::stringstream sstr;
+    sstr << "file throw error code " << static_cast<int>(error_code_) << ": ";
+    set_Message(sstr.str() + str);
+  };
+};
+
 }  // namespace utility
 }  // namespace common
 }  // namespace atd

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -173,6 +174,17 @@ class Singleton {
  protected:                                     \
   TYPE() = default;                             \
   virtual ~TYPE() = default;
+
+class CString {
+ public:
+  template <typename... ARG>
+  static void cstring_cat(char *, const char *, ARG &&...);
+
+  static void cstring_cat(char *, const char *);
+
+ private:
+  CString() = default;
+};
 
 }  // namespace utility
 }  // namespace common
