@@ -157,7 +157,8 @@ class FileException : public CommonException {
   enum INVALID_PARTERN : int {
     UNKNOW = 0,
     UNABLE_TO_OPEN = 1,
-    GOOD_CHECK_FAIL = 2
+    NOT_INITIALIZED = 2,
+    GOOD_CHECK_FAIL = 3
   };
 
  private:

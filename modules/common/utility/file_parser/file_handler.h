@@ -20,7 +20,10 @@ class ReadWriteableFile {
 
  public:
   void redirect(const char*, const char*);
-  inline std::fstream& get_FileStream();
+  inline std::fstream* get_FileStream();
+
+  virtual void parse_file();
+  virtual void refresh_file();
 
  public:
   explicit ReadWriteableFile(const char* file_name,

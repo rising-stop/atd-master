@@ -4,9 +4,9 @@ namespace atd {
 namespace common {
 namespace utility {
 
-std::fstream& ReadWriteableFile::get_FileStream() {
+std::fstream* ReadWriteableFile::get_FileStream() {
   if (file_stm_.good()) {
-    return file_stm_;
+    return &file_stm_;
   } else {
     throw FileException(FileException::GOOD_CHECK_FAIL, "good checking fail");
   }
@@ -24,7 +24,7 @@ void ReadWriteableFile::file_init() {
   }
 }
 
-void ReadWriteableFile::redirect(const char* path, const char* name) {
+void ReadWriteableFile::redirect(const char* name, const char* path) {
   strcpy(path_, path);
   strcpy(name_, name);
   if (path[strlen(path) - 1] == '/') {
@@ -35,8 +35,11 @@ void ReadWriteableFile::redirect(const char* path, const char* name) {
   file_init();
 }
 
-ReadWriteableFile::ReadWriteableFile(const char* path, const char* name) {
-  redirect(path, name);
+void ReadWriteableFile::parse_file() {}
+void ReadWriteableFile::refresh_file() {}
+
+ReadWriteableFile::ReadWriteableFile(const char* name, const char* path) {
+  redirect(name, path);
 }
 
 ReadWriteableFile::~ReadWriteableFile() {
