@@ -178,6 +178,37 @@ class FileException : public CommonException {
   };
 };
 
+/**
+ * @brief Class CSVFileException
+ * containing messages from class ReadWriteableFile and its derives
+ */
+class CSVException : public CommonException {
+ public:
+  enum INVALID_PARTERN : int {
+    UNKNOW = 0,
+    ROW_OVERFLOW = 1,
+    COL_OVERFLOW = 2,
+    TITLE_NOT_FOUND = 3
+  };
+
+ private:
+  INVALID_PARTERN error_code_;
+
+ public:
+  /**
+   * @brief constructor:
+   * @param
+   *   1. INVALID_PARTERN error_code:  some invalid partern code
+   *   2. const string&: error message
+   */
+  CSVException(INVALID_PARTERN error_code, const std::string& str)
+      : error_code_(error_code) {
+    std::stringstream sstr;
+    sstr << "csv file throw error code " << static_cast<int>(error_code_) << ": ";
+    set_Message(sstr.str() + str);
+  };
+};
+
 }  // namespace utility
 }  // namespace common
 }  // namespace atd
