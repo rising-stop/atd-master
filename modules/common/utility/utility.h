@@ -183,7 +183,8 @@ class CString {
   static void cstring_cat(char *, const char *);
 
   template <typename METHOD>
-  static void cstring_split(const std::string &, const char, METHOD);
+  static void cstring_split(const std::string &split_line, const char comma,
+                            METHOD substring_handler, int op_times = -1);
 
  private:
   CString() = default;

@@ -11,6 +11,10 @@ namespace utility {
 
 class CSVFile : public ReadWriteableFile {
  private:
+  inline void check_TitleRegistered(const std::string&) const;
+  inline void check_RequestColRange(uint64_t) const;
+  inline void check_RequestRowRange(uint64_t) const;
+
   uint64_t row_size_ = 0;
   uint64_t col_size_ = 0;
 
@@ -26,6 +30,7 @@ class CSVFile : public ReadWriteableFile {
   void register_title(const std::string&);
   std::string* get_MutableElement(const std::string&, uint64_t);
   void set_TitleContent(const std::string&, const std::vector<std::string>&);
+  void push_Content(const std::string&, const std::string&);
 
   virtual void parse_file() override;
   virtual void refresh_file() override;

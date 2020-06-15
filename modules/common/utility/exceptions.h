@@ -189,7 +189,8 @@ class CSVException : public CommonException {
     UNKNOW = 0,
     ROW_OVERFLOW = 1,
     COL_OVERFLOW = 2,
-    TITLE_NOT_FOUND = 3
+    TITLE_NOT_FOUND = 3,
+    REGISTER_FAIL = 4
   };
 
  private:
