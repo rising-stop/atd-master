@@ -1,5 +1,7 @@
 #include "csv_parser.h"
 
+#include <iostream>
+
 namespace atd {
 namespace common {
 namespace utility {
@@ -145,13 +147,13 @@ void CSVFile::refresh_file() {
   }
   file_stm->clear();
 
-  for (auto itr4loop = title_hash_.begin(); itr4loop != title_hash_.end();
+  for (auto itr4loop = row_map_.begin(); itr4loop != row_map_.end();
        itr4loop++) {
-    if (itr4loop == (title_hash_.end() - 1)) {
-      *file_stm << itr4loop->first << '\n';
-      continue;
+    if (itr4loop->first == (row_size_ - 1)) {
+      *file_stm << itr4loop->second << '\n';
+      break;
     } else {
-      *file_stm << itr4loop->first << ',';
+      *file_stm << itr4loop->second << ',';
     }
   }
 
@@ -169,8 +171,34 @@ void CSVFile::refresh_file() {
   file_stm->flush();
 }
 
-CSVFile::CSVFile(const char* path, const char* name)
-    : ReadWriteableFile(path, name) {}
+CSVFile::CSVFile(const char* name, const char* path)
+    : ReadWriteableFile(name, path) {}
+
+void CSV_Observer::push_Item(const std::string& id, const std::string& data) {
+  if (try_Register(id)) {
+    csv_.register_title(id);
+  }
+  try {
+    *csv_.get_MutableElement(id, col_index_) = data;
+  } catch (const CSVException& e) {
+    std::cout << e.what() << '\n' << std::endl;
+  }
+}
+
+bool CSV_Observer::try_Register(const std::string& id) {
+  return registry_.insert(id).second;
+}
+
+void CSV_Observer::col_Dispathcer(const std::string& id) {
+  auto ins_res = dynamic_registry_.insert(id);
+  if (!ins_res.second) {
+    col_index_++;
+    dynamic_registry_.clear();
+  }
+}
+
+CSV_Observer::CSV_Observer(const std::string& name, const std::string& path)
+    : csv_(name.c_str(), path.c_str()) {}
 
 }  // namespace utility
 }  // namespace common

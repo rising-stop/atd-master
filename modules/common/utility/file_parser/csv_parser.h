@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <unordered_set>
 
 #include "common/utility/file_parser/file_handler.h"
 #include "common/utility/utility.h"
@@ -37,9 +38,30 @@ class CSVFile : public ReadWriteableFile {
 
  public:
   CSVFile() = default;
-  CSVFile(const char*, const char*);
+  CSVFile(const char* name, const char* path = "~/.config/ATD/default/");
   virtual ~CSVFile() = default;
-};  // namespace utility
+};
+
+class CSV_Observer : public Singleton {
+ public:
+  void push_Item(const std::string&, const std::string&);
+
+ private:
+  bool try_Register(const std::string&);
+  void col_Dispathcer(const std::string&);
+
+  std::unordered_set<std::string> dynamic_registry_;
+  std::unordered_set<std::string> registry_;
+  uint64_t col_index_ = 0;
+
+  CSVFile csv_;
+
+ private:
+  CSV_Observer(const std::string&, const std::string&);
+  virtual ~CSV_Observer() = default;
+
+  friend class atd::common::utility::Singleton;
+};
 
 }  // namespace utility
 }  // namespace common

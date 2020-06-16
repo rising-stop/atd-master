@@ -19,28 +19,28 @@ namespace utility {
  * @brief Macro SINGLETON
  * declare class as the singleton, using default constructor
  */
-#define SINGLETON(TYPE)                              \
- public:                                             \
-  static TYPE *instance() {                          \
-    std::lock_guard<std::mutex> lk(instance_mutex_); \
-    std::call_once(flag_init_, &init);               \
-    return instance_;                                \
-  }                                                  \
-                                                     \
- private:                                            \
-  static void init() { instance_ = new TYPE(); }     \
-  static TYPE *instance_;                            \
-  static std::once_flag flag_init_;                  \
-  static std::mutex instance_mutex_;                 \
-  TYPE() = default;                                  \
-  ~TYPE() = default;                                 \
-  TYPE(const TYPE &) = delete;                       \
-  TYPE(TYPE &&) = delete;
+// #define SINGLETON(TYPE)                              \
+//  public:                                             \
+//   static TYPE *instance() {                          \
+//     std::lock_guard<std::mutex> lk(instance_mutex_); \
+//     std::call_once(flag_init_, &init);               \
+//     return instance_;                                \
+//   }                                                  \
+//                                                      \
+//  private:                                            \
+//   static void init() { instance_ = new TYPE(); }     \
+//   static TYPE *instance_;                            \
+//   static std::once_flag flag_init_;                  \
+//   static std::mutex instance_mutex_;                 \
+//   TYPE() = default;                                  \
+//   ~TYPE() = default;                                 \
+//   TYPE(const TYPE &) = delete;                       \
+//   TYPE(TYPE &&) = delete;
 
-#define SINGLETON_MEMBER_REGISTER(TYPE) \
-  TYPE *TYPE::instance_ = nullptr;      \
-  std::once_flag TYPE::flag_init_;      \
-  std::mutex TYPE::instance_mutex_;
+// #define SINGLETON_MEMBER_REGISTER(TYPE) \
+//   TYPE *TYPE::instance_ = nullptr;      \
+//   std::once_flag TYPE::flag_init_;      \
+//   std::mutex TYPE::instance_mutex_;
 
 /**
  * @class Factory
@@ -151,9 +151,12 @@ class Singleton {
   }
 
  protected:
-  template <typename SINGLETON_DERIVED>
-  static void try_register(const SGLTN_ID &id) {
-    registry_.insert(std::make_pair(id, new SINGLETON_DERIVED()));
+  template <typename SINGLETON_DERIVED, typename... ARGS>
+  static void try_register(const SGLTN_ID &id, ARGS &&... args) {
+    if (registry_.find(id) != registry_.end()) {
+      registry_.insert(std::make_pair(
+          id, new SINGLETON_DERIVED(std::forward<ARGS>(args)...)));
+    }
   }
 
  private:

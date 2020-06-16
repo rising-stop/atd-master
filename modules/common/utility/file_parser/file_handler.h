@@ -26,6 +26,7 @@ class ReadWriteableFile {
   virtual void refresh_file();
 
  public:
+  ReadWriteableFile() = default;
   explicit ReadWriteableFile(const char* file_name,
                              const char* full_path = "~/.config/ATD/default/");
   virtual ~ReadWriteableFile();
