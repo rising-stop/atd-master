@@ -14,8 +14,7 @@
 #include "modules/common/3rd_party/easylogging/easylogging++.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 #ifndef NUMINFO
 #define NUMINFO(num) #num << " = " << num << " "
@@ -81,8 +80,7 @@ class LoggingCondition {
 #endif
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 template <typename T1, typename T2>

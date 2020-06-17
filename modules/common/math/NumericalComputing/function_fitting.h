@@ -8,8 +8,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class FunctionFitting {
  public:
@@ -21,8 +20,6 @@ class FunctionFitting {
  public:
   FunctionFitting() = delete;
 };
-
-}  // namespace common
 
 }  // namespace planning
 }  // namespace atd

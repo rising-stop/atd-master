@@ -8,8 +8,7 @@
 #include "modules/common/math/EuclideanGeometry/point/vectorXD.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class Point2D {
  public:
@@ -33,7 +32,6 @@ class Point2D {
   friend std::ostream& operator<<(std::ostream&, const Point2D&);
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

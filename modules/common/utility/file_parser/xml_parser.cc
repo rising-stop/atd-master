@@ -3,12 +3,10 @@
 #include <iostream>
 
 namespace atd {
-namespace common {
 namespace utility {
 
-int XMLParser::Insert2DTable(
-    const char* xml_path, const char* table_ID,
-    const atd::planning::common::MonotonicDiscreteLine2D& table) {
+int XMLParser::Insert2DTable(const char* xml_path, const char* table_ID,
+                             const MonotonicDiscreteLine2D& table) {
   XMLDocument doc;
   XMLError load_code = doc.LoadFile(xml_path);
   if (load_code) {
@@ -30,9 +28,8 @@ int XMLParser::Insert2DTable(
   return doc.SaveFile(xml_path);
 }
 
-int XMLParser::Import2DTable(
-    const char* xml_path, const char* table_ID,
-    atd::planning::common::MonotonicDiscreteLine2D& table) {
+int XMLParser::Import2DTable(const char* xml_path, const char* table_ID,
+                             MonotonicDiscreteLine2D& table) {
   XMLDocument doc;
   XMLError load_code = doc.LoadFile(xml_path);
   if (load_code) {
@@ -61,5 +58,4 @@ int XMLParser::Import2DTable(
 }
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

@@ -5,8 +5,7 @@
 #include <stdexcept>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 static const double PI = 3.1415926535898;
 
@@ -78,6 +77,5 @@ std::vector<double> MathCommon::merge_vector_from_end(
   return merge_vector;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

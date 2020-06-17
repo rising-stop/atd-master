@@ -4,8 +4,7 @@
 #include <vector>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 class VectorXD {
@@ -48,7 +47,6 @@ class VectorXD {
 typedef VectorXD<2> Vector2D;
 typedef VectorXD<3> Vector3D;
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

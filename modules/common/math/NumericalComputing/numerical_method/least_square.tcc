@@ -3,8 +3,7 @@
 #include <stdexcept>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 LeastSquare2D<ORDER>::LeastSquare2D(const std::vector<Point2D>& source,
@@ -127,6 +126,5 @@ inline double LeastSquare2D<ORDER>::get_CoefficientA(
   return top / bottom;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

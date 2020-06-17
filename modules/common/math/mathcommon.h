@@ -4,8 +4,7 @@
 #include <vector>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class MathCommon {
  public:
@@ -24,7 +23,6 @@ class MathCommon {
                                                    const std::vector<double>&);
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

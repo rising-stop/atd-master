@@ -2,13 +2,12 @@
 
 #include <stdexcept>
 
-#include "modules/common/utility/file_parser/xml_parser.h"
 #include "modules/common/common_support/observer/ObservingLogging.h"
 #include "modules/common/math/NumericalComputing/interpolation.h"
+#include "modules/common/utility/file_parser/xml_parser.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 std::mutex NonLinearRelation::mutex_instance_;
 NonLinearRelation* NonLinearRelation::instance_ = nullptr;
@@ -59,6 +58,5 @@ NonLinearRelation* NonLinearRelation::get_Instance() {
   return instance_;
 }
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd

@@ -4,8 +4,7 @@
 #include "modules/common/math/NumericalComputing/numerical_method/newton_interp.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 double Interpolation::NewtonInterp(const std::vector<Point2D>& source,
                                    const double& target) {
@@ -49,6 +48,5 @@ std::vector<double> Interpolation::QuadraticInterp(
   return quadratic_interp.get_InterpRes(source, targets);
 }
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd

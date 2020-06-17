@@ -24,7 +24,6 @@ typedef union {
 } semun;
 
 namespace atd {
-namespace common {
 namespace utility {
 
 /**
@@ -221,5 +220,4 @@ class shared_lock {
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

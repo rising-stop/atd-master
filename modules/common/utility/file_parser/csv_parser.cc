@@ -3,7 +3,6 @@
 #include <iostream>
 
 namespace atd {
-namespace common {
 namespace utility {
 
 void CSVFile::check_TitleRegistered(const std::string& title) const {
@@ -171,14 +170,45 @@ void CSVFile::refresh_file() {
   file_stm->flush();
 }
 
-CSVFile::CSVFile(const char* name, const char* path)
-    : ReadWriteableFile(name, path) {}
+void CSVFile::fresh_file() {
+  auto file_stm = get_FileStream();
+  for (auto index4loop = print_head_; index4loop < col_size_; index4loop++) {
+    auto print_vector = container_.at(index4loop);
+    for (auto itr4loop = print_vector.begin(); itr4loop != print_vector.end();
+         itr4loop++) {
+      if (itr4loop != (print_vector.end() - 1)) {
+        *file_stm << *itr4loop << ',';
+      } else {
+        *file_stm << *itr4loop << '\n';
+      }
+    }
+  }
+  file_stm->flush();
+  print_head_ = col_size_;
+}
+
+uint64_t CSVFile::get_RowSize() const { return row_size_; }
+uint64_t CSVFile::get_ColSize() const { return col_size_; }
+
+CSVFile::CSVFile(FILE_MODE mode, const char* name, const char* path)
+    : ReadWriteableFile(mode, name, path) {}
+
+void CSV_Observer::redirect(ReadWriteableFile::FILE_MODE mode,
+                            const std::string& name, const std::string& path) {
+  csv_.redirect(mode, name.c_str(), path.c_str());
+}
 
 void CSV_Observer::push_Item(const std::string& id, const std::string& data) {
   if (try_Register(id)) {
     csv_.register_title(id);
   }
   try {
+    col_Dispathcer(id);
+    static uint64_t last_col_index = 0;
+    if (last_col_index != col_index_) {
+      csv_.fresh_file();
+      last_col_index = col_index_;
+    }
     *csv_.get_MutableElement(id, col_index_) = data;
   } catch (const CSVException& e) {
     std::cout << e.what() << '\n' << std::endl;
@@ -197,9 +227,9 @@ void CSV_Observer::col_Dispathcer(const std::string& id) {
   }
 }
 
-CSV_Observer::CSV_Observer(const std::string& name, const std::string& path)
-    : csv_(name.c_str(), path.c_str()) {}
+CSV_Observer::CSV_Observer(ReadWriteableFile::FILE_MODE mode,
+                           const std::string& name, const std::string& path)
+    : csv_(mode, name.c_str(), path.c_str()) {}
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

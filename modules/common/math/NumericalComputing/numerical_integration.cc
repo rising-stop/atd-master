@@ -6,8 +6,7 @@
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 double Midpoint(const double& lower, const double& upper,
                 const std::function<double(const double&)>& func,
@@ -64,6 +63,5 @@ double Simpson(const double& lower, const double& upper,
          static_cast<double>(6);
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

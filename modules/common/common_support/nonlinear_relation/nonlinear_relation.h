@@ -8,13 +8,11 @@
 #include "modules/common/math/EuclideanGeometry/line/monotonic_discrete_line2D.h"
 
 #ifndef NONLINEAR_RELATION
-#define NONLINEAR_RELATION \
-  atd::planning::common::NonLinearRelation::get_Instance()
+#define NONLINEAR_RELATION atd::utility::NonLinearRelation::get_Instance()
 #endif
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class NonLinearRelation {
  public:
@@ -38,8 +36,7 @@ class NonLinearRelation {
   ~NonLinearRelation() = default;
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #endif

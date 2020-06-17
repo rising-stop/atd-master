@@ -5,8 +5,7 @@
 #include <stdexcept>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 void MonotonicDiscreteLine2D::clear() {
   flag_is_sorted_ = false;
@@ -59,6 +58,5 @@ std::string MonotonicDiscreteLine2D::get_DebugString() const {
   return sstm.str();
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

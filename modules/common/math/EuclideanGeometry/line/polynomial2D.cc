@@ -8,8 +8,7 @@
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 Polynomial::Polynomial(const std::initializer_list<double>& init_list) {
   set_PolynomialParameters(init_list);
@@ -291,6 +290,5 @@ std::ostream& operator<<(std::ostream& ostm, const Polynomial& poly) {
   return ostm;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

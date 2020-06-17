@@ -1,8 +1,7 @@
 #include "timer.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 Runtime_Observer* Runtime_Observer::instance_ = nullptr;
 std::mutex Runtime_Observer::instance_mutex_;
@@ -29,6 +28,5 @@ bool Runtime_Observer::is_LogPeriod() const {
              : false;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

@@ -3,35 +3,36 @@
 #include <cstring>
 #include <fstream>
 
-#include "common/utility/exceptions.h"
-#include "common/utility/utility.h"
+#include "modules/common/utility/exceptions.h"
+#include "modules/common/utility/utility.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 class ReadWriteableFile {
- private:
-  void file_init();
-  char* name_;
-  char* path_;
-  char* full_path_file_name_;
-  std::fstream file_stm_;
-
  public:
-  void redirect(const char*, const char*);
-  inline std::fstream* get_FileStream();
+  enum FILE_MODE : int { WRITE = 0, READ = 1 };
+
+  void redirect(FILE_MODE, const char*, const char*);
+  std::fstream* get_FileStream();
 
   virtual void parse_file();
   virtual void refresh_file();
 
+ private:
+  void file_init();
+  char* name_ = new char;
+  char* path_ = new char;
+  char* full_path_file_name_ = new char;
+  FILE_MODE mode_;
+  std::fstream file_stm_;
+
  public:
   ReadWriteableFile() = default;
-  explicit ReadWriteableFile(const char* file_name,
+  explicit ReadWriteableFile(FILE_MODE mode, const char* file_name,
                              const char* full_path = "~/.config/ATD/default/");
   virtual ~ReadWriteableFile();
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

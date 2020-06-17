@@ -8,8 +8,7 @@
 #include <unordered_map>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 using namespace std::chrono;
 
@@ -124,11 +123,10 @@ class Runtime_Observer : public Runtime_Calculator<microseconds>,
 };
 
 #ifndef TIMER
-#define TIMER atd::planning::common::Runtime_Observer::get_Instance()
+#define TIMER atd::utility::Runtime_Observer::get_Instance()
 #endif
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #endif

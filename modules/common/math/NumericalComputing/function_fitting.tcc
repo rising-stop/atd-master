@@ -3,8 +3,7 @@
 #include "modules/common/math/NumericalComputing/numerical_method/least_square.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 Polynomial FunctionFitting::LeastSquareFitting(
@@ -30,6 +29,5 @@ Polynomial FunctionFitting::LeastSquareFitting(
   return Polynomial();
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

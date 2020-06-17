@@ -5,11 +5,11 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
+
 #include "modules/common/common_support/class_support.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class Polynomial {
   /* basic operation for polynomial */
@@ -71,8 +71,7 @@ class Polynomial {
   friend std::ostream& operator<<(std::ostream&, const Polynomial&);
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #endif  // PLANNING_POLYNOMIAL_H

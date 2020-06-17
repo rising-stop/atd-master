@@ -9,8 +9,7 @@
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 double BasicGeometry::Distance2LineSegment2D(
     const Point2D& point, const std::pair<Point2D, Point2D>& segment) {
@@ -200,6 +199,5 @@ Point2D BasicGeometry::IntersectedPoint(
   return Point2D(res_x, res_y);
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

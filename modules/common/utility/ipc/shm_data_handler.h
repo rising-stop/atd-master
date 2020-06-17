@@ -4,7 +4,6 @@
 #include "shared_memory.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 class ShmDataHandler {
@@ -21,5 +20,4 @@ class ShmDataHandler {
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

@@ -9,7 +9,6 @@
 #include "modules/common/utility/utility.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 class ShmDispatcher : public Singleton {
@@ -82,7 +81,7 @@ class SharedMemory {
 };
 
 class ShmFactory : public Singleton {
-  friend class atd::common::utility::Singleton;
+  friend class atd::utility::Singleton;
 
  public:
   std::unique_ptr<SharedMemory> get_Shm(int, size_t);
@@ -92,14 +91,13 @@ class ShmFactory : public Singleton {
   virtual ~ShmFactory() = default;
 
  private:
-  Factory<std::string, SharedMemory, SharedMemory*(int, size_t)> shm_factory_;
+  Factory<std::string, SharedMemory, SharedMemory*(*)(int, size_t)> shm_factory_;
 };
 
 // ShmSyncLink
 // ShmAsyncLink
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd
 
 #include "shared_memory.tcc"

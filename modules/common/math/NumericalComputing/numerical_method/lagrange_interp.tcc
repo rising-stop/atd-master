@@ -2,8 +2,7 @@
 #include <stdexcept>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 double LagrangeInterp<ORDER>::get_InterpRes(const std::vector<Point2D>& source,
@@ -38,6 +37,5 @@ std::vector<double> LagrangeInterp<ORDER>::get_InterpRes(
   return interp_res;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

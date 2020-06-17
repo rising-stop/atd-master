@@ -3,8 +3,7 @@
 #include <stdexcept>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 bool NewtonInterp2D::deal_DifferenceQuotient(
     const std::vector<Point2D>& source) {
@@ -40,6 +39,5 @@ double NewtonInterp2D::get_InterpRes(const double& target) const {
   return u;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

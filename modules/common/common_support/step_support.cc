@@ -3,7 +3,5 @@
 INITIALIZE_EASYLOGGINGPP
 
 namespace atd {
-namespace planning {
-namespace common {}
-}  // namespace planning
+namespace utility {}  // namespace utility
 }  // namespace atd

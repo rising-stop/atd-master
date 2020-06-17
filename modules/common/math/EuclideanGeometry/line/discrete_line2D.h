@@ -9,8 +9,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <typename TYPE>
 class DiscreteLine2D {
@@ -52,8 +51,7 @@ class DiscreteLine2D {
   const std::deque<POINT_TYPE>& get_PointSet() const;
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #include "discrete_line2D.tcc"

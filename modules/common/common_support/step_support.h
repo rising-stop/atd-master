@@ -5,8 +5,7 @@
 #include "modules/common/common_support/timer/timer.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 #ifndef STEP_HEADER
 #define STEP_HEADER(logger_id, logger_conf_file_path, ver_num, log_period)  \
@@ -35,15 +34,14 @@ namespace common {
 
 #ifndef STEP_END
 #define STEP_END(logger_id)                                            \
-  TIMER->set_EndStick(atd::planning::common::NODE_STEP_STICK_ID);      \
+  TIMER->set_EndStick(atd::utility::NODE_STEP_STICK_ID);      \
   CLOG_IF(TIMER->is_LogPeriod(), INFO, logger_id)                      \
       << "step complete, elapse "                                      \
-      << TIMER->get_TimeGap(atd::planning::common::NODE_STEP_STICK_ID) \
+      << TIMER->get_TimeGap(atd::utility::NODE_STEP_STICK_ID) \
       << "ms."                                                         \
       << "\n";
 #endif
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

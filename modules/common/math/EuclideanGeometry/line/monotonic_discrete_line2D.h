@@ -4,8 +4,7 @@
 #include "discrete_line2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class MonotonicDiscreteLine2D : public DiscreteLine2D<Point2D> {
  public:
@@ -26,8 +25,7 @@ class MonotonicDiscreteLine2D : public DiscreteLine2D<Point2D> {
   virtual ~MonotonicDiscreteLine2D() = default;
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #endif

@@ -8,11 +8,11 @@
 #include <mutex>
 #include <sstream>
 #include <unordered_map>
+#include <vector>
 
 #include "exceptions.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 /**
@@ -114,7 +114,7 @@ class Factory {
   template <typename... Args>
   std::unique_ptr<AbstractProduct> create_Object(const IdentifierType &id,
                                                  Args &&... args) {
-    auto result = CreateObjectOrNull(id, args...);
+    auto result = create_ObjectOrNull(id, args...);
     if (!result) {
       std::stringstream sstm;
       sstm << "not found " << id << " in factory";
@@ -134,34 +134,33 @@ class Factory {
 class Singleton {
  public:
   typedef std::string SGLTN_ID;
+
+  template <typename SINGLETON_DERIVED, typename... ARGS>
+  static void try_register(ARGS &&... args) {
+    SGLTN_ID id = typeid(SINGLETON_DERIVED).name();
+    std::lock_guard<std::mutex> reg_lock(register_lock_);
+    auto itr_registry = registry_.find(id);
+    if (itr_registry == registry_.end()) {
+      registry_.insert(std::make_pair(
+          id, new SINGLETON_DERIVED(std::forward<ARGS>(args)...)));
+    }
+  }
+
   template <typename SINGLETON_DERIVED>
   static typename std::enable_if<
       std::is_base_of<Singleton, SINGLETON_DERIVED>::value,
       SINGLETON_DERIVED>::type *
   instance() {
     SGLTN_ID id = typeid(SINGLETON_DERIVED).name();
-    auto itr_flag = once_flags_.find(id);
-    if (itr_flag == once_flags_.end()) {
-      once_flags_.insert(
-          {id, std::shared_ptr<std::once_flag>(new std::once_flag())});
+    if (registry_.find(id) == registry_.end()) {
+      throw CommonException("Singleton not been registered yet.");
     }
-    std::call_once(*once_flags_[id], &try_register<SINGLETON_DERIVED>, id);
     auto ptr = registry_[id];
     return dynamic_cast<SINGLETON_DERIVED *>(ptr);
   }
 
- protected:
-  template <typename SINGLETON_DERIVED, typename... ARGS>
-  static void try_register(const SGLTN_ID &id, ARGS &&... args) {
-    if (registry_.find(id) != registry_.end()) {
-      registry_.insert(std::make_pair(
-          id, new SINGLETON_DERIVED(std::forward<ARGS>(args)...)));
-    }
-  }
-
  private:
-  static std::unordered_map<SGLTN_ID, std::shared_ptr<std::once_flag>>
-      once_flags_;
+  static std::mutex register_lock_;
   static std::unordered_map<SGLTN_ID, Singleton *> registry_;
 
  protected:
@@ -171,11 +170,11 @@ class Singleton {
   Singleton(Singleton &&) = delete;
 };
 
-#define SINGLETON_DERIVED(TYPE)                 \
-  friend class atd::common::utility::Singleton; \
-                                                \
- protected:                                     \
-  TYPE() = default;                             \
+#define SINGLETON_DERIVED(TYPE)         \
+  friend class atd::utility::Singleton; \
+                                        \
+ protected:                             \
+  TYPE() = default;                     \
   virtual ~TYPE() = default;
 
 class CString {
@@ -194,5 +193,6 @@ class CString {
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd
+
+#include "utility.tcc"

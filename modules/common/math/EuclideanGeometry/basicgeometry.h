@@ -5,8 +5,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class BasicGeometry {
  public:
@@ -22,14 +21,13 @@ class BasicGeometry {
       const std::pair<Point2D, Point2D>&, const std::pair<Point2D, Point2D>&);
 
   static Point2D IntersectedPoint(const std::pair<Point2D, Point2D>&,
-                                         const std::pair<Point2D, Point2D>&);
+                                  const std::pair<Point2D, Point2D>&);
 
  public:
   BasicGeometry() = delete;
 };
 
-}  // namespace common
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
 
 #endif  // BASICGEOMETRY_H

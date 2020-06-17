@@ -4,8 +4,7 @@
 #include <functional>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class NumericalIntegration {
  public:
@@ -26,7 +25,6 @@ class NumericalIntegration {
   ~NumericalIntegration() = default;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

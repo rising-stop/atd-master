@@ -6,7 +6,6 @@
 #include "modules/common/utility/exceptions.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 int SemDispatcher::register_sem(::key_t key, int sgnl_num) {
@@ -196,6 +195,5 @@ void SharedSemMutex::shared_unlock() {
   is_shared_locked_ = false;
 }
 
-}  // namespace utility
 }  // namespace common
 }  // namespace atd

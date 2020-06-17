@@ -4,8 +4,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class SLPoint2D : public Point2D {
   PROTECTED_MEMBER(double, s_)
@@ -16,7 +15,6 @@ class SLPoint2D : public Point2D {
   virtual ~SLPoint2D() = default;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

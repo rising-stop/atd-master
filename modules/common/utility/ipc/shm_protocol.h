@@ -5,7 +5,6 @@
 // #include "protobuf_msg/shm_dispatcher.pb.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 typedef struct {
@@ -32,5 +31,4 @@ typedef struct {
 } SHM_BASIC_FRAME;
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

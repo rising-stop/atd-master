@@ -3,11 +3,10 @@
 #include <map>
 #include <unordered_set>
 
-#include "common/utility/file_parser/file_handler.h"
-#include "common/utility/utility.h"
+#include "modules/common/utility/file_parser/file_handler.h"
+#include "modules/common/utility/utility.h"
 
 namespace atd {
-namespace common {
 namespace utility {
 
 class CSVFile : public ReadWriteableFile {
@@ -23,6 +22,8 @@ class CSVFile : public ReadWriteableFile {
   std::map<uint64_t, std::string> row_map_;
   std::map<uint64_t, std::vector<std::string>> container_;
 
+  uint64_t print_head_ = 0;
+
  public:
   double get_Double(const std::string&, uint64_t) const;
   int get_Int(const std::string&, uint64_t) const;
@@ -33,17 +34,26 @@ class CSVFile : public ReadWriteableFile {
   void set_TitleContent(const std::string&, const std::vector<std::string>&);
   void push_Content(const std::string&, const std::string&);
 
+  uint64_t get_RowSize() const;
+  uint64_t get_ColSize() const;
+
   virtual void parse_file() override;
   virtual void refresh_file() override;
+  void fresh_file();
 
  public:
   CSVFile() = default;
-  CSVFile(const char* name, const char* path = "~/.config/ATD/default/");
+  CSVFile(FILE_MODE mode, const char* name,
+          const char* path = "~/.config/ATD/default/");
   virtual ~CSVFile() = default;
 };
 
 class CSV_Observer : public Singleton {
+  friend class atd::utility::Singleton;
+
  public:
+  void redirect(ReadWriteableFile::FILE_MODE, const std::string&,
+                const std::string&);
   void push_Item(const std::string&, const std::string&);
 
  private:
@@ -57,12 +67,11 @@ class CSV_Observer : public Singleton {
   CSVFile csv_;
 
  private:
-  CSV_Observer(const std::string&, const std::string&);
+  CSV_Observer() = default;
+  CSV_Observer(ReadWriteableFile::FILE_MODE, const std::string&,
+               const std::string&);
   virtual ~CSV_Observer() = default;
-
-  friend class atd::common::utility::Singleton;
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

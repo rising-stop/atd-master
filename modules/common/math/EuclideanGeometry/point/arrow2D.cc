@@ -3,8 +3,7 @@
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 void Arrow2D::set_ThetaFromPoint(const Point2D& target) {
   if (!has_x_() || !has_y_()) {
@@ -14,6 +13,5 @@ void Arrow2D::set_ThetaFromPoint(const Point2D& target) {
   theta_ = MathCommon::arctan(target.get_y_() - y_, target.get_x_() - x_);
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

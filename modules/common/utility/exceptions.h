@@ -7,7 +7,6 @@
 #include <string>
 
 namespace atd {
-namespace common {
 namespace utility {
 
 /**
@@ -206,11 +205,11 @@ class CSVException : public CommonException {
   CSVException(INVALID_PARTERN error_code, const std::string& str)
       : error_code_(error_code) {
     std::stringstream sstr;
-    sstr << "csv file throw error code " << static_cast<int>(error_code_) << ": ";
+    sstr << "csv file throw error code " << static_cast<int>(error_code_)
+         << ": ";
     set_Message(sstr.str() + str);
   };
 };
 
 }  // namespace utility
-}  // namespace common
 }  // namespace atd

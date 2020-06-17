@@ -3,8 +3,7 @@
 #include "discrete_line2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <typename TYPE>
 DiscreteLine2D<TYPE>::DiscreteLine2D(const std::vector<POINT_TYPE>& target) {
@@ -79,6 +78,5 @@ DiscreteLine2D<TYPE>::get_PointSet() const {
   return point_storage_;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

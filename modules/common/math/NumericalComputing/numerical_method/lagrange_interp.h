@@ -5,8 +5,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 class LagrangeInterp {
@@ -22,7 +21,6 @@ class LagrangeInterp {
   LagrangeInterp() = default;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

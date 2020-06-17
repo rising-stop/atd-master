@@ -4,8 +4,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class Arrow2D : public Point2D {
  public:
@@ -18,7 +17,6 @@ class Arrow2D : public Point2D {
   virtual ~Arrow2D() = default;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

@@ -5,8 +5,7 @@
 #include "vectorXD.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 bool VectorXD<ORDER>::empty() const {
@@ -178,6 +177,5 @@ VectorXD<ORDER>::VectorXD(const VectorXD<ORDER>& target) {
   *this = target;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

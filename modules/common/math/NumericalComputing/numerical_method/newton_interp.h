@@ -6,8 +6,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class NewtonInterp2D {
  public:
@@ -23,7 +22,6 @@ class NewtonInterp2D {
   ~NewtonInterp2D() = default;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

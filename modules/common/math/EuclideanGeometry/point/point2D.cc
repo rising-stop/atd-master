@@ -4,8 +4,7 @@
 #include <cmath>
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 Point2D::Point2D(const double& x, const double& y) : x_(x), y_(y) {}
 
@@ -48,6 +47,5 @@ std::ostream& operator<<(std::ostream& ostm, const Point2D& point2d) {
   return ostm;
 }
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd

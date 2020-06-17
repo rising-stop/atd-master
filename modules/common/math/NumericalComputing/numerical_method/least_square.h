@@ -7,8 +7,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 template <int ORDER>
 class LeastSquare2D {
@@ -40,7 +39,6 @@ class LeastSquare2D {
   LeastSquare2D(const std::vector<Point2D>&, const std::vector<double>&);
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 

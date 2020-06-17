@@ -6,8 +6,7 @@
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
 namespace atd {
-namespace planning {
-namespace common {
+namespace utility {
 
 class Interpolation {
  public:
@@ -30,7 +29,6 @@ class Interpolation {
   Interpolation() = delete;
 };
 
-}  // namespace common
 }  // namespace planning
 }  // namespace atd
 
