@@ -192,6 +192,53 @@ class CString {
   CString() = default;
 };
 
+class FinateStateMachine {
+ public:
+  class State {
+   public:
+    void set_ID(const std::string &);
+    const std::string &get_ID() const;
+
+    void register_Init(std::function<void()>);
+    void register_Step(std::function<std::string()>);
+    void register_Exit(std::function<void()>);
+
+    void init();
+    std::string step();
+    void exit();
+
+   private:
+    std::string id_;
+    bool is_registered_init_ = false;
+    std::function<void()> init_;
+    bool is_registered_step_ = false;
+    std::function<std::string()> step_;
+    bool is_registered_exit_ = false;
+    std::function<void()> exit_;
+
+   public:
+    State() = default;
+    State(const std::string &);
+    State(const State &) = delete;
+    State(State &&) = default;
+    ~State() = default;
+  };
+
+  State *add_State(const std::string &);
+  void set_InitState(const std::string &);
+  const std::string &get_CurrentState() const;
+  void run();
+
+ private:
+  State *current_state_;
+  std::string init_state_;
+  std::unordered_map<std::string, State *> state_map_;
+
+ public:
+  FinateStateMachine() = default;
+  virtual ~FinateStateMachine() = default;
+};
+
 }  // namespace utility
 }  // namespace atd
 
