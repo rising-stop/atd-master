@@ -3,24 +3,19 @@
 
 #include "modules/common/common_support/observer/ObservingLogging.h"
 #include "modules/common/common_support/timer/timer.h"
-#include "modules/common/utility/file_parser/csv_parser.h"
-#include "modules/common/utility/ipc/semaphore_mutex.h"
-#include "modules/common/utility/ipc/shared_memory.h"
-#include "modules/common/utility/ipc/shm_protocol.h"
+#include "modules/common/utility/ipc/lcm_dispatcher/lcm_dispatcher.h"
+#include "protobuf_msg/shm_dispatcher.pb.h"
 
 using namespace atd::utility;
 
 int main(int argc, char* argv[]) {
-  Singleton::try_register<CSV_Observer>(ReadWriteableFile::FILE_MODE::WRITE,
-                                        "test.csv", "./");
+  LCM_Proxy msg_sender{LCM_Proxy::SENDER, "TEST_SENDER"};
+  LCM_Proxy msg_reader{LCM_Proxy::READER, "TEST_READER"};
 
-  Singleton::instance<CSV_Observer>()->push_Item("var1", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var2", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var3", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var2", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var1", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var1", "var");
-  Singleton::instance<CSV_Observer>()->push_Item("var1", "var");
+  atd::common::msg::shminfo test_msg;
+  test_msg.set_sem_id(100);
+  ProtoLite_Messages proto_msg{test_msg};
+  msg_sender.publish(proto_msg);
 
   while (1) {
     /* Write it into shared memory */

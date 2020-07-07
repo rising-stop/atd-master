@@ -9,4 +9,4 @@ file(GLOB_RECURSE PROJECT_SOURCES
   "../protobuf_msg/*.cc")
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(${PROJECT_NAME} pthread)
+target_link_libraries(${PROJECT_NAME} pthread lcm)

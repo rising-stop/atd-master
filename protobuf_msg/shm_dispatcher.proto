@@ -1,6 +1,7 @@
 syntax="proto3";
-
 package atd.common.msg;
+
+option optimize_for = LITE_RUNTIME;
 
 message shminfo {
 	enum shmmode{

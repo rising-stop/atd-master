@@ -211,5 +211,38 @@ class CSVException : public CommonException {
   };
 };
 
+/**
+ * @brief Class LCMException
+ * containing messages from class LCM_Proxy and its relations
+ */
+class LCMException : public CommonException {
+ public:
+  enum INVALID_PARTERN : int {
+    UNKNOW = 0,
+    UNKNOW_MODE = 1,
+    MODE_ERROR = 2,
+    PROTOMSG_SERIALIZE_FAIL = 3,
+    PROTOMSG_PARSE_FAIL = 4
+  };
+
+ private:
+  INVALID_PARTERN error_code_;
+
+ public:
+  /**
+   * @brief constructor:
+   * @param
+   *   1. INVALID_PARTERN error_code:  some invalid partern code
+   *   2. const string&: error message
+   */
+  LCMException(INVALID_PARTERN error_code, const std::string& str)
+      : error_code_(error_code) {
+    std::stringstream sstr;
+    sstr << "csv file throw error code " << static_cast<int>(error_code_)
+         << ": ";
+    set_Message(sstr.str() + str);
+  };
+};
+
 }  // namespace utility
 }  // namespace atd
