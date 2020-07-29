@@ -9,14 +9,6 @@
 using namespace atd::utility;
 
 int main(int argc, char* argv[]) {
-  LCM_Proxy msg_sender{LCM_Proxy::SENDER, "TEST_SENDER"};
-  LCM_Proxy msg_reader{LCM_Proxy::READER, "TEST_READER"};
-
-  atd::common::msg::shminfo test_msg;
-  test_msg.set_sem_id(100);
-  ProtoLite_Messages proto_msg{test_msg};
-  msg_sender.publish(proto_msg);
-
   while (1) {
     /* Write it into shared memory */
     TIMER->set_EndStick("counter");

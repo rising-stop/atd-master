@@ -3,27 +3,6 @@
 namespace atd {
 namespace utility {
 
-std::shared_ptr<lcm::ReceiveBuffer> ProtoLite_Messages::msg_Encode() {
-  auto ptr_buf = std::make_shared<lcm::ReceiveBuffer>();
-  ptr_buf->data_size = ref_msg_.ByteSize();
-  ptr_buf->data = malloc(ptr_buf->data_size);
-  if (!ref_msg_.SerializeToArray(ptr_buf->data, ptr_buf->data_size)) {
-    throw LCMException(LCMException::PROTOMSG_SERIALIZE_FAIL,
-                       "proto msg encode fail");
-  }
-  return ptr_buf;
-}
-
-void ProtoLite_Messages::msg_Decode(lcm::ReceiveBuffer* lcm_buf) {
-  if (!ref_msg_.ParseFromArray(lcm_buf->data, lcm_buf->data_size)) {
-    throw LCMException(LCMException::PROTOMSG_PARSE_FAIL,
-                       "proto msg decode fail");
-  }
-}
-
-ProtoLite_Messages::ProtoLite_Messages(google::protobuf::MessageLite& proto_msg)
-    : ref_msg_(proto_msg) {}
-
 LCM_Proxy::LCM_MODE LCM_Proxy::lcm_Mode() const { return mode_; }
 
 bool LCM_Proxy::is_Good() const { return ptr_lcm_->good(); }
@@ -68,10 +47,11 @@ void LCM_Proxy::spin() {
 LCM_Proxy::LCM_Proxy(LCM_MODE mode, const std::string& channel, int ttl,
                      int buffer_size)
     : mode_(mode), channel_(channel), buffer_size_(buffer_size) {
-  char* lcm_init_param;
+  std::string lcm_init_param = "udpm://";
   const char* udpm = "239.255.76.67:7667";
-  CString::cstring_cat(lcm_init_param, "udpm://", udpm,
-                       "?ttl=", std::to_string(ttl).c_str());
+  lcm_init_param.append(udpm);
+  lcm_init_param.append("?ttl=");
+  lcm_init_param.append(std::to_string(ttl));
   ptr_lcm_ = new lcm::LCM(lcm_init_param);
 
   switch (mode_) {

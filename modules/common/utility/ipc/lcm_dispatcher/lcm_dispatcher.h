@@ -21,13 +21,13 @@ class LCM_Messages_Adapter {
 };
 
 template <typename LCM_TYPE>
-class LCM_Messages : LCM_Messages_Adapter {
+class LCM_Messages : public LCM_Messages_Adapter, public LCM_TYPE {
  public:
   virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() override;
   virtual void msg_Decode(lcm::ReceiveBuffer*) override;
 
  public:
-  LCM_Messages(LCM_TYPE&);
+  explicit LCM_Messages() = default;
   virtual ~LCM_Messages() = default;
 };
 
@@ -40,7 +40,7 @@ class ProtoLite_Messages : public LCM_Messages_Adapter {
   google::protobuf::MessageLite& ref_msg_;
 
  public:
-  ProtoLite_Messages(google::protobuf::MessageLite&);
+  explicit ProtoLite_Messages(google::protobuf::MessageLite&);
   virtual ~ProtoLite_Messages() = default;
 };
 
@@ -77,3 +77,5 @@ class LCM_Proxy {
 
 }  // namespace utility
 }  // namespace atd
+
+#include "lcm_dispatcher.tcc"
