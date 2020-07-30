@@ -25,7 +25,7 @@ bool LCM_Proxy::subscribe(LCM_Messages_Adapter& adapter) {
     spin_handler_ = new std::thread(&LCM_Proxy::spin, this);
   }
   lcm::ReceiveBuffer tmp_buffer;
-  if (buffers_.try_pop_back(tmp_buffer)) {
+  if (buffers_.try_pop_front(tmp_buffer)) {
     adapter.msg_Decode(&tmp_buffer);
     return true;
   }

@@ -69,7 +69,7 @@ class LCM_Proxy {
 
  public:
   LCM_Proxy() = delete;
-  LCM_Proxy(LCM_MODE, const std::string&, int ttl = 1, int buffer_size = 5);
+  LCM_Proxy(LCM_MODE, const std::string&, int ttl = 1, int buffer_size = 3);
   LCM_Proxy(const LCM_Proxy&) = delete;
   LCM_Proxy(LCM_Proxy&&) = delete;
   ~LCM_Proxy();
