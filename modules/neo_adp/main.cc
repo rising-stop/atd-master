@@ -1,171 +1,84 @@
-#include "modules/neo_adp/libs/gl3w/GL/gl3w.h"
-#include "modules/neo_adp/libs/glfw/include/GLFW/glfw3.h"
-#include <stdio.h>
+#include "modules/neo_adp/display_elements/common_frame.h"
 
-#include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
-#include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
-#include "modules/neo_adp/imgui_module/imgui.h"
-
-static void glfw_error_callback(int error, const char* description) {
-  fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-}
-
-int main(int, char**) {
-  // Setup window
-  glfwSetErrorCallback(glfw_error_callback);
-  if (!glfwInit()) return 1;
-  // GL 3.0 + GLSL 130
-  const char* glsl_version = "#version 130";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+
-  // only glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            //
-  // Create window with graphics context
-  GLFWwindow* window = glfwCreateWindow(
-      1280, 720, "ATD Autonomous Driving System", NULL, NULL);
-  if (window == NULL) return 1;
-  glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);  // Enable vsync
-
-  bool err = gl3wInit() != 0;
-
-  if (err) {
-    fprintf(stderr, "Failed to initialize OpenGL loader!\n");
-    return 1;
-  }
-
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO();
-  (void)io;
-  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
-  // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
-  // Enable Gamepad Controls
-
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsClassic();
-
-  // Setup Platform/Renderer bindings
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
-
-  // Load Fonts
-  // - If no fonts are loaded, dear imgui will use the default font. You can
-  // also load multiple fonts and use ImGui::PushFont()/PopFont() to select
-  // them.
-  // - AddFontFromFileTTF() will return the ImFont* so you can store it if you
-  // need to select the font among multiple.
-  // - If the file cannot be loaded, the function will return NULL. Please
-  // handle those errors in your application (e.g. use an assertion, or display
-  // an error and quit).
-  // - The fonts will be rasterized at a given size (w/ oversampling) and stored
-  // into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which
-  // ImGui_ImplXXXX_NewFrame below will call.
-  // - Read 'docs/FONTS.md' for more instructions and details.
-  // - Remember that in C/C++ if you want to include a backslash \ in a string
-  // literal you need to write a double backslash \\ !
-  // io.Fonts->AddFontDefault();
-  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-  // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-  // ImFont* font =
-  // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f,
-  // NULL, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
-
+/* main function */
+int main(int args, char** argv) {
   // Our state
+  bool ImGui = true;
+  bool the_same_color = false;
+  bool draw_trangle_without_render = false;
+  bool draw_trangle = false;
+  bool bonus_draw_line = false;
+  bool bonus_draw_another_trangle = false;
+  unsigned int VBO, VAO, EBO;
   bool show_demo_window = true;
-  bool show_another_window = false;
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+  GLuint VertexArrayID;
+  glGenVertexArrays(1, &VertexArrayID);
+  glBindVertexArray(VertexArrayID);
+
+  GLuint programID = LoadShaders("SimpleVertexShader.vertexshader",
+                                 "SimpleFragmentShader.fragmentshader");
+  ImVec4 v1 = ImVec4(-0.25f, -0.25f, 0.0f, 1.00f);
+  ImVec4 v2 = ImVec4(0.25f, -0.25f, 0.0f, 1.00f);
+  ImVec4 v3 = ImVec4(0.0f, 0.25f, 0.0f, 1.00f);
+
+  GLuint vertexbuffer;
 
   // Main loop
-  while (!glfwWindowShouldClose(window)) {
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
-    // tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to
-    // your main application.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input
-    // data to your main application. Generally you may always pass all inputs
-    // to dear imgui, and hide them from your application based on those two
-    // flags.
-    glfwPollEvents();
+  while (!glfwWindowShouldClose(ptr_window)) {
 
-    // Start the Dear ImGui frame
+    /* 创建 VBO */
+    GLfloat g_vertex_buffer_data[] = {
+        v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z,
+    };
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER,
+                 vertexbuffer); /* 顶点缓冲对象 GL_ARRAY_BUFFER */
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
+                 g_vertex_buffer_data, GL_STATIC_DRAW);
+    /**
+     * GL_STATIC_DRAW ：数据不会或几乎不会改变。
+     * GL_DYNAMIC_DRAW：数据会被改变很多。
+     * GL_STREAM_DRAW ：数据每次绘制时都会改变。*/
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void*)0);
+    /**
+     * 第一个参数指定我们要配置的顶点属性。顶点着色器中使用layout(location=0)定义了position顶点属性的位置值(Location)
+     * 第二个参数指定顶点属性的大小。顶点属性是一个vec3，它由3个值组成，所以大小是
+     * 第三个参数指定数据的类型，这里是GL_FLOAT(GLSL中vec*都是由浮点数值组成的)。
+     * 第四个参数定义我们是否希望数据被标准化(Normalize)。如果我们设置为GL_TRUE，所有数据都会被映射到0（对于有符号型signed数据是-1）到1之间。我们把它设置为GL_FALSE
+     * 第五个参数叫做步长(Stride)，它告诉我们在连续的顶点属性组之间的间隔。由于下个组位置数据在3个float之后，我们把步长设置为3sizeof(float)。要注意的是由于我们知道这个数组是紧密排列的（在两个顶点属性之间没有空隙）我们也可以设置为0来让OpenGL决定具体步长是多少（只有当数值是紧密排列时才可用）。一旦我们有更多的顶点属性，我们就必须更小心地定义每个顶点属性之间的间隔
+     * 最后一个参数的类型是void*，所以需要我们进行这个奇怪的强制类型转换。它表示位置数据在缓冲中起始位置的偏移量(Offset)。由于位置数据在数组的开头，所以这里是0。
+     */
+    glEnableVertexAttribArray(0);
+    glUseProgram(programID); /* 每个着色器调用和渲染调用都会使用这个着色器了*/
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGui::Begin("change vertex", &ImGui, ImGuiWindowFlags_MenuBar);
+    ImGui::SliderFloat("", &v3.y, -1.0f, 1.0f, "v3.y = %.3f");
+    ImGui::End();
 
-    // 1. Show the big demo window (Most of the sample code is in
-    // ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
-    // ImGui!).
     if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair
-    // to created a named window.
-    {
-      static float f = 0.0f;
-      static int counter = 0;
-
-      ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!"
-                                      // and append into it.
-
-      ImGui::Text("This is some useful text.");  // Display some text (you can
-                                                 // use a format strings too)
-      ImGui::Checkbox(
-          "Demo Window",
-          &show_demo_window);  // Edit bools storing our window open/close state
-      ImGui::Checkbox("Another Window", &show_another_window);
-
-      ImGui::SliderFloat(
-          "float", &f, 0.0f,
-          1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
-      ImGui::ColorEdit3(
-          "clear color",
-          (float*)&clear_color);  // Edit 3 floats representing a color
-
-      if (ImGui::Button(
-              "Button"))  // Buttons return true when clicked (most widgets
-                          // return true when edited/activated)
-        counter++;
-      ImGui::SameLine();
-      ImGui::Text("counter = %d", counter);
-
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                  1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      ImGui::End();
-    }
-
-    // 3. Show another simple window.
-    if (show_another_window) {
-      ImGui::Begin(
-          "Another Window",
-          &show_another_window);  // Pass a pointer to our bool variable (the
-                                  // window will have a closing button that will
-                                  // clear the bool when clicked)
-      ImGui::Text("Hello from another window!");
-      if (ImGui::Button("Close Me")) show_another_window = false;
-      ImGui::End();
-    }
 
     // Rendering
     ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    glfwSwapBuffers(window);
   }
 
   // Cleanup
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 
-  glfwDestroyWindow(window);
+  glfwDestroyWindow(ptr_window);
   glfwTerminate();
 
   return 0;
