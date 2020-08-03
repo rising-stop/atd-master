@@ -7,18 +7,20 @@ include_directories("${ATD_MASTER_ROOT}/modules/neo_adp/libs/gl3w")
 file(GLOB_RECURSE PROJECT_HEADERS
   "imgui_module/*.h"
   "imgui-opengl3/*.h"
-  "libs/*.h"
-  "opengl_test/*.h")
+  "libs/*.h")
 #set source files:*.cpp, *.c, *.cc in this project
 file(GLOB_RECURSE PROJECT_SOURCES
   "imgui_module/*.cpp"
   "imgui-opengl3/*.cpp"
   "libs/*.c"
-  "opengl_test/*.cc"
+  "display_elements/*.hpp"
+  "display_elements/*.cc"
   "main.cc")
 #set library files: *.lib in this project
 
-# file(GLOB_RECURSE PROJECT_LIBRARIES)
+file(GLOB_RECURSE PROJECT_LIBRARIES
+    "../../bin/lib/libcommon.so"
+    "../../3rd_party/lcm-1.3.0-saic/lib/liblcm.so")
 
 add_definitions(-D IMGUI_IMPL_OPENGL_LOADER_GL3W)
 
