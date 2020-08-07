@@ -1,5 +1,7 @@
 message(STATUS "start generating protobuf message")
-execute_process(COMMAND sh protobuf_generate_cpp.sh ${PROTOBUF_LIBRARY_PATH} ${PROTOBUF_PROTOC_PATH} ${PROTO_MSG_PATH} ${PROTO_MSG_PATH}
+
+execute_process(COMMAND sh protobuf_generate_cpp.sh  
+	${PROTO_MSG_PATH} ${PROTO_MSG_PATH}
 	WORKING_DIRECTORY ${PROTO_MSG_PATH}
 	RESULT_VARIABLE RES
 	OUTPUT_VARIABLE OUT_RES

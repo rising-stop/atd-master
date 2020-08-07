@@ -221,8 +221,8 @@ class LCMException : public CommonException {
     UNKNOW = 0,
     UNKNOW_MODE = 1,
     MODE_ERROR = 2,
-    PROTOMSG_SERIALIZE_FAIL = 3,
-    PROTOMSG_PARSE_FAIL = 4
+    MSG_SERIALIZE_FAIL = 3,
+    MSG_PARSE_FAIL = 4
   };
 
  private:
@@ -238,7 +238,7 @@ class LCMException : public CommonException {
   LCMException(INVALID_PARTERN error_code, const std::string& str)
       : error_code_(error_code) {
     std::stringstream sstr;
-    sstr << "csv file throw error code " << static_cast<int>(error_code_)
+    sstr << "lcm throw error code " << static_cast<int>(error_code_)
          << ": ";
     set_Message(sstr.str() + str);
   };

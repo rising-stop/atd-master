@@ -11,7 +11,7 @@ else()
 	# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ATD_MASTER_ROOT}/build)
 endif()
 
-# add_subdirectory(common)
+add_subdirectory(common)
 # add_subdirectory(AlgthmLauncher)
 # add_subdirectory(ShmService)
 add_subdirectory(neo_adp)

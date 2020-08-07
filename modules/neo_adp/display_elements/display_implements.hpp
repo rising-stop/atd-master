@@ -2,6 +2,19 @@
 
 #include "common_frame.hpp"
 
+static void init4Display() {
+  atd::utility::Singleton::try_register<OpenGL_Frame>();
+
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawGrid);
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawMiscObjects);
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawFrustum);
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawText);
+}
+
 static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
   if (!keys.showLabels) {
     return;
@@ -18,8 +31,9 @@ static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
 
 static void drawGrid(const ThreadData &td) {
   if (keys.showGrid) {
-    dd::xzSquareGrid(td.ddContext, -50.0f, 50.0f, 0.0f, 1.0f,
-                     dd::colors::DarkGreen);  // Grid from -50 to +50 in both X & Z
+    dd::xzSquareGrid(
+        td.ddContext, -50.0f, 50.0f, 0.0f, 1.0f,
+        dd::colors::DarkGreen);  // Grid from -50 to +50 in both X & Z
   }
 }
 

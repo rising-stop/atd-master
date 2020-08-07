@@ -1,0 +1,24 @@
+syntax="proto3";
+package atd.protocol;
+
+option optimize_for = LITE_RUNTIME;
+
+message display_point {
+  double x = 1;
+  double y = 2;
+  double z = 3  ;
+}
+
+message display_line {
+  repeated display_point sample_points = 1;
+}
+
+message display_frame {
+  repeated display_line envelopes = 1;
+}
+
+message Opengl_Elements{
+  repeated display_point point_set = 1;
+  repeated display_point line_set = 2;
+  repeated display_point frame_set = 3;
+}

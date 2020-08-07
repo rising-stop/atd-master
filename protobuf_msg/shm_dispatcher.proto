@@ -1,5 +1,5 @@
 syntax="proto3";
-package atd.common.msg;
+package atd.protocol.msg;
 
 option optimize_for = LITE_RUNTIME;
 

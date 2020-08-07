@@ -23,6 +23,7 @@
 #include "modules/common/utility/ipc/semaphore_mutex.h"
 #include "modules/common/utility/ipc/shared_memory.h"
 #include "modules/common/utility/ipc/shm_protocol.h"
+#include "modules/common/utility/ipc/lcm_dispatcher/lcm_dispatcher.h"
 
 /**
  * observer functions

@@ -719,7 +719,7 @@ class OpenGL_Frame : public atd::utility::Singleton {
   GLFWwindow *ptr_mainwindow_;
 
   OpenGL_Frame() {
-    ptr_mainwindow_ = Init4GLFW(800, 600);
+    ptr_mainwindow_ = Init4GLFW(1200, 800);
     Imgui_Setting();
   }
   ~OpenGL_Frame() { delete ddRenderIfaceGL_; }

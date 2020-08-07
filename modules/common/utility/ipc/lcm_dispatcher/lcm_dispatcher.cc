@@ -7,13 +7,27 @@ LCM_Proxy::LCM_MODE LCM_Proxy::lcm_Mode() const { return mode_; }
 
 bool LCM_Proxy::is_Good() const { return ptr_lcm_->good(); }
 
-bool LCM_Proxy::publish(LCM_Messages_Adapter& adapter) {
+void LCM_Proxy::publish(LCM_Messages_Adapter& adapter) {
   if (mode_ != SENDER) {
     throw LCMException(LCMException::MODE_ERROR,
                        "LCM_Proxy mode error, current mode is SENDER");
   }
+  if (!spin_handler_) {
+    spin_handler_ = new std::thread(&LCM_Proxy::publisher_spin, this);
+  }
   auto lcm_rbuf = adapter.msg_Encode();
-  return ptr_lcm_->publish(channel_, lcm_rbuf->data, lcm_rbuf->data_size);
+  if (!lcm_rbuf) {
+    throw LCMException(LCMException::MSG_SERIALIZE_FAIL,
+                       "LCM_Proxy: msg encode fail");
+  }
+  buffers_.push_back_with_limits(*lcm_rbuf, buffer_size_);
+}
+
+void LCM_Proxy::publisher_spin() {
+  while (!flag_shutdown_spin_) {
+    auto lcm_rbuf = buffers_.wait_pop_front();
+    ptr_lcm_->publish(channel_, lcm_rbuf->data, lcm_rbuf->data_size);
+  }
 }
 
 bool LCM_Proxy::subscribe(LCM_Messages_Adapter& adapter) {
@@ -22,7 +36,7 @@ bool LCM_Proxy::subscribe(LCM_Messages_Adapter& adapter) {
                        "LCM_Proxy mode error, current mode is READER");
   }
   if (!spin_handler_) {
-    spin_handler_ = new std::thread(&LCM_Proxy::spin, this);
+    spin_handler_ = new std::thread(&LCM_Proxy::receiver_spin, this);
   }
   lcm::ReceiveBuffer tmp_buffer;
   if (buffers_.try_pop_front(tmp_buffer)) {
@@ -32,13 +46,13 @@ bool LCM_Proxy::subscribe(LCM_Messages_Adapter& adapter) {
   return false;
 }
 
-void LCM_Proxy::lcm_Handler(const lcm::ReceiveBuffer* rbuf,
-                            const std::string& channel) {
+void LCM_Proxy::catch_LCM_buffers(const lcm::ReceiveBuffer* rbuf,
+                                  const std::string& channel) {
   buffers_.push_back_with_limits(*rbuf, buffer_size_);
 }
 
-void LCM_Proxy::spin() {
-  ptr_lcm_->subscribe(channel_, &LCM_Proxy::lcm_Handler, this);
+void LCM_Proxy::receiver_spin() {
+  ptr_lcm_->subscribe(channel_, &LCM_Proxy::catch_LCM_buffers, this);
   while (!flag_shutdown_spin_) {
     ptr_lcm_->handle();
   }

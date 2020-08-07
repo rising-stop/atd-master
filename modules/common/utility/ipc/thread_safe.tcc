@@ -12,25 +12,31 @@ bool ThreadSafe_Deque<TYPE, Container>::empty() const {
 template <typename TYPE, typename Container>
 void ThreadSafe_Deque<TYPE, Container>::push_back_with_limits(
     const TYPE &element, int limit) {
-  std::lock_guard<std::mutex> lock(deque_mutex_);
-  container_.push_back(element);
-  if (container_.size() > limit) {
-    container_.pop_front();
+  {
+    std::lock_guard<std::mutex> lock(deque_mutex_);
+    container_.push_back(element);
+    if (container_.size() > limit) {
+      container_.pop_front();
+    }
   }
   wait_cond_.notify_one();
 }
 
 template <typename TYPE, typename Container>
 void ThreadSafe_Deque<TYPE, Container>::push_back(const TYPE &element) {
-  std::lock_guard<std::mutex> lock(deque_mutex_);
-  container_.push_back(element);
+  {
+    std::lock_guard<std::mutex> lock(deque_mutex_);
+    container_.push_back(element);
+  }
   wait_cond_.notify_one();
 }
 
 template <typename TYPE, typename Container>
 void ThreadSafe_Deque<TYPE, Container>::push_front(const TYPE &element) {
-  std::lock_guard<std::mutex> lock(deque_mutex_);
-  container_.push_back(element);
+  {
+    std::lock_guard<std::mutex> lock(deque_mutex_);
+    container_.push_back(element);
+  }
   wait_cond_.notify_one();
 }
 
@@ -60,7 +66,7 @@ template <typename TYPE, typename Container>
 std::shared_ptr<TYPE> ThreadSafe_Deque<TYPE, Container>::wait_pop_back() {
   std::unique_lock<std::mutex> lock(deque_mutex_);
   wait_cond_.wait(lock, [&]() -> bool { return !container_.empty(); });
-  auto res = std::make_shared(container_.back());
+  auto res = std::make_shared<TYPE>(container_.back());
   container_.pop_back();
   return res;
 }
@@ -69,7 +75,7 @@ template <typename TYPE, typename Container>
 std::shared_ptr<TYPE> ThreadSafe_Deque<TYPE, Container>::wait_pop_front() {
   std::unique_lock<std::mutex> lock(deque_mutex_);
   wait_cond_.wait(lock, [&]() -> bool { return !container_.empty(); });
-  auto res = std::make_shared(container_.front());
+  auto res = std::make_shared<TYPE>(container_.front());
   container_.pop_front();
   return res;
 }
