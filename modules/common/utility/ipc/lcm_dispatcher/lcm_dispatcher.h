@@ -2,19 +2,19 @@
 
 #include <google/protobuf/message_lite.h>
 
+#include <lcm/lcm-cpp.hpp>
 #include <thread>
 
-#include "lcm/lcm-cpp.hpp"
-#include "modules/common/utility/ipc/thread_safe.h"
-#include "modules/common/utility/utility.h"
+#include "thread_safe.h"
+#include "utility.h"
 
 namespace atd {
 namespace utility {
 
 class LCM_Messages_Adapter {
  public:
-  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() = 0;
-  virtual bool msg_Decode(lcm::ReceiveBuffer*) = 0;
+  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() const noexcept = 0;
+  virtual bool msg_Decode(const lcm::ReceiveBuffer*) noexcept = 0;
 
  public:
   LCM_Messages_Adapter() = default;
@@ -24,8 +24,8 @@ class LCM_Messages_Adapter {
 template <typename LCM_TYPE>
 class LCM_Messages : public LCM_Messages_Adapter, public LCM_TYPE {
  public:
-  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() override;
-  virtual bool msg_Decode(lcm::ReceiveBuffer*) override;
+  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() const noexcept override;
+  virtual bool msg_Decode(const lcm::ReceiveBuffer*) noexcept override;
 
  public:
   explicit LCM_Messages() = default;
@@ -33,23 +33,27 @@ class LCM_Messages : public LCM_Messages_Adapter, public LCM_TYPE {
 };
 
 template <typename PROTO_TYPE>
-class ProtoLite_Messages : public LCM_Messages_Adapter, public PROTO_TYPE {
+class Proto_Messages : public LCM_Messages_Adapter, public PROTO_TYPE {
  public:
-  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() override;
-  virtual bool msg_Decode(lcm::ReceiveBuffer*) override;
+  virtual std::shared_ptr<lcm::ReceiveBuffer> msg_Encode() const noexcept override;
+  virtual bool msg_Decode(const lcm::ReceiveBuffer*) noexcept override;
 
  public:
-  explicit ProtoLite_Messages() = default;
-  virtual ~ProtoLite_Messages() = default;
+  explicit Proto_Messages() = default;
+  virtual ~Proto_Messages() = default;
 };
 
+enum LCM_MODE : int { SENDER = 0, READER = 1};
+template <typename MSG_TYPE>
 class LCM_Proxy {
  public:
-  enum LCM_MODE : int { SENDER = 0, READER = 1, PARSER = 2 };
+  typedef typename std::enable_if<
+      std::is_base_of<LCM_Messages_Adapter, MSG_TYPE>::value, MSG_TYPE>::type
+      BASE_MSG_TYPE;
 
   LCM_MODE lcm_Mode() const;
-  void publish(LCM_Messages_Adapter&);
-  bool subscribe(LCM_Messages_Adapter&);
+  void publish(const BASE_MSG_TYPE&);
+  bool subscribe(BASE_MSG_TYPE&);
 
  protected:
   bool is_Good() const;
@@ -64,7 +68,7 @@ class LCM_Proxy {
 
   volatile bool flag_shutdown_spin_ = false;
   std::thread* spin_handler_ = nullptr;
-  ThreadSafe_Deque<lcm::ReceiveBuffer> buffers_;
+  ThreadSafe_Deque<BASE_MSG_TYPE> buffers_;
   const int buffer_size_;
 
  public:

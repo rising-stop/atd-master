@@ -1,0 +1,45 @@
+syntax="proto3";
+package atd.protocol;
+
+option optimize_for = LITE_RUNTIME;
+
+message FRAME_HEADER {
+  uint64 time_stamp = 1;
+  uint64 counter_no = 2;
+}
+
+enum SECURITY_INFO {
+  INFO = 0;
+  WARNING = 1;
+  ERROR = 2;
+}
+
+enum DATA_TYPE {
+  INT16 = 0;
+  UINT16 = 1;
+  INT32 = 2;
+  UINT32 = 3;
+  INT64 = 4;
+  UINT64 = 5;
+  FLOAT32 = 6;
+  FLOAT64 = 7;
+}
+
+message VARIABLE {
+  DATA_TYPE type = 1;
+  string name = 2;
+  string data = 3;
+}
+
+message FRAME_CONTENT {
+  SECURITY_INFO level = 1;
+  uint64 line_no = 2;
+  string file_name = 3;
+  repeated string str_msg = 4;
+  repeated VARIABLE variables = 5;
+}
+
+message LOG_CONTENT {
+  FRAME_HEADER title = 1;
+  repeated FRAME_CONTENT content = 2;
+}

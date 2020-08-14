@@ -10,20 +10,6 @@ namespace atd {
 namespace utility {
 
 class CSVFile : public ReadWriteableFile {
- private:
-  inline void check_TitleRegistered(const std::string&) const;
-  inline void check_RequestColRange(uint64_t) const;
-  inline void check_RequestRowRange(uint64_t) const;
-
-  uint64_t row_size_ = 0;
-  uint64_t col_size_ = 0;
-
-  std::unordered_map<std::string, uint64_t> title_hash_;
-  std::map<uint64_t, std::string> row_map_;
-  std::map<uint64_t, std::vector<std::string>> container_;
-
-  uint64_t print_head_ = 0;
-
  public:
   double get_Double(const std::string&, uint64_t) const;
   int get_Int(const std::string&, uint64_t) const;
@@ -41,9 +27,23 @@ class CSVFile : public ReadWriteableFile {
   virtual void refresh_file() override;
   void fresh_file();
 
+ private:
+  inline void check_TitleRegistered(const std::string&) const;
+  inline void check_RequestColRange(uint64_t) const;
+  inline void check_RequestRowRange(uint64_t) const;
+
+  uint64_t row_size_ = 0;
+  uint64_t col_size_ = 0;
+
+  std::unordered_map<std::string, uint64_t> title_hash_;
+  std::map<uint64_t, std::string> row_map_;
+  std::map<uint64_t, std::vector<std::string>> container_;
+
+  uint64_t print_head_ = 0;
+
  public:
   CSVFile() = default;
-  CSVFile(FILE_MODE mode, const char* name,
+  explicit CSVFile(FILE_MODE mode, const char* name,
           const char* path = "~/.config/ATD/default/");
   virtual ~CSVFile() = default;
 };
