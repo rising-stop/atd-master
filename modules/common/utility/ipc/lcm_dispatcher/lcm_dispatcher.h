@@ -5,8 +5,8 @@
 #include <lcm/lcm-cpp.hpp>
 #include <thread>
 
-#include "thread_safe.h"
-#include "utility.h"
+#include "modules/common/utility/thread_safe.h"
+#include "modules/common/utility/utility.h"
 
 namespace atd {
 namespace utility {

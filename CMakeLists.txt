@@ -26,6 +26,7 @@ message(STATUS "ATD_MASTER_ROOT: ${ATD_MASTER_ROOT}")
 message(STATUS "PROTO_MSG_PATH: ${PROTO_MSG_PATH}")
 message(STATUS "PROTO_MSG_IMPLEMENT_PATH: ${PROTO_MSG_IMPLEMENT_PATH}")
 
+add_definitions(-Wno-format-security)
 
 add_subdirectory(protobuf_msg)
 add_subdirectory(modules)

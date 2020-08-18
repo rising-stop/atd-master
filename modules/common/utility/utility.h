@@ -118,7 +118,7 @@ class Factory {
     if (!result) {
       std::stringstream sstm;
       sstm << "not found " << id << " in factory";
-      throw CommonException(sstm.str());
+      throw CommonException();
     }
     return result;
   }
@@ -170,12 +170,7 @@ class Singleton {
   Singleton(Singleton &&) = delete;
 };
 
-#define SINGLETON_DERIVED(TYPE)         \
-  friend class atd::utility::Singleton; \
-                                        \
- protected:                             \
-  TYPE() = default;                     \
-  virtual ~TYPE() = default;
+#define CLASS_SINGLETON atd::utility::Singleton
 
 class CString {
  public:

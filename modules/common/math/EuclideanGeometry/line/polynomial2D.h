@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "modules/common/common_support/class_support.h"
-
 namespace atd {
 namespace utility {
 
@@ -34,9 +32,9 @@ class Polynomial {
   Polynomial& operator+=(const Polynomial&);
   Polynomial operator-(const Polynomial&) const;
   Polynomial& operator-=(const Polynomial&);
-  Polynomial operator*(const Polynomial&)const;
+  Polynomial operator*(const Polynomial&) const;
   Polynomial& operator*=(const Polynomial&);
-  Polynomial operator*(const double&)const;
+  Polynomial operator*(const double&) const;
   Polynomial& operator*=(const double&);
 
   inline int get_ItemOrder(int) const;

@@ -3,13 +3,11 @@
 #include <iostream>
 #include <thread>
 
-#include "modules/common/common_support/observer/ObservingLogging.h"
-#include "modules/common/common_support/timer/timer.h"
 #include "modules/common/utility/ipc/semaphore_mutex.h"
 #include "modules/common/utility/ipc/shared_memory.h"
 #include "modules/common/utility/ipc/shm_protocol.h"
 
-using namespace atd::common::utility;
+using namespace atd::utility;
 
 void CtlC_Handler(int sig) {
   Singleton::instance<ShmDispatcher>()->release_all_shm();
@@ -32,18 +30,13 @@ int main(int argc, char* argv[]) {
   atd::common::utility::SharedMemory test_mem(
       Singleton::instance<ShmDispatcher>()->get_ShmInfo(SHM_DIRECTOR_SEED));
   test_mem.write_Msg(dir, SHM_DIRECTOR_SIZE);
-
-  TIMER->set_BeginStick("counter");
-
-  while (1) {
+  ` while (1) {
     /* Write it into shared memory */
-    TIMER->set_EndStick("counter");
-    TIMER->set_BeginStick("counter");
 
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     std::cout << "last step elapse "
-              << static_cast<double>(TIMER->get_TimeGap("counter")) / 1000
+              << ""
               << "ms" << std::endl;
   }
 

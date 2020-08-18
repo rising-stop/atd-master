@@ -12,6 +12,8 @@ namespace atd {
 namespace utility {
 
 class ShmDispatcher : public Singleton {
+  friend class Singleton;
+
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -44,7 +46,9 @@ class ShmDispatcher : public Singleton {
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_shms_; /* static member for restore all semid and its size*/
 
-  SINGLETON_DERIVED(ShmDispatcher)
+ private:
+  ShmDispatcher() = default;
+  virtual ~ShmDispatcher() = default;
 };
 
 class SharedMemory {
@@ -91,7 +95,8 @@ class ShmFactory : public Singleton {
   virtual ~ShmFactory() = default;
 
  private:
-  Factory<std::string, SharedMemory, SharedMemory*(*)(int, size_t)> shm_factory_;
+  Factory<std::string, SharedMemory, SharedMemory* (*)(int, size_t)>
+      shm_factory_;
 };
 
 // ShmSyncLink

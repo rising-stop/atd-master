@@ -15,7 +15,7 @@ void ThreadSafe_Deque<TYPE, Container>::push_back_with_limits(
   {
     std::lock_guard<std::mutex> lock(deque_mutex_);
     container_.push_back(element);
-    if (container_.size() > limit) {
+    while (container_.size() > limit) {
       container_.pop_front();
     }
   }

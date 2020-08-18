@@ -8,20 +8,23 @@ namespace utility {
 void CSVFile::check_TitleRegistered(const std::string& title) const {
   auto itr_desired_title = title_hash_.find(title);
   if (itr_desired_title == title_hash_.end()) {
-    throw CSVException(CSVException::TITLE_NOT_FOUND, "title not found");
+    // throw CSVException(CSVException::TITLE_NOT_FOUND, "title not found");
+    CUSTOM_EXCEPTION("CSV file title not found");
   }
 }
 
 void CSVFile::check_RequestColRange(uint64_t col) const {
   if (col >= col_size_) {
-    throw CSVException(CSVException::COL_OVERFLOW,
-                       "required col is out of range");
+    // throw CSVException(CSVException::COL_OVERFLOW,
+    //  "required col is out of range");
+    CUSTOM_EXCEPTION("required col is out of range");
   }
 }
 void CSVFile::check_RequestRowRange(uint64_t row) const {
   if (row >= row_size_) {
-    throw CSVException(CSVException::ROW_OVERFLOW,
-                       "required row is out of range");
+    // throw CSVException(CSVException::ROW_OVERFLOW,
+    //  "required row is out of range");
+    CUSTOM_EXCEPTION("required row is out of range");
   }
 }
 
@@ -57,9 +60,10 @@ void CSVFile::register_title(const std::string& title) {
     row_map_.insert({row_size_, title});
     row_size_++;
   } else {
-    std::stringstream sstm;
-    sstm << "the title " << title << " has registered.";
-    throw CSVException(CSVException::REGISTER_FAIL, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "the title " << title << " has registered.";
+    // throw CSVException(CSVException::REGISTER_FAIL, sstm.str());
+    CUSTOM_EXCEPTION("the title %s has been registered", title);
   }
   if (container_.empty()) {
     container_.insert({0, std::vector<std::string>(row_size_, "0")});
@@ -110,21 +114,21 @@ void CSVFile::push_Content(const std::string& title,
 }
 
 void CSVFile::parse_file() {
-  auto file_stm = get_FileStream();
+  auto& file_stm = get_FileStream();
 
   title_hash_.clear();
   row_map_.clear();
   container_.clear();
 
   std::string content_in_line;
-  std::getline(*file_stm, content_in_line);
+  std::getline(file_stm, content_in_line);
 
   CString::cstring_split(content_in_line, ',',
                          [&](const std::string& str) { register_title(str); });
 
   int row_index = 0;
   int col_index = 0;
-  while (std::getline(*file_stm, content_in_line)) {
+  while (std::getline(file_stm, content_in_line)) {
     if (content_in_line.empty()) {
       break;
     }
@@ -141,19 +145,19 @@ void CSVFile::parse_file() {
 }
 
 void CSVFile::refresh_file() {
-  auto file_stm = get_FileStream();
+  auto& file_stm = get_FileStream();
   if (title_hash_.empty()) {
     return;
   }
-  file_stm->clear();
+  file_stm.clear();
 
   for (auto itr4loop = row_map_.begin(); itr4loop != row_map_.end();
        itr4loop++) {
     if (itr4loop->first == (row_size_ - 1)) {
-      *file_stm << itr4loop->second << '\n';
+      file_stm << itr4loop->second << '\n';
       break;
     } else {
-      *file_stm << itr4loop->second << ',';
+      file_stm << itr4loop->second << ',';
     }
   }
 
@@ -161,30 +165,30 @@ void CSVFile::refresh_file() {
     for (auto itr4loop = data_line.second.begin();
          itr4loop != data_line.second.end(); itr4loop++) {
       if (itr4loop != (data_line.second.end() - 1)) {
-        *file_stm << *itr4loop << ',';
+        file_stm << *itr4loop << ',';
       } else {
-        *file_stm << *itr4loop << '\n';
+        file_stm << *itr4loop << '\n';
       }
     }
   }
 
-  file_stm->flush();
+  file_stm.flush();
 }
 
 void CSVFile::fresh_file() {
-  auto file_stm = get_FileStream();
+  auto& file_stm = get_FileStream();
   for (auto index4loop = print_head_; index4loop < col_size_; index4loop++) {
     auto print_vector = container_.at(index4loop);
     for (auto itr4loop = print_vector.begin(); itr4loop != print_vector.end();
          itr4loop++) {
       if (itr4loop != (print_vector.end() - 1)) {
-        *file_stm << *itr4loop << ',';
+        file_stm << *itr4loop << ',';
       } else {
-        *file_stm << *itr4loop << '\n';
+        file_stm << *itr4loop << '\n';
       }
     }
   }
-  file_stm->flush();
+  file_stm.flush();
   print_head_ = col_size_;
 }
 
@@ -211,7 +215,7 @@ void CSV_Observer::push_Item(const std::string& id, const std::string& data) {
       last_col_index = col_index_;
     }
     *csv_.get_MutableElement(id, col_index_) = data;
-  } catch (const CSVException& e) {
+  } catch (const CommonException& e) {
     std::cout << e.what() << '\n' << std::endl;
   }
 }

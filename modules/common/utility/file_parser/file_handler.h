@@ -14,16 +14,16 @@ class ReadWriteableFile {
   enum FILE_MODE : int { WRITE = 0, READ = 1 };
 
   void redirect(FILE_MODE, const char*, const char*);
-  std::fstream* get_FileStream();
+  std::fstream& get_FileStream();
 
+ protected:
   virtual void parse_file();
   virtual void refresh_file();
 
- private:
   void file_init();
-  char* name_ = new char;
-  char* path_ = new char;
-  char* full_path_file_name_ = new char;
+  std::string name_;
+  std::string path_;
+  std::string full_path_file_name_;
   FILE_MODE mode_;
   std::fstream file_stm_;
 

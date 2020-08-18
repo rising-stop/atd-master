@@ -56,8 +56,12 @@ bool LCM_Proxy<MSG_TYPE>::is_Good() const {
 template <typename MSG_TYPE>
 void LCM_Proxy<MSG_TYPE>::publish(const BASE_MSG_TYPE& adapter) {
   if (mode_ != SENDER) {
-    throw LCMException(LCMException::MODE_ERROR,
-                       "LCM_Proxy mode error, current mode is SENDER");
+    // throw LCMException(LCMException::MODE_ERROR,
+    //                    "LCM_Proxy mode error, current mode is SENDER");
+    CUSTOM_EXCEPTION("LCM_Proxy mode error, current mode is SENDER");
+  }
+  if (!is_Good()) {
+    return;
   }
   if (!spin_handler_) {
     spin_handler_ = new std::thread(&LCM_Proxy::publisher_spin, this);
@@ -69,7 +73,7 @@ template <typename MSG_TYPE>
 void LCM_Proxy<MSG_TYPE>::publisher_spin() {
   while (!flag_shutdown_spin_) {
     auto adapter = buffers_.wait_pop_front();
-    auto lcm_rbuf = adapter.msg_Encode();
+    auto lcm_rbuf = adapter->msg_Encode();
     if (!lcm_rbuf) {
       continue;
     }
@@ -80,8 +84,12 @@ void LCM_Proxy<MSG_TYPE>::publisher_spin() {
 template <typename MSG_TYPE>
 bool LCM_Proxy<MSG_TYPE>::subscribe(BASE_MSG_TYPE& adapter) {
   if (mode_ != READER) {
-    throw LCMException(LCMException::MODE_ERROR,
-                       "LCM_Proxy mode error, current mode is READER");
+    // throw LCMException(LCMException::MODE_ERROR,
+    //                    "LCM_Proxy mode error, current mode is READER");
+    CUSTOM_EXCEPTION("LCM_Proxy mode error, current mode is READER");
+  }
+  if (!is_Good()) {
+    return false;
   }
   if (!spin_handler_) {
     spin_handler_ = new std::thread(&LCM_Proxy::receiver_spin, this);
@@ -127,11 +135,10 @@ LCM_Proxy<MSG_TYPE>::LCM_Proxy(LCM_MODE mode, const std::string& channel,
       break;
     case READER:
       break;
-    case PARSER:
-      break;
     default:
-      throw LCMException(LCMException::UNKNOW_MODE,
-                         "this mode is not registered yet");
+      // throw LCMException(LCMException::UNKNOW_MODE,
+      //                    "this mode is not registered yet");
+      CUSTOM_EXCEPTION("this mode is not registered yet");
   }
 }
 

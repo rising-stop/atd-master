@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 
-#include "modules/common/common_support/observer/ObservingLogging.h"
 #include "modules/common/math/NumericalComputing/interpolation.h"
 #include "modules/common/utility/file_parser/xml_parser.h"
 
@@ -36,7 +35,6 @@ double NonLinearRelation::LinearMatching(const char* table_ID,
     source.push_back(*point_check.second.second);
     return Interpolation::LinearInterp(source, num);
   }
-  RED_CERR("LinearMatching: out of range")
   if (point_check.second.first->get_x_() <
       data_base_.at(table_ID).get_PointSet().cbegin()->get_x_()) {
     return data_base_.at(table_ID).get_PointSet().cbegin()->get_x_();

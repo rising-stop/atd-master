@@ -26,223 +26,28 @@ class CommonException : public std::exception {
   void set_Message(const std::string& msg) { error_message_ = msg; }
 
  private:
-  std::string error_message_{"common exception"};
+  std::string error_message_;
 
  public:
   CommonException() = default;
+  template <typename... ARGS>
+  CommonException(const char* file_name, uint32_t line_no, const char* format,
+                  ARGS&&... args) {
+    error_message_.append(file_name);
+    error_message_.append(" no.");
+    error_message_.append(std::to_string(line_no));
+    error_message_.append(" : ");
+    char* excp_msg = new char();
+    sprintf(excp_msg, format, std::forward<ARGS>(args)...);
+    error_message_.append(excp_msg);
+    delete excp_msg;
+  }
   CommonException(const std::string& msg) { set_Message(msg); }
   ~CommonException() = default;
 };
 
-/**
- * @brief Class SemException
- * containing messages from class semaphore_mutex
- */
-class SemException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    SEM_ID_INVALID = 1,
-    OVER_SUBSCRIBE = 2,
-    DUAL_DOUBLE_LOCK = 3,
-    DUAL_DOUBLE_FREE = 4,
-    SHARED_WRITE_DOUBLE_LOCK = 5,
-    SHARED_WRITE_DOUBLE_FREE = 6,
-    SHARED_READ_DOUBLE_LOCK = 7,
-    SHARED_READ_DOUBLE_FREE = 8
-  };
-
- private:
-  int sem_id_;
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. int key: sem id
-   *   2. INVALID_PARTERN error_code:  some invalid partern code
-   *   3. const string&: error message
-   */
-  SemException(int id, INVALID_PARTERN error_code, const std::string& str)
-      : sem_id_(id), error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "sem id " << sem_id_ << " throw error code "
-         << static_cast<int>(error_code_) << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
-/**
- * @brief Class SemDispatcherException
- * containing messages from class SemDispatcher
- */
-class DispatcherException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    KEY_INVALID = 1,
-    UNABLE_RELEASE = 2,
-    KEY_NOT_EXIST = 3
-  };
-
- private:
-  int key_;
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. int key: sem key
-   *   2. INVALID_PARTERN error_code:  some invalid partern code
-   *   3. const string&: error message
-   */
-  DispatcherException(int key, INVALID_PARTERN error_code,
-                      const std::string& str)
-      : key_(key), error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "key " << key << " throw error code "
-         << static_cast<int>(error_code_) << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
-/**
- * @brief Class SemDispatcherException
- * containing messages from class SemDispatcher
- */
-class ShmException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    MSG_OVERFLOW = 1,
-    UNABLE_TO_READ = 2,
-    UNABLE_TO_WRITE = 3,
-    INVALID_ID = 4,
-    INVALID_SIZE = 5,
-    MEMORY_ASSIGN_ERROR = 6,
-    UNABLE_DETACH = 7,
-    DISPATCHER_DENIED = 8
-  };
-
- private:
-  int shm_id_;
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. int key: sem id
-   *   2. INVALID_PARTERN error_code:  some invalid partern code
-   *   3. const string&: error message
-   */
-  ShmException(int id, INVALID_PARTERN error_code, const std::string& str)
-      : shm_id_(id), error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "shm id " << shm_id_ << " throw error code "
-         << static_cast<int>(error_code_) << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
-/**
- * @brief Class FileException
- * containing messages from class ReadWriteableFile and its derives
- */
-class FileException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    UNABLE_TO_OPEN = 1,
-    NOT_INITIALIZED = 2,
-    GOOD_CHECK_FAIL = 3
-  };
-
- private:
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. INVALID_PARTERN error_code:  some invalid partern code
-   *   2. const string&: error message
-   */
-  FileException(INVALID_PARTERN error_code, const std::string& str)
-      : error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "file throw error code " << static_cast<int>(error_code_) << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
-/**
- * @brief Class CSVFileException
- * containing messages from class ReadWriteableFile and its derives
- */
-class CSVException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    ROW_OVERFLOW = 1,
-    COL_OVERFLOW = 2,
-    TITLE_NOT_FOUND = 3,
-    REGISTER_FAIL = 4
-  };
-
- private:
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. INVALID_PARTERN error_code:  some invalid partern code
-   *   2. const string&: error message
-   */
-  CSVException(INVALID_PARTERN error_code, const std::string& str)
-      : error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "csv file throw error code " << static_cast<int>(error_code_)
-         << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
-/**
- * @brief Class LCMException
- * containing messages from class LCM_Proxy and its relations
- */
-class LCMException : public CommonException {
- public:
-  enum INVALID_PARTERN : int {
-    UNKNOW = 0,
-    UNKNOW_MODE = 1,
-    MODE_ERROR = 2,
-    MSG_SERIALIZE_FAIL = 3,
-    MSG_PARSE_FAIL = 4
-  };
-
- private:
-  INVALID_PARTERN error_code_;
-
- public:
-  /**
-   * @brief constructor:
-   * @param
-   *   1. INVALID_PARTERN error_code:  some invalid partern code
-   *   2. const string&: error message
-   */
-  LCMException(INVALID_PARTERN error_code, const std::string& str)
-      : error_code_(error_code) {
-    std::stringstream sstr;
-    sstr << "lcm throw error code " << static_cast<int>(error_code_)
-         << ": ";
-    set_Message(sstr.str() + str);
-  };
-};
-
 }  // namespace utility
 }  // namespace atd
+
+#define CUSTOM_EXCEPTION(format, args...) \
+  throw atd::utility::CommonException(__FILE__, __LINE__, format, ##args)

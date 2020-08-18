@@ -14,10 +14,11 @@ int SemDispatcher::register_sem(::key_t key, int sgnl_num) {
     semid = semget(key, sgnl_num, 0666 | IPC_CREAT);
   }
   if (semid == -1) {
-    std::stringstream error_msg;
-    error_msg << "semget error, errno: " << errno;
-    throw DispatcherException(key, DispatcherException::KEY_INVALID,
-                              error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semget error, errno: " << errno;
+    // throw DispatcherException(key, DispatcherException::KEY_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semget error, errno: %d", errno);
   }
 
   registered_sems_.insert(std::make_pair(key, std::make_pair(semid, sgnl_num)));
@@ -36,10 +37,11 @@ void SemDispatcher::release_sem(::key_t key) {
     auto res_semctl = semctl(itr_sem->second.first, itr_sem->second.second,
                              IPC_RMID, sem_union);
     if (res_semctl == -1) {
-      std::stringstream error_msg;
-      error_msg << "semctl error, errno: " << errno;
-      throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
-                                error_msg.str());
+      // std::stringstream error_msg;
+      // error_msg << "semctl error, errno: " << errno;
+      // throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
+      // error_msg.str());
+      CUSTOM_EXCEPTION("semctl error, errno: %d", errno);
     }
     registered_sems_.erase(itr_sem);
   }
@@ -51,8 +53,9 @@ std::pair<int, int> SemDispatcher::get_SemInfo(::key_t key) const {
   } else {
     std::stringstream error_msg;
     error_msg << "key " << key << " not found";
-    throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
-                                 error_msg.str());
+    // throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("key %d not found", key);
   }
 }
 
@@ -64,7 +67,9 @@ SemMutex::~SemMutex() {}
 
 void DualSemMutex::lock() {
   if (is_locked_) {
-    throw SemException(sem_id_, SemException::DUAL_DOUBLE_LOCK, "double lock");
+    // throw SemException(sem_id_, SemException::DUAL_DOUBLE_LOCK, "double
+    // lock");
+    CUSTOM_EXCEPTION("double lock");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -72,16 +77,20 @@ void DualSemMutex::lock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_locked_ = true;
 }
 
 void DualSemMutex::unlock() {
   if (!is_locked_) {
-    throw SemException(sem_id_, SemException::DUAL_DOUBLE_FREE, "double free");
+    // throw SemException(sem_id_, SemException::DUAL_DOUBLE_FREE, "double
+    // free");
+    CUSTOM_EXCEPTION("double free");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -89,9 +98,11 @@ void DualSemMutex::unlock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_locked_ = false;
 }
@@ -100,9 +111,11 @@ void DualSemMutex::init() {
   semun sem_union;
   sem_union.val = 1;
   if (semctl(sem_id_, 0, SETVAL, sem_union) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semctl error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semctl error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semctl error, errno: %d", errno);
   }
 }
 
@@ -115,9 +128,11 @@ void SharedSemMutex::init() {
   semun sem_union_write;
   sem_union_write.val = MAX_PROCESS_NUM;
   if (semctl(sem_id_, 0, SETVAL, sem_union_write) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semctl error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semctl error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semctl error, errno: %d", errno);
   }
 }
 
@@ -125,8 +140,9 @@ SharedSemMutex::~SharedSemMutex() {}
 
 void SharedSemMutex::lock() {
   if (is_locked_) {
-    throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_LOCK,
-                       "double lock");
+    // throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_LOCK,
+    //                    "double lock");
+    CUSTOM_EXCEPTION("double lock");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -134,17 +150,20 @@ void SharedSemMutex::lock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_locked_ = true;
 }
 
 void SharedSemMutex::unlock() {
   if (!is_locked_) {
-    throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_FREE,
-                       "double free");
+    // throw SemException(sem_id_, SemException::SHARED_WRITE_DOUBLE_FREE,
+    //                    "double free");
+    CUSTOM_EXCEPTION("double free");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -152,17 +171,20 @@ void SharedSemMutex::unlock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_locked_ = false;
 }
 
 void SharedSemMutex::shared_lock() {
   if (is_shared_locked_) {
-    throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_LOCK,
-                       "double lock");
+    // throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_LOCK,
+    //  "double lock");
+    CUSTOM_EXCEPTION("double lock");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -170,17 +192,20 @@ void SharedSemMutex::shared_lock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_shared_locked_ = true;
 }
 
 void SharedSemMutex::shared_unlock() {
   if (is_shared_locked_) {
-    throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_FREE,
-                       "double free");
+    // throw SemException(sem_id_, SemException::SHARED_READ_DOUBLE_FREE,
+    //                    "double free");
+    CUSTOM_EXCEPTION("double free");
   }
   sembuf sem_b;
   sem_b.sem_num = 0;
@@ -188,12 +213,14 @@ void SharedSemMutex::shared_unlock() {
   sem_b.sem_flg = SEM_UNDO;
 
   if (semop(sem_id_, &sem_b, 1) == -1) {
-    std::stringstream error_msg;
-    error_msg << "semop error, errno: " << errno;
-    throw SemException(sem_id_, SemException::SEM_ID_INVALID, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semop error, errno: " << errno;
+    // throw SemException(sem_id_, SemException::SEM_ID_INVALID,
+    // error_msg.str());
+    CUSTOM_EXCEPTION("semop error, errno: %d", errno);
   }
   is_shared_locked_ = false;
 }
 
-}  // namespace common
+}  // namespace utility
 }  // namespace atd

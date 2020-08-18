@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "modules/common/common_support/numerical_support.h"
-#include "modules/common/common_support/observer/ObservingLogging.h"
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {

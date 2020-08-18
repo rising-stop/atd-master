@@ -12,10 +12,11 @@ int ShmDispatcher::register_shm(::key_t key, int size) {
     shmid = shmget(key, size, 0666 | IPC_CREAT);
   }
   if (shmid == -1) {
-    std::stringstream error_msg;
-    error_msg << "semget error, errno: " << errno;
-    throw DispatcherException(key, DispatcherException::KEY_INVALID,
-                              error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semget error, errno: " << errno;
+    // throw DispatcherException(key, DispatcherException::KEY_INVALID,
+    //                           error_msg.str());
+    CUSTOM_EXCEPTION("semget error, errno: %d", errno);
   }
 
   registered_shms_.insert(std::make_pair(key, std::make_pair(shmid, size)));
@@ -32,10 +33,11 @@ void ShmDispatcher::release_shm(::key_t key) {
   if (itr_shm != registered_shms_.end()) {
     auto res_semctl = shmctl(itr_shm->second.first, IPC_RMID, nullptr);
     if (res_semctl == -1) {
-      std::stringstream error_msg;
-      error_msg << "semctl error, errno: " << errno;
-      throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
-                                error_msg.str());
+      // std::stringstream error_msg;
+      // error_msg << "semctl error, errno: " << errno;
+      // throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
+      //                           error_msg.str());
+      CUSTOM_EXCEPTION("semctl error, errno: %d", errno);
     }
     registered_shms_.erase(itr_shm);
   }
@@ -45,10 +47,11 @@ std::pair<int, int> ShmDispatcher::get_ShmInfo(::key_t key) const {
   if (registered_shms_.find(key) != registered_shms_.end()) {
     return registered_shms_.at(key);
   } else {
-    std::stringstream error_msg;
-    error_msg << "key " << key << " not found";
-    throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
-                              error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "key " << key << " not found";
+    // throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
+    //                           error_msg.str());
+    CUSTOM_EXCEPTION("key %d not found", key);
   }
 }
 
@@ -58,29 +61,34 @@ const void* SharedMemory::get_AssignedAddr() const { return addr_; }
 
 void SharedMemory::mount_Shm() {
   if (shmid_ < 0) {
-    std::stringstream sstm;
-    sstm << "shm id received abnormal, required id " << shmid_;
-    throw ShmException(shmid_, ShmException::INVALID_ID, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shm id received abnormal, required id " << shmid_;
+    // throw ShmException(shmid_, ShmException::INVALID_ID, sstm.str());
+    CUSTOM_EXCEPTION("shm id %d received abnormal", shmid_);
   }
   if (shmsize_ < 0) {
-    std::stringstream sstm;
-    sstm << "shm size received abnormal, required size " << shmsize_;
-    throw ShmException(shmid_, ShmException::INVALID_SIZE, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shm size received abnormal, required size " << shmsize_;
+    // throw ShmException(shmid_, ShmException::INVALID_SIZE, sstm.str());
+    CUSTOM_EXCEPTION("shm id %d received abnormal", shmid_);
   }
   addr_ = shmat(shmid_, nullptr, 0);
   if (!addr_) {
-    std::stringstream sstm;
-    sstm << "shmat return nullptr, errno: " << errno;
-    throw ShmException(shmid_, ShmException::MEMORY_ASSIGN_ERROR, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shmat return nullptr, errno: " << errno;
+    // throw ShmException(shmid_, ShmException::MEMORY_ASSIGN_ERROR,
+    // sstm.str());
+    CUSTOM_EXCEPTION("shmat return nullptr, errno: %d", errno);
   }
 }
 
 void SharedMemory::unmount_Shm() {
   auto res = shmdt(addr_);
   if (res) {
-    std::stringstream sstm;
-    sstm << "shmdt return -1, errno: " << errno;
-    throw ShmException(shmid_, ShmException::UNABLE_DETACH, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shmdt return -1, errno: " << errno;
+    // throw ShmException(shmid_, ShmException::UNABLE_DETACH, sstm.str());
+    CUSTOM_EXCEPTION("shmdt return -1, errno: %d", errno);
   }
 }
 
@@ -90,31 +98,35 @@ void SharedMemory::write_Msg(const std::string& str) {
   }
   auto msg_size = str.size();
   if (msg_size > shmsize_) {
-    std::stringstream sstm;
-    sstm << "shm message overflow, input size " << msg_size << " shm size "
-         << shmsize_;
-    throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shm message overflow, input size " << msg_size << " shm size "
+    //      << shmsize_;
+    // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
+    CUSTOM_EXCEPTION("shm message overflow, shm size = %d", shmid_);
   }
   auto res_ptr = memcpy(addr_, static_cast<const void*>(str.c_str()), msg_size);
   if (!res_ptr) {
-    throw ShmException(shmid_, ShmException::UNABLE_TO_WRITE,
-                       "memcpy returns a nullptr");
+    // throw ShmException(shmid_, ShmException::UNABLE_TO_WRITE,
+    //                    "memcpy returns a nullptr");
+    CUSTOM_EXCEPTION("memcpy returns a nullptr");
   }
 }
 
 void SharedMemory::read_Msg(std::string& str, size_t size) {
   if (size > shmsize_) {
-    std::stringstream sstm;
-    sstm << "shm message overflow, required size " << size << " shm size "
-         << shmsize_;
-    throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
+    // std::stringstream sstm;
+    // sstm << "shm message overflow, required size " << size << " shm size "
+    //      << shmsize_;
+    // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
+    CUSTOM_EXCEPTION("shm message overflow, required size = %d", size);
   }
   str.clear();
   char* ptr_char;
   auto res_ptr = memcpy(ptr_char, addr_, size);
   if (!res_ptr) {
-    throw ShmException(shmid_, ShmException::UNABLE_TO_READ,
-                       "memcpy returns a nullptr");
+    // throw ShmException(shmid_, ShmException::UNABLE_TO_READ,
+    //                    "memcpy returns a nullptr");
+    CUSTOM_EXCEPTION("memcpy returns a nullptr");
   }
   str.copy(ptr_char, size);
 }
@@ -131,10 +143,15 @@ SharedMemory::SharedMemory(std::pair<int, size_t> info)
 std::pair<int, size_t> SharedMemory::try_get_ShmID(::key_t key, size_t size) {
   int shmid = shmget(key, size, 0666);
   if (shmid == -1) {
-    std::stringstream error_msg;
-    error_msg << "semget error, errno: " << errno
-              << " waiting DISPATCHER to be created, DISPATCHER key: " << key;
-    throw ShmException(0, ShmException::DISPATCHER_DENIED, error_msg.str());
+    // std::stringstream error_msg;
+    // error_msg << "semget error, errno: " << errno
+    //           << " waiting DISPATCHER to be created, DISPATCHER key: " <<
+    //           key;
+    // throw ShmException(0, ShmException::DISPATCHER_DENIED, error_msg.str());
+    CUSTOM_EXCEPTION(
+        "semget error, errno: %d, waiting DISPATCHER to be created, DISPATCHER "
+        "key: %d",
+        errno, key);
   }
   return std::make_pair(shmid, size);
 }

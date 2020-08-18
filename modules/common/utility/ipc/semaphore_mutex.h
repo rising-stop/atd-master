@@ -32,6 +32,7 @@ namespace utility {
  * @note all sems will be cleared so it just supposed to run only once
  */
 class SemDispatcher : public Singleton {
+  friend class Singleton;
  public:
   /**
    * @brief static member used for cleaning all sems
@@ -63,7 +64,10 @@ class SemDispatcher : public Singleton {
   std::unordered_map<::key_t, std::pair<int, int>>
       registered_sems_; /* static member for restore all semid and its signal
                            number*/
-  SINGLETON_DERIVED(SemDispatcher)
+
+ private:
+  SemDispatcher() = default;
+  virtual ~SemDispatcher() = default;
 };
 
 /**

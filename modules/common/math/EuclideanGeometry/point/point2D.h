@@ -4,7 +4,7 @@
 #include <ostream>
 #include <vector>
 
-#include "modules/common/common_support/class_support.h"
+#include "modules/common/utility/class_support.h"
 #include "modules/common/math/EuclideanGeometry/point/vectorXD.h"
 
 namespace atd {
