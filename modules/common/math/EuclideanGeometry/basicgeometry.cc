@@ -4,7 +4,6 @@
 #include <cmath>
 #include <memory>
 
-#include "modules/common/common_support/numerical_support.h"
 #include "modules/common/math/mathcommon.h"
 
 namespace atd {

@@ -63,7 +63,7 @@ void CSVFile::register_title(const std::string& title) {
     // std::stringstream sstm;
     // sstm << "the title " << title << " has registered.";
     // throw CSVException(CSVException::REGISTER_FAIL, sstm.str());
-    CUSTOM_EXCEPTION("the title %s has been registered", title);
+    CUSTOM_EXCEPTION("the title ", title, "has not been registered");
   }
   if (container_.empty()) {
     container_.insert({0, std::vector<std::string>(row_size_, "0")});

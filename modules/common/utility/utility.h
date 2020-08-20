@@ -153,7 +153,7 @@ class Singleton {
   instance() {
     SGLTN_ID id = typeid(SINGLETON_DERIVED).name();
     if (registry_.find(id) == registry_.end()) {
-      throw CommonException("Singleton not been registered yet.");
+      CUSTOM_EXCEPTION("Singleton ", id.c_str(), "not been registered yet.");
     }
     auto ptr = registry_[id];
     return dynamic_cast<SINGLETON_DERIVED *>(ptr);

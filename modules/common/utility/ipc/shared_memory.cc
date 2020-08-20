@@ -16,7 +16,7 @@ int ShmDispatcher::register_shm(::key_t key, int size) {
     // error_msg << "semget error, errno: " << errno;
     // throw DispatcherException(key, DispatcherException::KEY_INVALID,
     //                           error_msg.str());
-    CUSTOM_EXCEPTION("semget error, errno: %d", errno);
+    CUSTOM_EXCEPTION("semget error, errno: ", errno);
   }
 
   registered_shms_.insert(std::make_pair(key, std::make_pair(shmid, size)));
@@ -37,7 +37,7 @@ void ShmDispatcher::release_shm(::key_t key) {
       // error_msg << "semctl error, errno: " << errno;
       // throw DispatcherException(key, DispatcherException::UNABLE_RELEASE,
       //                           error_msg.str());
-      CUSTOM_EXCEPTION("semctl error, errno: %d", errno);
+      CUSTOM_EXCEPTION("semctl error, errno: ", errno);
     }
     registered_shms_.erase(itr_shm);
   }
@@ -51,7 +51,7 @@ std::pair<int, int> ShmDispatcher::get_ShmInfo(::key_t key) const {
     // error_msg << "key " << key << " not found";
     // throw DispatcherException(key, DispatcherException::KEY_NOT_EXIST,
     //                           error_msg.str());
-    CUSTOM_EXCEPTION("key %d not found", key);
+    CUSTOM_EXCEPTION("key ", key, "not found");
   }
 }
 
@@ -64,13 +64,13 @@ void SharedMemory::mount_Shm() {
     // std::stringstream sstm;
     // sstm << "shm id received abnormal, required id " << shmid_;
     // throw ShmException(shmid_, ShmException::INVALID_ID, sstm.str());
-    CUSTOM_EXCEPTION("shm id %d received abnormal", shmid_);
+    CUSTOM_EXCEPTION("shm id ", shmid_, "received abnormal");
   }
   if (shmsize_ < 0) {
     // std::stringstream sstm;
     // sstm << "shm size received abnormal, required size " << shmsize_;
     // throw ShmException(shmid_, ShmException::INVALID_SIZE, sstm.str());
-    CUSTOM_EXCEPTION("shm id %d received abnormal", shmid_);
+    CUSTOM_EXCEPTION("shm id ", shmid_, "received abnormal");
   }
   addr_ = shmat(shmid_, nullptr, 0);
   if (!addr_) {
@@ -78,7 +78,7 @@ void SharedMemory::mount_Shm() {
     // sstm << "shmat return nullptr, errno: " << errno;
     // throw ShmException(shmid_, ShmException::MEMORY_ASSIGN_ERROR,
     // sstm.str());
-    CUSTOM_EXCEPTION("shmat return nullptr, errno: %d", errno);
+    CUSTOM_EXCEPTION("shmat return nullptr, errno: ", errno);
   }
 }
 
@@ -88,7 +88,7 @@ void SharedMemory::unmount_Shm() {
     // std::stringstream sstm;
     // sstm << "shmdt return -1, errno: " << errno;
     // throw ShmException(shmid_, ShmException::UNABLE_DETACH, sstm.str());
-    CUSTOM_EXCEPTION("shmdt return -1, errno: %d", errno);
+    CUSTOM_EXCEPTION("shmdt return -1, errno: ", errno);
   }
 }
 
@@ -102,7 +102,7 @@ void SharedMemory::write_Msg(const std::string& str) {
     // sstm << "shm message overflow, input size " << msg_size << " shm size "
     //      << shmsize_;
     // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
-    CUSTOM_EXCEPTION("shm message overflow, shm size = %d", shmid_);
+    CUSTOM_EXCEPTION("shm message overflow, shm size = ", shmid_);
   }
   auto res_ptr = memcpy(addr_, static_cast<const void*>(str.c_str()), msg_size);
   if (!res_ptr) {
@@ -118,7 +118,7 @@ void SharedMemory::read_Msg(std::string& str, size_t size) {
     // sstm << "shm message overflow, required size " << size << " shm size "
     //      << shmsize_;
     // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
-    CUSTOM_EXCEPTION("shm message overflow, required size = %d", size);
+    CUSTOM_EXCEPTION("shm message overflow, required size = ", size);
   }
   str.clear();
   char* ptr_char;
@@ -149,9 +149,8 @@ std::pair<int, size_t> SharedMemory::try_get_ShmID(::key_t key, size_t size) {
     //           key;
     // throw ShmException(0, ShmException::DISPATCHER_DENIED, error_msg.str());
     CUSTOM_EXCEPTION(
-        "semget error, errno: %d, waiting DISPATCHER to be created, DISPATCHER "
-        "key: %d",
-        errno, key);
+        "semget error, errno: ", errno,
+        " waiting DISPATCHER to be created, DISPATCHER key: ", key);
   }
   return std::make_pair(shmid, size);
 }

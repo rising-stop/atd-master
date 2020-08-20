@@ -20,7 +20,7 @@ void PlanningLog::parse_file() {
 
   lcm::LogFile lcm_log(log_name_, "r");
   if (!lcm_log.good()) {
-    CUSTOM_EXCEPTION("can not open file log %s", log_name_.c_str());
+    CUSTOM_EXCEPTION("can not open file log ", log_name_.c_str());
   }
   while (1) {
     const lcm::LogEvent* event = lcm_log.readNextEvent();
@@ -38,7 +38,7 @@ void PlanningLog::parse_file() {
   }
   if (!file_length) {
     // throw LCMException(LCMException::MSG_NOT_FOUND, "");
-    CUSTOM_EXCEPTION("can not found LCM channel %s", channel_name_.c_str());
+    CUSTOM_EXCEPTION("can not found LCM channel ", channel_name_.c_str());
   }
 }
 

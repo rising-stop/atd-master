@@ -1,7 +1,7 @@
 #include "point2D.h"
-#include "modules/common/common_support/numerical_support.h"
 
 #include <cmath>
+#include "modules/common/math/mathcommon.h"
 
 namespace atd {
 namespace utility {

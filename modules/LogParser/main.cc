@@ -1,14 +1,20 @@
 // #include "modules/neo_adp/display_elements/display_implements.hpp"
 // #include "../protobuf_msg/debug_monitor_protocol.pb.h"
 #include "modules/common/common_header.h"
-#include "modules/common/tools/logging/debug_logging.h"
-#include "protobuf_msg/planning_log.pb.h"
 
 using namespace atd::utility;
 using namespace atd::protocol;
 
+void init() {
+  atd::utility::Singleton::try_register<Runtime_Counter>();
+  atd::utility::Singleton::try_register<
+      Runtime_Calculator<std::chrono::milliseconds>>();
+  atd::utility::Singleton::try_register<DebugLogging>();
+}
+
 /* main function */
 int main(int args, char** argv) {
+  init();
   //   init4Display();
   //   atd::utility::Singleton::instance<OpenGL_Frame>()->spin();
 
@@ -22,12 +28,20 @@ int main(int args, char** argv) {
   //     "test_stick");
 
   // uint64_t counter = 0;
-
   double arg1 = 0.1;
   double arg2 = 0.2;
   double arg3 = 0.3;
   double arg4 = 0.4;
-  TEST_MACRO(arg1, arg2, arg3, arg4);
+
+  while (true) {
+    atd::utility::Singleton::instance<DebugLogging>()->reset_Frame();
+    LCM_LOG(atd::utility::SECURITY_INFO::INFO)
+        .LogInfo("Test Str 1")
+        .LogVar("Var1", arg1)
+        .LogVar("Var2", arg2);
+    atd::utility::Singleton::instance<DebugLogging>()->publish_Frame();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
 
   if (args < 2) {
     std::cout << "log file name required" << std::endl;

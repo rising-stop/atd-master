@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#define SYSTEM_PRECISION 1e-6
+
 namespace atd {
 namespace utility {
 

@@ -15,7 +15,7 @@ void SharedMemory::write_Msg(const TYPE& msg, size_t size) {
     // sstm << "shm message overflow, input size " << size << " shm size "
     //      << shmsize_;
     // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
-    CUSTOM_EXCEPTION("shm message overflow, input size %d", size);
+    CUSTOM_EXCEPTION("shm message overflow, input size ", size);
   }
   auto res_ptr = memcpy(addr_, static_cast<const void*>(&msg), size);
   if (!res_ptr) {
@@ -30,7 +30,7 @@ void SharedMemory::read_Msg(TYPE& msg, size_t size) {
     // sstm << "shm message overflow, required size " << size << " shm size "
     //      << shmsize_;
     // throw ShmException(shmid_, ShmException::MSG_OVERFLOW, sstm.str());
-    CUSTOM_EXCEPTION("shm message overflow, required size = %d", size);
+    CUSTOM_EXCEPTION("shm message overflow, required size = ", size);
   }
   auto res_ptr = memcpy(static_cast<void*>(&msg), addr_, size);
   if (!res_ptr) {

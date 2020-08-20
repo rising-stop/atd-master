@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "modules/common/common_support/numerical_support.h"
 #include "modules/common/math/NumericalComputing/numerical_integration.h"
 #include "modules/common/math/mathcommon.h"
 
@@ -138,7 +137,12 @@ double Polynomial::get_Length(const double& lower, const double& upper) const {
     resolution = 0.5;
     dev_num = static_cast<int>((upper - lower) / resolution);
   }
-  NUMBER_BOUND_CHECK(dev_num, 3, 100)
+  if (dev_num > 100){
+    dev_num = 100;
+  }
+  if (dev_num < 3){
+    dev_num = 3;
+  }
   throw std::runtime_error("get_Length: function not be completed yet");
   return 0;
   // return NumericalIntegration::Simpson(

@@ -23,7 +23,7 @@ void ReadWriteableFile::file_init() {
       // std::stringstream sstm;
       // sstm << "unable to open file " << full_path_file_name_;
       // throw FileException(FileException::UNABLE_TO_OPEN, sstm.str());
-      CUSTOM_EXCEPTION("unable to open file %s", full_path_file_name_.c_str());
+      CUSTOM_EXCEPTION("unable to open file ", full_path_file_name_.c_str());
     }
   } else {
     file_stm_.open(full_path_file_name_, std::ios::in);
@@ -31,7 +31,7 @@ void ReadWriteableFile::file_init() {
       //   std::stringstream sstm;
       //   sstm << "unable to open file " << full_path_file_name_;
       //   throw FileException(FileException::UNABLE_TO_OPEN, sstm.str());
-      CUSTOM_EXCEPTION("unable to open file %s", full_path_file_name_.c_str());
+      CUSTOM_EXCEPTION("unable to open file ", full_path_file_name_.c_str());
     }
   }
 }

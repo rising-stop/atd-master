@@ -42,9 +42,7 @@ class Runtime_Calculator : public Singleton {
     return {0, false};
   }
 
-  time_stick Now() {
-    return time_point_cast<Duration>(system_clock::now());
-  }
+  time_stick Now() { return time_point_cast<Duration>(system_clock::now()); }
 
  private:
   ThreadSafe_HashMap<std::string, time_stick> time_probe_;
@@ -55,5 +53,33 @@ class Runtime_Calculator : public Singleton {
   virtual ~Runtime_Calculator() = default;
 };
 
+class Runtime_Counter : public Singleton {
+  friend class Singleton;
+
+ public:
+  uint64_t get_Counter(const std::string &name) {
+    auto find_res = counters_.insert({name, 0});
+    if (find_res.second) {
+      return 0;
+    }
+    return ++(find_res.first->second);
+  }
+
+ private:
+  std::unordered_map<std::string, uint64_t> counters_;
+
+ private:
+  Runtime_Counter() = default;
+  ~Runtime_Counter() = default;
+};
+
 }  // namespace utility
 }  // namespace atd
+
+#define TIMER                        \
+  atd::utility::Singleton::instance< \
+      atd::utility::Runtime_Calculator<std::chrono::milliseconds>>()
+
+#define COUNTER(name)                                                \
+  atd::utility::Singleton::instance<atd::utility::Runtime_Counter>() \
+      ->get_Counter(name)
