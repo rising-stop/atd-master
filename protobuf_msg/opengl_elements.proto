@@ -4,13 +4,22 @@ package atd.protocol;
 option optimize_for = LITE_RUNTIME;
 
 message display_point {
-  double x = 1;
-  double y = 2;
-  double z = 3  ;
+  float x = 1;
+  float y = 2;
+  float z = 3;
 }
 
 message display_line {
   repeated display_point sample_points = 1;
+}
+
+message display_box {
+  display_point origin = 1;
+  float heading = 2;
+  float width = 3;
+  float height = 4;
+  float deepth = 5;
+  string discription = 6;
 }
 
 message display_frame {
@@ -19,6 +28,7 @@ message display_frame {
 
 message Opengl_Elements{
   repeated display_point point_set = 1;
-  repeated display_point line_set = 2;
-  repeated display_point frame_set = 3;
+  repeated display_line line_set = 2;
+  repeated display_box box_set = 3;
+  repeated display_frame frame_set = 4;
 }

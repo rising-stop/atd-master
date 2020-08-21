@@ -1,19 +1,8 @@
 #pragma once
 
 #include "common_frame.hpp"
-
-static void init4Display() {
-  atd::utility::Singleton::try_register<OpenGL_Frame>();
-
-  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
-      &drawGrid);
-  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
-      &drawMiscObjects);
-  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
-      &drawFrustum);
-  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
-      &drawText);
-}
+#include "modules/common/common_header.h"
+#include "opengl_elements.pb.h"
 
 static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
   if (!keys.showLabels) {
@@ -34,6 +23,38 @@ static void drawGrid(const ThreadData &td) {
     dd::xzSquareGrid(
         td.ddContext, -50.0f, 50.0f, 0.0f, 1.0f,
         dd::colors::DarkGreen);  // Grid from -50 to +50 in both X & Z
+  }
+}
+
+static void draw_PlanningElements(const ThreadData &td) {
+  static atd::utility::Proto_Messages<atd::protocol::Opengl_Elements> adp_msg;
+  static atd::utility::LCM_Proxy<
+      atd::utility::Proto_Messages<atd::protocol::Opengl_Elements>>
+      receiver(atd::utility::LCM_MODE::READER, "DEBUG_DRAW");
+
+  ddVec3 origin = {0.0f, 0.0f, 0.0f};
+  drawLabel(td, origin, "ego vehicle");
+  dd::box(td.ddContext, origin, dd::colors::BlueViolet, 1.8f, 1.5f, 4.68f);
+  dd::point(td.ddContext, origin, dd::colors::White, 5.0f);
+
+  receiver.subscribe(adp_msg);
+  auto box_set = adp_msg.box_set();
+  for (auto single_box : box_set) {
+    ddVec3 box_origin = {single_box.origin().x(), single_box.origin().y(),
+                         single_box.origin().z()};
+    if (single_box.discription() == "CIPV") {
+      drawLabel(td, box_origin, "CIPV");
+      dd::box(td.ddContext, box_origin, dd::colors::Green, 1.8f, 1.5f, 4.68f);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+    } else if (single_box.discription() == "TOS") {
+      drawLabel(td, box_origin, "TOS");
+      dd::box(td.ddContext, box_origin, dd::colors::Red, 1.8f, 1.5f, 4.68f);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+    } else {
+      drawLabel(td, box_origin, "UNKNOW");
+      dd::box(td.ddContext, box_origin, dd::colors::White, 1.8f, 1.5f, 4.68f);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+    }
   }
 }
 
@@ -149,10 +170,23 @@ static void drawText(const ThreadData &td) {
   // HUD text:
   const ddVec3 textColor = {1.0f, 1.0f, 1.0f};
   const ddVec3 textPos2D = {10.0f, 15.0f, 0.0f};
-  dd::screenText(
-      td.ddContext,
-      "Welcome to the multi-threaded Core OpenGL Debug Draw demo.\n\n"
-      "[SPACE]  to toggle labels on/off\n"
-      "[RETURN] to toggle grid on/off",
-      textPos2D, textColor, 0.55f);
+  dd::screenText(td.ddContext,
+                 "[SPACE]  to toggle labels on/off\n"
+                 "[RETURN] to toggle grid on/off",
+                 textPos2D, textColor, 0.55f);
+}
+
+static void init4Display() {
+  atd::utility::Singleton::try_register<OpenGL_Frame>();
+
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawGrid);
+  // atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+  // &drawMiscObjects);
+  // atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+  // &drawFrustum);
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &drawText);
+  atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+      &draw_PlanningElements);
 }

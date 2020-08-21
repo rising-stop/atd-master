@@ -21,7 +21,15 @@ atd::protocol::FRAME_CONTENT* DebugLogging::get_PtrFrame() {
 
 Writer::Writer(const char* file, uint32_t line_no, SECURITY_INFO level) {
   init();
-  ptr_content_->set_file_name(file);
+  uint32_t name_length = strlen(file);
+  uint32_t index = name_length - 1;
+  for (; index > 0; index--) {
+    if ((file[index] == '/') && (index != (name_length - 1))) {
+      break;
+    }
+  }
+  std::string file_name(file, index + 1, strlen(file) - index);
+  ptr_content_->set_file_name(file_name);
   ptr_content_->set_line_no(line_no);
   switch (level) {
     case INFO:
