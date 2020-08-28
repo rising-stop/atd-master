@@ -8,27 +8,48 @@ message FRAME_HEADER {
   uint64 counter_no = 2;
 }
 
+message DISPLAY_POINT {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  string discription = 4;
+}
+
+message DISPLAY_PLOYNOMIAL {
+  repeated float coeffients = 1;
+  string discription = 2;
+}
+
+message DISPLAY_LINE {
+  repeated DISPLAY_POINT sample_points = 1;
+  string discription = 2;
+}
+
+message DISPLAY_BOX {
+  DISPLAY_POINT origin = 1;
+  float heading = 2;
+  float width = 3;
+  float height = 4;
+  float deepth = 5;
+  string discription = 6;
+}
+
+message OPENGL_ELEMENT{
+  repeated DISPLAY_POINT point_set = 1;
+  repeated DISPLAY_PLOYNOMIAL ploy_set = 2;
+  repeated DISPLAY_LINE line_set = 3;
+  repeated DISPLAY_BOX box_set = 4;
+}
+
 enum SECURITY_INFO {
   INFO = 0;
   WARNING = 1;
   ERROR = 2;
 }
 
-enum DATA_TYPE {
-  INT16 = 0;
-  UINT16 = 1;
-  INT32 = 2;
-  UINT32 = 3;
-  INT64 = 4;
-  UINT64 = 5;
-  FLOAT32 = 6;
-  FLOAT64 = 7;
-}
-
 message VARIABLE {
-  DATA_TYPE type = 1;
-  string name = 2;
-  string data = 3;
+  string name = 1;
+  string data = 2;
 }
 
 message FRAME_CONTENT {
@@ -40,6 +61,16 @@ message FRAME_CONTENT {
 }
 
 message LOG_CONTENT {
+  repeated FRAME_CONTENT content = 1;
+}
+
+message DISPLAY_CONTENT {
+  repeated VARIABLE content = 1;
+}
+
+message MONITOR_MSG {
   FRAME_HEADER title = 1;
-  repeated FRAME_CONTENT content = 2;
+  LOG_CONTENT log = 2;
+  OPENGL_ELEMENT gl_element = 3;
+  DISPLAY_CONTENT display_element = 4;
 }

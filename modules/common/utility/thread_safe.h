@@ -169,6 +169,9 @@ class ThreadSafe_Deque final {
   std::shared_ptr<TYPE> wait_pop_back();
   std::shared_ptr<TYPE> wait_pop_front();
 
+  bool try_read(Container &);
+  void wait_and_read(Container &);
+
  public:
   ThreadSafe_Deque() = default;
   ThreadSafe_Deque(const ThreadSafe_Deque &);

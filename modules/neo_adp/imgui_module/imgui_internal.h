@@ -47,7 +47,9 @@ Index of this file:
 #include <stdlib.h>     // NULL, malloc, free, qsort, atoi, atof
 #include <math.h>       // sqrtf, fabsf, fmodf, powf, floorf, ceilf, cosf, sinf
 #include <limits.h>     // INT_MIN, INT_MAX
-
+#include <functional>
+#include <string>
+#include <vector>
 // Visual Studio warnings
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -2012,6 +2014,13 @@ namespace ImGui
 
     // Plot
     IMGUI_API int           PlotEx(ImGuiPlotType plot_type, const char* label, float (*values_getter)(void* data, int idx), void* data, int values_count, int values_offset, const char* overlay_text, float scale_min, float scale_max, ImVec2 frame_size);
+
+    IMGUI_API int MulitPlotEx(
+        std::string label,
+        std::function<float(const std::string&, int)> values_getter,
+        int values_count, int values_offset, const std::vector<ImU32>& colors,
+        const std::vector<std::string>& overlay_text, float scale_min,
+        float scale_max, ImVec2 frame_size);
 
     // Shade functions (write over already created vertices)
     IMGUI_API void          ShadeVertsLinearColorGradientKeepAlpha(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1);

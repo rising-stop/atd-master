@@ -52,6 +52,9 @@ Index of this file:
 //-----------------------------------------------------------------------------
 
 // Includes
+#include <functional>
+#include <string>
+#include <vector>
 #include <float.h>                  // FLT_MIN, FLT_MAX
 #include <stdarg.h>                 // va_list, va_start, va_end
 #include <stddef.h>                 // ptrdiff_t, NULL
@@ -329,6 +332,8 @@ namespace ImGui
     IMGUI_API ImVec2        GetWindowContentRegionMax();                                    // content boundaries max (roughly (0,0)+Size-Scroll) where Size can be override with SetNextWindowContentSize(), in window coordinates
     IMGUI_API float         GetWindowContentRegionWidth();                                  //
 
+    IMGUI_API float         GetWindowContentRegionHeight();                                  //
+
     // Windows Scrolling
     IMGUI_API float         GetScrollX();                                                   // get scrolling amount [0..GetScrollMaxX()]
     IMGUI_API float         GetScrollY();                                                   // get scrolling amount [0..GetScrollMaxY()]
@@ -562,6 +567,13 @@ namespace ImGui
     IMGUI_API void          PlotLines(const char* label, float(*values_getter)(void* data, int idx), void* data, int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2(0, 0));
     IMGUI_API void          PlotHistogram(const char* label, const float* values, int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2(0, 0), int stride = sizeof(float));
     IMGUI_API void          PlotHistogram(const char* label, float(*values_getter)(void* data, int idx), void* data, int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2(0, 0));
+
+    IMGUI_API void MulitPlot(
+        std::string label,
+        std::function<float(const std::string&, int)> values_getter,
+        int values_count, int values_offset, const std::vector<ImU32>& colors,
+        const std::vector<std::string>& overlay_text, float scale_min,
+        float scale_max, ImVec2 frame_size);
 
     // Widgets: Value() Helpers.
     // - Those are merely shortcut to calling Text() with a format string. Output single value in "name: value" format (tip: freely declare more in your code to handle your types. you can add functions to the ImGui namespace)

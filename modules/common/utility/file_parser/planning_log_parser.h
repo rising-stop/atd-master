@@ -15,7 +15,7 @@ class PlanningLog : public ReadWriteableFile {
   void Log_Parse(const std::string&);
 
  protected:
-  void log_record(const atd::protocol::LOG_CONTENT&);
+  void log_record(const atd::protocol::MONITOR_MSG&);
   virtual void parse_file();
   virtual void refresh_file();
 

@@ -13,11 +13,20 @@ void DebugLogging::reset_Frame() {
   log_frame_.mutable_title()->set_counter_no(COUNTER("planning_log"));
 }
 
-void DebugLogging::publish_Frame() { log_publisher_.publish(log_frame_); }
-
 atd::protocol::FRAME_CONTENT* DebugLogging::get_PtrFrame() {
-  return log_frame_.add_content();
+  return log_frame_.mutable_log()->add_content();
 }
+atd::protocol::DISPLAY_BOX* DebugLogging::get_PtrElementBox() {
+  return log_frame_.mutable_gl_element()->add_box_set();
+}
+atd::protocol::DISPLAY_LINE* DebugLogging::get_PtrElementLine() {
+  return log_frame_.mutable_gl_element()->add_line_set();
+}
+atd::protocol::DISPLAY_PLOYNOMIAL* DebugLogging::get_PtrElementPoly() {
+  return log_frame_.mutable_gl_element()->add_ploy_set();
+}
+
+void DebugLogging::publish_Frame() { log_publisher_.publish(log_frame_); }
 
 Writer::Writer(const char* file, uint32_t line_no, SECURITY_INFO level) {
   init();

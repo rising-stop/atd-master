@@ -16,7 +16,7 @@ void PlanningLog::Log_Parse(const std::string& log_name) {
 
 void PlanningLog::parse_file() {
   uint64_t file_length = 0;
-  atd::protocol::LOG_CONTENT single_frame;
+  atd::protocol::MONITOR_MSG single_frame;
 
   lcm::LogFile lcm_log(log_name_, "r");
   if (!lcm_log.good()) {
@@ -42,7 +42,7 @@ void PlanningLog::parse_file() {
   }
 }
 
-void PlanningLog::log_record(const atd::protocol::LOG_CONTENT& frame) {
+void PlanningLog::log_record(const atd::protocol::MONITOR_MSG& frame) {
   auto& ptr_file_stream = get_FileStream();
 
   ptr_file_stream << "########### "
@@ -50,8 +50,8 @@ void PlanningLog::log_record(const atd::protocol::LOG_CONTENT& frame) {
                   << ", TIME STAMP " << frame.title().time_stamp()
                   << " ###########"
                   << "\n";
-  for (uint32_t index = 0; index < frame.content_size(); index++) {
-    switch (frame.content(index).level()) {
+  for (uint32_t index = 0; index < frame.log().content_size(); index++) {
+    switch (frame.log().content(index).level()) {
       case atd::protocol::SECURITY_INFO::INFO:
         ptr_file_stream << "> level: INFO, ";
         break;
@@ -65,20 +65,20 @@ void PlanningLog::log_record(const atd::protocol::LOG_CONTENT& frame) {
         ptr_file_stream << "> level: UNKNOW, ";
         break;
     }
-    ptr_file_stream << frame.content(index).file_name() << " no. "
-                    << frame.content(index).line_no() << ":"
+    ptr_file_stream << frame.log().content(index).file_name() << " no. "
+                    << frame.log().content(index).line_no() << ":"
                     << "\n";
     for (uint32_t str_index = 0;
-         str_index < frame.content(index).str_msg_size(); str_index++) {
-      ptr_file_stream << "   > " << frame.content(index).str_msg(str_index)
-                      << "\n";
+         str_index < frame.log().content(index).str_msg_size(); str_index++) {
+      ptr_file_stream << "   > "
+                      << frame.log().content(index).str_msg(str_index) << "\n";
     }
     for (uint32_t var_index = 0;
-         var_index < frame.content(index).variables_size(); var_index++) {
+         var_index < frame.log().content(index).variables_size(); var_index++) {
       ptr_file_stream << "   > "
-                      << frame.content(index).variables(var_index).name()
+                      << frame.log().content(index).variables(var_index).name()
                       << " = "
-                      << frame.content(index).variables(var_index).data()
+                      << frame.log().content(index).variables(var_index).data()
                       << "\n";
     }
   }

@@ -81,6 +81,25 @@ std::shared_ptr<TYPE> ThreadSafe_Deque<TYPE, Container>::wait_pop_front() {
 }
 
 template <typename TYPE, typename Container>
+bool ThreadSafe_Deque<TYPE, Container>::try_read(Container &quene) {
+  std::lock_guard<std::mutex> lock(deque_mutex_);
+  if (container_.empty()) {
+    return false;
+  }
+  quene.clear();
+  quene = container_;
+  return true;
+}
+
+template <typename TYPE, typename Container>
+void ThreadSafe_Deque<TYPE, Container>::wait_and_read(Container &quene) {
+  std::unique_lock<std::mutex> lock(deque_mutex_);
+  wait_cond_.wait(lock, [&]() -> bool { return !container_.empty(); });
+  quene.clear();
+  quene = container_;
+}
+
+template <typename TYPE, typename Container>
 ThreadSafe_Deque<TYPE, Container>::ThreadSafe_Deque(
     const ThreadSafe_Deque &deque) {
   std::lock_guard<std::mutex> lock(deque_mutex_);

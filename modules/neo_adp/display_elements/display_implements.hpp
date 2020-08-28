@@ -1,14 +1,15 @@
 #pragma once
 
+#include <cmath>
+
 #include "common_frame.hpp"
 #include "modules/common/common_header.h"
-#include "opengl_elements.pb.h"
+#include "protobuf_msg/planning_log.pb.h"
 
 static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
   if (!keys.showLabels) {
     return;
   }
-
   // Only draw labels inside the camera frustum.
   if (camera.isPointInsideFrustum(pos[0], pos[1], pos[2])) {
     const ddVec3 textColor = {0.8f, 0.8f, 1.0f};
@@ -20,40 +21,92 @@ static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
 
 static void drawGrid(const ThreadData &td) {
   if (keys.showGrid) {
-    dd::xzSquareGrid(
-        td.ddContext, -50.0f, 50.0f, 0.0f, 1.0f,
-        dd::colors::DarkGreen);  // Grid from -50 to +50 in both X & Z
+    dd::xzSquareGrid(td.ddContext, -40.0f, 40.0f, -20.0f, 100.0f, -1.0f, 5.0f,
+                     dd::colors::DarkGray);
   }
 }
 
+static void convert_BoxData(ddVec3 *corner_points, ddVec3 origin,
+                            const float width, const float height,
+                            const float deepth, const float heading) {
+  float init_ang = atan2(height, width);
+  float diag_length = sqrt(width * width + height * height) / 2.0f;
+  corner_points[0][0] = origin[0] + diag_length * sin(heading + init_ang);
+  corner_points[0][1] = origin[1];
+  corner_points[0][2] = origin[2] + diag_length * cos(heading + init_ang);
+  corner_points[1][0] = origin[0] - diag_length * sin(heading + init_ang);
+  corner_points[1][1] = origin[1];
+  corner_points[1][2] = origin[2] + diag_length * cos(heading + init_ang);
+  corner_points[2][0] = origin[0] - diag_length * sin(heading + init_ang);
+  corner_points[2][1] = origin[1];
+  corner_points[2][2] = origin[2] - diag_length * cos(heading + init_ang);
+  corner_points[3][0] = origin[0] + diag_length * sin(heading + init_ang);
+  corner_points[3][1] = origin[1];
+  corner_points[3][2] = origin[2] - diag_length * cos(heading + init_ang);
+  corner_points[4][0] = corner_points[0][0];
+  corner_points[4][1] = corner_points[0][1] + deepth;
+  corner_points[4][2] = corner_points[0][2];
+  corner_points[5][0] = corner_points[1][0];
+  corner_points[5][1] = corner_points[1][1] + deepth;
+  corner_points[5][2] = corner_points[1][2];
+  corner_points[6][0] = corner_points[2][0];
+  corner_points[6][1] = corner_points[2][1] + deepth;
+  corner_points[6][2] = corner_points[2][2];
+  corner_points[7][0] = corner_points[3][0];
+  corner_points[7][1] = corner_points[3][1] + deepth;
+  corner_points[7][2] = corner_points[3][2];
+}
+
 static void draw_PlanningElements(const ThreadData &td) {
-  static atd::utility::Proto_Messages<atd::protocol::Opengl_Elements> adp_msg;
-  static atd::utility::LCM_Proxy<
-      atd::utility::Proto_Messages<atd::protocol::Opengl_Elements>>
-      receiver(atd::utility::LCM_MODE::READER, "DEBUG_DRAW");
+  static atd::protocol::OPENGL_ELEMENT adp_msg;
+  atd::utility::Singleton::instance<DataDispatcher>()->get_GLElements(adp_msg);
 
   ddVec3 origin = {0.0f, 0.0f, 0.0f};
   drawLabel(td, origin, "ego vehicle");
   dd::box(td.ddContext, origin, dd::colors::BlueViolet, 1.8f, 1.5f, 4.68f);
   dd::point(td.ddContext, origin, dd::colors::White, 5.0f);
 
-  receiver.subscribe(adp_msg);
   auto box_set = adp_msg.box_set();
   for (auto single_box : box_set) {
-    ddVec3 box_origin = {single_box.origin().x(), single_box.origin().y(),
-                         single_box.origin().z()};
+    ddVec3 box_origin = {single_box.origin().y(), single_box.origin().z(),
+                         single_box.origin().x()};
+    ddVec3 corner_points[8];
+    convert_BoxData(corner_points, box_origin, single_box.width(),
+                    single_box.height(), single_box.deepth(),
+                    single_box.heading());
     if (single_box.discription() == "CIPV") {
       drawLabel(td, box_origin, "CIPV");
-      dd::box(td.ddContext, box_origin, dd::colors::Green, 1.8f, 1.5f, 4.68f);
-      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+      dd::box(td.ddContext, corner_points, dd::colors::Green);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else if (single_box.discription() == "TOS") {
       drawLabel(td, box_origin, "TOS");
-      dd::box(td.ddContext, box_origin, dd::colors::Red, 1.8f, 1.5f, 4.68f);
-      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+      dd::box(td.ddContext, corner_points, dd::colors::Red);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else {
-      drawLabel(td, box_origin, "UNKNOW");
-      dd::box(td.ddContext, box_origin, dd::colors::White, 1.8f, 1.5f, 4.68f);
-      dd::point(td.ddContext, box_origin, dd::colors::White, 5.0f);
+      drawLabel(td, box_origin, single_box.discription().c_str());
+      dd::box(td.ddContext, corner_points, dd::colors::White);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+    }
+  }
+
+  auto line_set = adp_msg.line_set();
+  for (auto single_line : line_set) {
+    auto point_size = single_line.sample_points().size();
+    if (point_size > 2) {
+      ddVec3 point_ori{single_line.sample_points(point_size / 2).y(),
+                       single_line.sample_points(point_size / 2).z(),
+                       single_line.sample_points(point_size / 2).x()};
+      drawLabel(td, point_ori, single_line.discription().c_str());
+      dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
+      for (uint32_t index = 0; index < (point_size - 1); index++) {
+        ddVec3 seg_start{single_line.sample_points(index).y(),
+                         single_line.sample_points(index).z(),
+                         single_line.sample_points(index).x()};
+        ddVec3 seg_end{single_line.sample_points(index + 1).y(),
+                       single_line.sample_points(index + 1).z(),
+                       single_line.sample_points(index + 1).x()};
+        dd::line(td.ddContext, seg_start, seg_end, dd::colors::Yellow);
+      }
     }
   }
 }
@@ -174,10 +227,22 @@ static void drawText(const ThreadData &td) {
                  "[SPACE]  to toggle labels on/off\n"
                  "[RETURN] to toggle grid on/off",
                  textPos2D, textColor, 0.55f);
+
+  const ddVec3 displayColor = {0.9f, 0.9f, 0.9f};
+  const ddVec3 displayPos2D = {10.0f, 45.0f, 0.0f};
+
+  static std::string basic_info;
+  if (!atd::utility::Singleton::instance<DataDispatcher>()
+           ->get_BasicDisplayInfo(basic_info)) {
+    basic_info = "System OffLine";
+  }
+  dd::screenText(td.ddContext, basic_info.c_str(), displayPos2D, displayColor,
+                 0.9f);
 }
 
 static void init4Display() {
   atd::utility::Singleton::try_register<OpenGL_Frame>();
+  atd::utility::Singleton::try_register<DataDispatcher>();
 
   atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
       &drawGrid);

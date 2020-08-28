@@ -6,7 +6,9 @@
 #include <functional>
 #include <iostream>
 
+#include "data_dispatcher.hpp"
 #include "debug_draw.hpp"
+#include "display_imgui_components.hpp"
 #include "modules/common/utility/utility.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
@@ -597,10 +599,13 @@ class OpenGL_Frame : public atd::utility::Singleton {
     while (!glfwWindowShouldClose(ptr_mainwindow_)) {
       const double t0s = glfwGetTime();
 
+      atd::utility::Singleton::instance<DataDispatcher>()->spin();
+
       glfwPollEvents();  // checking outsource events
       glfwSwapBuffers(ptr_mainwindow_);
 
       single_Frame();
+      Imgui_Drawing();
 
       // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       // glClear(GL_COLOR_BUFFER_BIT);
@@ -615,10 +620,12 @@ class OpenGL_Frame : public atd::utility::Singleton {
     for (auto td : draw_task_) {
       td.shutdown();
     }
-
+    Imgui_Terminate();
     glfwDestroyWindow(ptr_mainwindow_);
     glfwTerminate();
   }
+
+  int display_w = 100, display_h = 100;
 
  private:
   GLFWwindow *Init4GLFW(int windowWidth, int windowHeight) {
@@ -691,9 +698,17 @@ class OpenGL_Frame : public atd::utility::Singleton {
     ImGui_ImplOpenGL3_Init(glsl_version);
   }
 
+  void Imgui_Terminate() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+  }
+
   void single_Frame() {
     camera.checkKeyboardMovement();
+    camera.checkMouseMovement();
     camera.checkMouseRotation();
+    camera.checkKey1();
     camera.updateMatrices();
 
     for (const auto &td : draw_task_) {
@@ -708,7 +723,7 @@ class OpenGL_Frame : public atd::utility::Singleton {
     for (const auto &td : draw_task_) {
       dd::flush(td.ddContext);
     }
-    int display_w, display_h;
+    // int display_w, display_h;
     glfwGetFramebufferSize(ptr_mainwindow_, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
   }
