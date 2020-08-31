@@ -33,19 +33,17 @@ class DataDispatcher final : public Singleton {
 
   bool get_GLElements(OPENGL_ELEMENT& gl_ele) const {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
-    static uint64_t latest_time_stamp_ = 0;
-    if (latest_time_stamp_ == frame_msg_.title().time_stamp()) {
+    if (!msg_validity_checking()) {
       return false;
     }
     gl_ele.Clear();
     gl_ele = frame_msg_.gl_element();
-    latest_time_stamp_ = frame_msg_.title().time_stamp();
     return true;
   }
 
   bool get_LogFrame(std::string& log) const {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
-    if (!frame_msg_.has_title()) {
+    if (!msg_validity_checking()) {
       return false;
     }
     log.clear();
@@ -55,6 +53,9 @@ class DataDispatcher final : public Singleton {
 
   bool get_TotalLogFrame(std::string& log) const {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
+    if (!msg_validity_checking()) {
+      return false;
+    }
     if (data_quene_.empty()) {
       return false;
     }
@@ -62,7 +63,8 @@ class DataDispatcher final : public Singleton {
     std::string tmp_str;
     for (int index = std::max(
              0, static_cast<int>(data_quene_.size() - 1 - log_buffer_size));
-         index < std::min(DataDispatcher_MaxBufferSize, log_buffer_size);
+         index < std::min(DataDispatcher_MaxBufferSize,
+                          static_cast<int>(data_quene_.size()));
          index++) {
       parse_LogContent(data_quene_.at(index), tmp_str);
       log.append(tmp_str);
@@ -72,11 +74,9 @@ class DataDispatcher final : public Singleton {
 
   bool get_BasicDisplayInfo(std::string& info) {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
-    static uint64_t latest_time_stamp_ = 0;
-    if (latest_time_stamp_ == frame_msg_.title().time_stamp()) {
+    if (!msg_validity_checking()) {
       return false;
     }
-
     // "AutoDriving\nSpeed(kph): 11.0\nSteer(deg): 11.0"
     std::string auto_info{"Offline"};
     std::string display_speed{"Speed(kph): "};
@@ -126,20 +126,15 @@ class DataDispatcher final : public Singleton {
     info.append(display_act_acc);
     info.append("\n");
     info.append(display_DTC);
-    latest_time_stamp_ = frame_msg_.title().time_stamp();
+    return true;
   }
 
   bool get_LatestFrame(std::map<std::string, std::string>& umap) {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
-    if (!frame_msg_.has_title()) {
-      return false;
-    }
-    static uint64_t latest_time_stamp_ = 0;
-    if (latest_time_stamp_ == frame_msg_.title().time_stamp()) {
+    if (!msg_validity_checking()) {
       return false;
     }
     umap = variables_;
-    latest_time_stamp_ = frame_msg_.title().time_stamp();
     return true;
   }
 
@@ -184,7 +179,24 @@ class DataDispatcher final : public Singleton {
     log = sstm.str();
   }
 
+  bool msg_validity_checking() const{
+    static uint64_t last_time_stamp = 0;
+    static int time_out_counter = 0;
+    if (last_time_stamp == frame_msg_.title().time_stamp()) {
+      time_out_counter++;
+      if (time_out_counter > time_out_) {
+        time_out_counter = time_out_ + 1;
+        return false;
+      }
+    } else {
+      time_out_counter = 0;
+    }
+    last_time_stamp = frame_msg_.title().time_stamp();
+    return true;
+  }
+
  private:
+  const int time_out_ = 30;
   const int log_buffer_size = 11;
   Proto_Messages<MONITOR_MSG> frame_msg_;
   std::map<std::string, std::string> variables_;

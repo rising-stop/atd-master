@@ -38,15 +38,6 @@ static void Show_Custom_Window() {
   ImGui::Checkbox("Log Info", &switches.show_log_window);
   ImGui::Checkbox("Data Monitor", &switches.show_data_monitor);
 
-  ImGui::SliderFloat("float", &f, 0.0f,
-                     1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
-
-  if (ImGui::Button("Button"))  // Buttons return true when clicked (most
-                                // widgets return true when edited/activated)
-    counter++;
-  ImGui::SameLine();
-  ImGui::Text("counter = %d", counter);
-
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
   ImGui::End();
@@ -103,9 +94,11 @@ static void Show_DataMonitor(bool* swth) {
 
   ImGui::Begin("Data Monitor", swth);
   if (ImGui::Button("Monitor - Add on")) {
-    monitor_set.push_back(new DataMonitor());
+    static int monitor_counter = 0;
+    monitor_set.push_back(new DataMonitor(std::to_string(++monitor_counter)));
   }
 
+  ImGui::Separator();
   for (auto single_monitor : monitor_set) {
     single_monitor->Render();
   }
@@ -117,7 +110,7 @@ static void Show_DataMonitor(bool* swth) {
     }
   }
 
-  if (ImGui::Button("Close")) switches.show_log_window = false;
+  if (ImGui::Button("Close")) switches.show_data_monitor = false;
   ImGui::End();
 }
 

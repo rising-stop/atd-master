@@ -15,7 +15,7 @@ static void drawLabel(const ThreadData &td, ddVec3_In pos, const char *name) {
     const ddVec3 textColor = {0.8f, 0.8f, 1.0f};
     dd::projectedText(td.ddContext, name, pos, textColor,
                       toFloatPtr(camera.vpMatrix), 0, 0, WindowWidth,
-                      WindowHeight, 0.5f);
+                      WindowHeight, 0.3f);
   }
 }
 
@@ -81,6 +81,10 @@ static void draw_PlanningElements(const ThreadData &td) {
     } else if (single_box.discription() == "TOS") {
       drawLabel(td, box_origin, "TOS");
       dd::box(td.ddContext, corner_points, dd::colors::Red);
+      dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+    } else if (single_box.discription() == "Selected") {
+      drawLabel(td, box_origin, "Selected");
+      dd::box(td.ddContext, corner_points, dd::colors::Yellow);
       dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else {
       drawLabel(td, box_origin, single_box.discription().c_str());
@@ -237,7 +241,7 @@ static void drawText(const ThreadData &td) {
     basic_info = "System OffLine";
   }
   dd::screenText(td.ddContext, basic_info.c_str(), displayPos2D, displayColor,
-                 0.9f);
+                 0.55f);
 }
 
 static void init4Display() {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <iostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -11,88 +12,110 @@
 #include "modules/neo_adp/imgui_module/imgui.h"
 
 constexpr int monitor_max_buffer = 600; /* time_buffer  (s) */
+constexpr int monitor_min_buffer = 10;
 
 class DataMonitor {
  public:
   void Render() {
-    ImGui::SliderInt("Sample range", &sample_range, 10, 600);
-    if (ImGui::Button("Data Set")) ImGui::OpenPopup("toggle_popup");
-    if (ImGui::BeginPopup("my_toggle_popup")) {
-      update_frame();
-      ImGui::EndPopup();
-    }
+    std::string slider_name{"Range: "};
+    slider_name.append(name_);
+    ImGui::SliderInt(slider_name.c_str(), &sample_range, monitor_min_buffer,
+                     monitor_max_buffer);
+    std::string botton_name{"Sheet: "};
+    botton_name.append(name_);
 
-    if (!line_data_.size()) {
-      return;
+    if (ImGui::Button(botton_name.c_str())) ImGui::OpenPopup(name_.c_str());
+
+    ImGui::SameLine();
+    std::string check_box_name{"Enable Sheet "};
+    check_box_name.append(name_);
+    ImGui::Checkbox(check_box_name.c_str(), &enable_);
+    if (enable_) {
+      update_frame();
+    }
+    if (ImGui::BeginPopup(name_.c_str())) {
+      for (auto& menu_item : menu_content_)
+        ImGui::MenuItem(menu_item.first.c_str(), "",
+                        &(menu_item.second.enable));
+      ImGui::EndPopup();
     }
 
     std::vector<ImU32> line_colors;
     std::vector<std::string> overlay_text;
 
     int line_index = 0;
-    for (auto line : line_data_) {
-      ImVec4 line_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-      ImGui::ColorEdit4(line.first.c_str(), (float*)&line_color);
-      line_colors.push_back(ImGui::ColorConvertFloat4ToU32(line_color));
+    for (auto& line : menu_content_) {
+      if (!line.second.enable) {
+        continue;
+      }
+      ImGui::ColorEdit4(line.first.c_str(), (float*)&line.second.line_color);
+      line_colors.push_back(
+          ImGui::ColorConvertFloat4ToU32(line.second.line_color));
       overlay_text.push_back(line.first);
     }
     ImGui::MulitPlot(
-        "",
+        name_.c_str(),
         [&](const std::string name, int idx) -> float {
-          return line_data_[name].at(idx);
+          int data_size = menu_content_[name].data.size();
+          return menu_content_[name].data.at(data_size - sample_range + idx);
         },
-        monitor_max_buffer, 0, line_colors, overlay_text, -1.0f, 1.0f,
-        ImVec2(0, 80));
+        sample_range, 0, line_colors, overlay_text, -1.0f, 1.0f,
+        ImVec2(0, 160));
+    ImGui::Separator();
   }
 
  private:
   void update_frame() {
-    std::map<std::string, std::string> frame;
     if (!atd::utility::Singleton::instance<DataDispatcher>()->get_LatestFrame(
-            frame)) {
-      return;
+            frame_)) {
     }
 
-    menu_content_.clear();
-    for (auto item_pos : frame) {
-      menu_content_.insert({item_pos.first, false});
+    for (auto item_pos : frame_) {
+      menu_content_.insert({item_pos.first, line_frame()});
     }
 
     std::set<std::string> selected_set;
     for (auto& menu_item : menu_content_) {
-      ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second));
-      if (menu_item.second) {
+      if (menu_item.second.enable) {
         selected_set.insert(menu_item.first);
       }
     }
 
-    auto itr_data = line_data_.begin();
-    while (itr_data != line_data_.end()) {
-      if (selected_set.find(itr_data->first) == selected_set.end()) {
-        itr_data = line_data_.erase(itr_data);
+    auto itr_data = menu_content_.begin();
+    while (itr_data != menu_content_.end()) {
+      if (frame_.find(itr_data->first) == frame_.end()) {
+        itr_data = menu_content_.erase(itr_data);
       } else {
         itr_data++;
       }
     }
 
-    for (auto list_name : selected_set) {
-      auto itr_name = line_data_.find(list_name);
-      if (itr_name == line_data_.end()) {
-        line_data_.insert(
-            {list_name, std::deque<float>(monitor_max_buffer, 0.0f)});
-      } else {
-        line_data_[list_name].pop_front();
-        line_data_[list_name].push_back(std::stof(frame[list_name]));
+    for (auto& line_data : menu_content_) {
+      line_data.second.data.pop_front();
+      try {
+        line_data.second.data.push_back(std::stof(frame_[line_data.first]));
+      } catch (...) {
+        line_data.second.data.push_back(0.0f);
+        std::cerr << "update_frame(): stof throw a exception" << std::endl;
       }
     }
   }
 
+ public:
+  const std::string name_;
+
  private:
-  int sample_range = 0;
-  std::map<std::string, bool> menu_content_;
-  std::map<std::string, std::deque<float>> line_data_;
+  bool enable_ = true;
+  int sample_range = monitor_max_buffer;
+  struct line_frame {
+    bool enable = false;
+    std::deque<float> data = std::deque<float>(monitor_max_buffer, 0.0f);
+    ImVec4 line_color{1.0f, 1.0f, 1.0f, 1.00f};
+  };
+  std::map<std::string, std::string> frame_;
+  std::map<std::string, line_frame> menu_content_;
 
  public:
-  DataMonitor() {}
+  DataMonitor(const std::string& id) : name_(id) {}
   ~DataMonitor() {}
 };

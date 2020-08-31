@@ -34,7 +34,6 @@ Separator, etc.)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
 
@@ -7108,17 +7107,17 @@ bool ImGui::ListBox(const char* label, int* current_item,
   return value_changed;
 }
 
-int ImGui::MulitPlotEx(std::string label,
-                       std::function<float(const std::string&, int)> values_getter,
-                       int values_count,
-                       int values_offset, const std::vector<ImU32>& colors,
-                       const std::vector<std::string>& overlay_text, float scale_min,
-                       float scale_max, ImVec2 frame_size) {
+int ImGui::MulitPlotEx(
+    std::string label,
+    std::function<float(const std::string&, int)> values_getter,
+    int values_count, int values_offset, const std::vector<ImU32>& colors,
+    const std::vector<std::string>& overlay_text, float scale_min,
+    float scale_max, ImVec2 frame_size) {
   ImGuiContext& g = *GImGui;
   ImGuiWindow* window = GetCurrentWindow();
   if (window->SkipItems) return -1;
   int data_set_num = overlay_text.size();
-  if (!data_set_num) return -1;
+  // if (!data_set_num) return -1;
 
   const ImGuiStyle& style = g.Style;
   const ImGuiID id = window->GetID(label.c_str());
@@ -7127,7 +7126,6 @@ int ImGui::MulitPlotEx(std::string label,
   if (frame_size.x == 0.0f) frame_size.x = CalcItemWidth();
   if (frame_size.y == 0.0f)
     frame_size.y = label_size.y + (style.FramePadding.y * 2);
-
   const ImRect frame_bb(window->DC.CursorPos,
                         window->DC.CursorPos + frame_size);
   const ImRect inner_bb(frame_bb.Min + style.FramePadding,
@@ -7179,7 +7177,7 @@ int ImGui::MulitPlotEx(std::string label,
       std::string tip_info;
       for (int index = 0; index < data_set_num; index++) {
         float v0 =
-            values_getter(overlay_text.at(index), (v_idx + values_offset) % values_count);
+            values_getter(overlay_text.at(index), (v_idx) % values_count);
         tip_info.append(overlay_text[index]);
         tip_info.append(" : ");
         tip_info.append(std::to_string(v0));
@@ -7196,28 +7194,30 @@ int ImGui::MulitPlotEx(std::string label,
     const float inv_scale =
         (scale_min == scale_max) ? 0.0f : (1.0f / (scale_max - scale_min));
 
-    float v0 = values_getter(overlay_text.at(0), (0 + values_offset) % values_count);
-    float t0 = 0.0f;
-    ImVec2 tp0 = ImVec2(
-        t0, 1.0f - ImSaturate((v0 - scale_min) *
-                              inv_scale));  // Point in the normalized space of
-                                            // our target rectangle
-    float histogram_zero_line_t =
-        (scale_min * scale_max < 0.0f)
-            ? (-scale_min * inv_scale)
-            : (scale_min < 0.0f ? 0.0f
-                                : 1.0f);  // Where does the zero line stands
-
     const ImU32 col_hovered = GetColorU32(ImGuiCol_PlotLinesHovered);
 
+    ImVec2 pos_key_top{std::min(g.IO.MousePos.x, inner_bb.Max.x),
+                       inner_bb.Min.y};
+    ImVec2 pos_key_bottom{std::min(g.IO.MousePos.x, inner_bb.Max.x),
+                          inner_bb.Max.y};
+
+    window->DrawList->AddLine(pos_key_top, pos_key_bottom, col_hovered);
+
     for (int index = 0; index < data_set_num; index++) {
+      float v0 = 0.0f;
+      if (!overlay_text.empty()) {
+        float v0 =
+            values_getter(overlay_text.at(index), (index) % values_count);
+      }
+      float t0 = 0.0f;
+      ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_min) * inv_scale));
       ImU32 col_base = colors[index];
       for (int n = 0; n < res_w; n++) {
         const float t1 = t0 + t_step;
         const int v1_idx = (int)(t0 * item_count + 0.5f);
         IM_ASSERT(v1_idx >= 0 && v1_idx < values_count);
-        const float v1 = values_getter(
-            overlay_text.at(index), (v1_idx + values_offset + 1) % values_count);
+        const float v1 =
+            values_getter(overlay_text.at(index), (v1_idx + 1) % values_count);
         const ImVec2 tp1 =
             ImVec2(t1, 1.0f - ImSaturate((v1 - scale_min) * inv_scale));
 
@@ -7225,6 +7225,9 @@ int ImGui::MulitPlotEx(std::string label,
         // should render our batch are lower level to save a bit of CPU.
         ImVec2 pos0 = ImLerp(inner_bb.Min, inner_bb.Max, tp0);
         ImVec2 pos1 = ImLerp(inner_bb.Min, inner_bb.Max, tp1);
+        if (n == 0) {
+          pos0 = pos1;
+        }
 
         window->DrawList->AddLine(
             pos0, pos1, idx_hovered == v1_idx ? col_hovered : col_base);
@@ -7236,14 +7239,14 @@ int ImGui::MulitPlotEx(std::string label,
   }
 
   // Text overlay
-  if (overlay_text.size()) {
-    for (int index = 0; index < data_set_num; index++) {
-      RenderTextClipped(
-          ImVec2(frame_bb.Min.x, frame_bb.Min.y + style.FramePadding.y),
-          frame_bb.Max, overlay_text[index].c_str(), NULL, NULL,
-          ImVec2(0.5f * (float)(index + 1), 0.0f));
-    }
-  }
+  // if (overlay_text.size()) {
+  //   for (int index = 0; index < data_set_num; index++) {
+  //     RenderTextClipped(
+  //         ImVec2(frame_bb.Min.x, frame_bb.Min.y + style.FramePadding.y),
+  //         frame_bb.Max, overlay_text[index].c_str(), NULL, NULL,
+  //         ImVec2(0.5f * (float)(index + 1), 0.0f));
+  //   }
+  // }
 
   if (label_size.x > 0.0f)
     RenderText(
@@ -7440,16 +7443,17 @@ void ImGui::PlotLines(const char* label, const float* values, int values_count,
 }
 
 void ImGui::MulitPlot(
-        std::string label,
-        std::function<float(const std::string&, int)> values_getter,
-        int values_count, int values_offset, const std::vector<ImU32>& colors,
-        const std::vector<std::string>& overlay_text, float scale_min,
-        float scale_max, ImVec2 frame_size){
-          MulitPlotEx(label, values_getter, values_count, values_offset, colors, overlay_text, scale_min, scale_max, frame_size);
-        }
+    std::string label,
+    std::function<float(const std::string&, int)> values_getter,
+    int values_count, int values_offset, const std::vector<ImU32>& colors,
+    const std::vector<std::string>& overlay_text, float scale_min,
+    float scale_max, ImVec2 frame_size) {
+  MulitPlotEx(label, values_getter, values_count, values_offset, colors,
+              overlay_text, scale_min, scale_max, frame_size);
+}
 
 void ImGui::PlotLines(const char* label,
-                      float (*values_getter)(void* data, int idx),  void* data,
+                      float (*values_getter)(void* data, int idx), void* data,
                       int values_count, int values_offset,
                       const char* overlay_text, float scale_min,
                       float scale_max, ImVec2 graph_size) {

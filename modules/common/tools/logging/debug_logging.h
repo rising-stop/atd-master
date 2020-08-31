@@ -28,7 +28,7 @@ class DebugLogging : public Singleton {
   atd::protocol::DISPLAY_BOX* get_PtrElementBox();
   atd::protocol::DISPLAY_LINE* get_PtrElementLine();
   atd::protocol::DISPLAY_PLOYNOMIAL* get_PtrElementPoly();
-  atd::protocol::DISPLAY_CONTENT* get_PtrDisplayElement();
+  atd::protocol::VARIABLE* get_PtrDisplayElement();
 
  private:
   Proto_Messages<atd::protocol::MONITOR_MSG> log_frame_;
@@ -44,7 +44,7 @@ class StringConverter {
  public:
   template <typename T>
   std::string operator()(const T& var) {
-    return std::to_string(var);
+    return std::to_string(static_cast<float>(var));
   }
 
   StringConverter() = default;

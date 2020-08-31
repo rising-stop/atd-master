@@ -25,6 +25,9 @@ atd::protocol::DISPLAY_LINE* DebugLogging::get_PtrElementLine() {
 atd::protocol::DISPLAY_PLOYNOMIAL* DebugLogging::get_PtrElementPoly() {
   return log_frame_.mutable_gl_element()->add_ploy_set();
 }
+atd::protocol::VARIABLE* DebugLogging::get_PtrDisplayElement() {
+  return log_frame_.mutable_display_element()->add_content();
+}
 
 void DebugLogging::publish_Frame() { log_publisher_.publish(log_frame_); }
 
