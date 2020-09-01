@@ -510,19 +510,18 @@ static void keyCallback(GLFWwindow* window, const int key, const int scancode,
   (void)scancode;
   (void)mods;
 
-  if (key == GLFW_KEY_A || key == GLFW_KEY_LEFT) {
+  if (key == GLFW_KEY_A) {
     keys.aDown = (action != GLFW_RELEASE);
-  } else if (key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) {
+  } else if (key == GLFW_KEY_D) {
     keys.dDown = (action != GLFW_RELEASE);
-  } else if (key == GLFW_KEY_W || key == GLFW_KEY_UP) {
+  } else if (key == GLFW_KEY_W) {
     keys.wDown = (action != GLFW_RELEASE);
-  } else if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN) {
+  } else if (key == GLFW_KEY_S) {
     keys.sDown = (action != GLFW_RELEASE);
   } else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
     keys.showLabels = !keys.showLabels;
-  } else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
     keys.showGrid = !keys.showGrid;
-  } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+  } else if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
     keys.default_eye = !keys.default_eye;
   }
 }

@@ -7141,21 +7141,35 @@ int ImGui::MulitPlotEx(
   const bool hovered = ItemHoverable(frame_bb, id);
 
   // Determine scale from values if not specified
-  if (scale_min == FLT_MAX || scale_max == FLT_MAX) {
-    float v_min = FLT_MAX;
-    float v_max = -FLT_MAX;
-    for (int index = 0; index < data_set_num; index++) {
-      for (int i = 0; i < values_count; i++) {
-        const float v = values_getter(overlay_text.at(index), i);
-        if (v != v)  // Ignore NaN values
-          continue;
-        v_min = ImMin(v_min, v);
-        v_max = ImMax(v_max, v);
-      }
+  // if (scale_min == FLT_MAX || scale_max == FLT_MAX) {
+  float v_min = FLT_MAX;
+  float v_max = -FLT_MAX;
+  for (int index = 0; index < data_set_num; index++) {
+    for (int i = 0; i < values_count; i++) {
+      const float v = values_getter(overlay_text.at(index), i);
+      if (v != v)  // Ignore NaN values
+        continue;
+      v_min = ImMin(v_min, v);
+      v_max = ImMax(v_max, v);
     }
-    if (scale_min == FLT_MAX) scale_min = v_min;
-    if (scale_max == FLT_MAX) scale_max = v_max;
   }
+  float scale_top =
+      (v_max + v_min) / 2.0f + std::max(0.5f, (v_max - v_min) * 0.8f);
+  float scale_bottom =
+      (v_max + v_min) / 2.0f - std::max(0.5f, (v_max - v_min) * 0.8f);
+  if (scale_max > 0.0f) {
+    if (scale_max < 0.5f) {
+      scale_max = 0.5f;
+    }
+  }
+  if (scale_min < 0.0f) {
+    if (scale_min > -0.5f) {
+      scale_min = -0.5f;
+    }
+  }
+  // if (scale_min == FLT_MAX) scale_min = v_min;
+  // if (scale_max == FLT_MAX) scale_max = v_max;
+  // }
 
   RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true,
               style.FrameRounding);
@@ -7191,8 +7205,7 @@ int ImGui::MulitPlotEx(
     }
 
     const float t_step = 1.0f / (float)res_w;
-    const float inv_scale =
-        (scale_min == scale_max) ? 0.0f : (1.0f / (scale_max - scale_min));
+    const float inv_scale = 1.0f / (scale_top - scale_bottom);
 
     const ImU32 col_hovered = GetColorU32(ImGuiCol_PlotLinesHovered);
 
@@ -7210,7 +7223,7 @@ int ImGui::MulitPlotEx(
             values_getter(overlay_text.at(index), (index) % values_count);
       }
       float t0 = 0.0f;
-      ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_min) * inv_scale));
+      ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_bottom) * inv_scale));
       ImU32 col_base = colors[index];
       for (int n = 0; n < res_w; n++) {
         const float t1 = t0 + t_step;
@@ -7219,7 +7232,7 @@ int ImGui::MulitPlotEx(
         const float v1 =
             values_getter(overlay_text.at(index), (v1_idx + 1) % values_count);
         const ImVec2 tp1 =
-            ImVec2(t1, 1.0f - ImSaturate((v1 - scale_min) * inv_scale));
+            ImVec2(t1, 1.0f - ImSaturate((v1 - scale_bottom) * inv_scale));
 
         // NB: Draw calls are merged together by the DrawList system. Still, we
         // should render our batch are lower level to save a bit of CPU.

@@ -49,6 +49,8 @@ class DataMonitor {
         continue;
       }
       ImGui::ColorEdit4(line.first.c_str(), (float*)&line.second.line_color);
+      ImGui::SameLine();
+      ImGui::Text(std::to_string(line.second.data.back()).c_str());
       line_colors.push_back(
           ImGui::ColorConvertFloat4ToU32(line.second.line_color));
       overlay_text.push_back(line.first);

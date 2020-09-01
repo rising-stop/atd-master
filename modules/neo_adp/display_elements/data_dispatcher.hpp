@@ -28,6 +28,9 @@ class DataDispatcher final : public Singleton {
           variables_.insert({item.name(), item.data()});
         }
       }
+      for (auto display_content : frame_msg_.display_element().content()) {
+        variables_.insert({display_content.name(), display_content.data()});
+      }
     }
   }
 
@@ -140,10 +143,11 @@ class DataDispatcher final : public Singleton {
 
  private:
   void parse_LogContent(const MONITOR_MSG& msg, std::string& log) const {
+    static int last_timestamp = 0;
     std::stringstream sstm;
     sstm << "########### "
          << "FRAME NO. " << msg.title().counter_no() << ", TIME STAMP "
-         << msg.title().time_stamp() << " ###########"
+         << msg.title().time_stamp() << ", ELAPSE " << msg.title().time_stamp() - last_timestamp << "ms ###########"
          << "\n";
     for (uint32_t index = 0; index < msg.log().content_size(); index++) {
       switch (msg.log().content(index).level()) {
@@ -173,13 +177,14 @@ class DataDispatcher final : public Singleton {
              << " = " << msg.log().content(index).variables(var_index).data()
              << "\n";
       }
+      last_timestamp = msg.title().time_stamp();
     }
 
     log.clear();
     log = sstm.str();
   }
 
-  bool msg_validity_checking() const{
+  bool msg_validity_checking() const {
     static uint64_t last_time_stamp = 0;
     static int time_out_counter = 0;
     if (last_time_stamp == frame_msg_.title().time_stamp()) {
@@ -196,7 +201,7 @@ class DataDispatcher final : public Singleton {
   }
 
  private:
-  const int time_out_ = 30;
+  const int time_out_ = 60;
   const int log_buffer_size = 11;
   Proto_Messages<MONITOR_MSG> frame_msg_;
   std::map<std::string, std::string> variables_;

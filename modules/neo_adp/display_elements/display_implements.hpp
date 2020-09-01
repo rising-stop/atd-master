@@ -228,8 +228,7 @@ static void drawText(const ThreadData &td) {
   const ddVec3 textColor = {1.0f, 1.0f, 1.0f};
   const ddVec3 textPos2D = {10.0f, 15.0f, 0.0f};
   dd::screenText(td.ddContext,
-                 "[SPACE]  to toggle labels on/off\n"
-                 "[RETURN] to toggle grid on/off",
+                 "[SPACE]  to toggle labels and grid on/off on/off",
                  textPos2D, textColor, 0.55f);
 
   const ddVec3 displayColor = {0.9f, 0.9f, 0.9f};
