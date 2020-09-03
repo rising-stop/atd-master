@@ -80,11 +80,11 @@ static void draw_PlanningElements(const ThreadData &td) {
       dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else if (single_box.discription() == "TOS") {
       drawLabel(td, box_origin, "TOS");
-      dd::box(td.ddContext, corner_points, dd::colors::Red);
+      dd::box(td.ddContext, corner_points, dd::colors::Yellow);
       dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else if (single_box.discription() == "Selected") {
       drawLabel(td, box_origin, "Selected");
-      dd::box(td.ddContext, corner_points, dd::colors::Yellow);
+      dd::box(td.ddContext, corner_points, dd::colors::Red);
       dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
     } else {
       drawLabel(td, box_origin, single_box.discription().c_str());
@@ -100,16 +100,42 @@ static void draw_PlanningElements(const ThreadData &td) {
       ddVec3 point_ori{single_line.sample_points(point_size / 2).y(),
                        single_line.sample_points(point_size / 2).z(),
                        single_line.sample_points(point_size / 2).x()};
-      drawLabel(td, point_ori, single_line.discription().c_str());
-      dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
-      for (uint32_t index = 0; index < (point_size - 1); index++) {
-        ddVec3 seg_start{single_line.sample_points(index).y(),
-                         single_line.sample_points(index).z(),
-                         single_line.sample_points(index).x()};
-        ddVec3 seg_end{single_line.sample_points(index + 1).y(),
-                       single_line.sample_points(index + 1).z(),
-                       single_line.sample_points(index + 1).x()};
-        dd::line(td.ddContext, seg_start, seg_end, dd::colors::Yellow);
+      if (single_line.discription() == "Planning_Line") {
+        drawLabel(td, point_ori, single_line.discription().c_str());
+        dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
+        for (uint32_t index = 0; index < (point_size - 1); index++) {
+          ddVec3 seg_start{single_line.sample_points(index).y(),
+                           single_line.sample_points(index).z(),
+                           single_line.sample_points(index).x()};
+          ddVec3 seg_end{single_line.sample_points(index + 1).y(),
+                         single_line.sample_points(index + 1).z(),
+                         single_line.sample_points(index + 1).x()};
+          dd::line(td.ddContext, seg_start, seg_end, dd::colors::Yellow);
+        }
+      }else if (single_line.discription() == "RawRate_Line"){ 
+        drawLabel(td, point_ori, single_line.discription().c_str());
+        dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
+        for (uint32_t index = 0; index < (point_size - 1); index++) {
+          ddVec3 seg_start{single_line.sample_points(index).y(),
+                           single_line.sample_points(index).z(),
+                           single_line.sample_points(index).x()};
+          ddVec3 seg_end{single_line.sample_points(index + 1).y(),
+                         single_line.sample_points(index + 1).z(),
+                         single_line.sample_points(index + 1).x()};
+          dd::line(td.ddContext, seg_start, seg_end, dd::colors::DeepPink);
+        }
+      }else {
+        drawLabel(td, point_ori, single_line.discription().c_str());
+        dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
+        for (uint32_t index = 0; index < (point_size - 1); index++) {
+          ddVec3 seg_start{single_line.sample_points(index).y(),
+                           single_line.sample_points(index).z(),
+                           single_line.sample_points(index).x()};
+          ddVec3 seg_end{single_line.sample_points(index + 1).y(),
+                         single_line.sample_points(index + 1).z(),
+                         single_line.sample_points(index + 1).x()};
+          dd::line(td.ddContext, seg_start, seg_end, dd::colors::White);
+        }
       }
     }
   }
@@ -228,8 +254,8 @@ static void drawText(const ThreadData &td) {
   const ddVec3 textColor = {1.0f, 1.0f, 1.0f};
   const ddVec3 textPos2D = {10.0f, 15.0f, 0.0f};
   dd::screenText(td.ddContext,
-                 "[SPACE]  to toggle labels and grid on/off on/off",
-                 textPos2D, textColor, 0.55f);
+                 "[SPACE]  to toggle labels and grid on/off", textPos2D,
+                 textColor, 0.55f);
 
   const ddVec3 displayColor = {0.9f, 0.9f, 0.9f};
   const ddVec3 displayPos2D = {10.0f, 45.0f, 0.0f};

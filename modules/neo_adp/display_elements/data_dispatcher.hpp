@@ -14,6 +14,18 @@ class DataDispatcher final : public Singleton {
   friend class Singleton;
 
  public:
+  class CalibrationVariable {
+   public:
+    CalibrationVariable(const std::string& str, float var, float max, float min, float init)
+        : name_(str), var_(var), max_(max), min_(min), init_(init) {}
+    std::string name_;
+    float var_;
+    float max_;
+    float min_;
+    float init_;
+  };
+
+ public:
   void spin() {
     unique_writeguard<WfirstRWLock> rwguard(rwlock_);
     if (msg_reciver_.subscribe(frame_msg_)) {
@@ -31,7 +43,25 @@ class DataDispatcher final : public Singleton {
       for (auto display_content : frame_msg_.display_element().content()) {
         variables_.insert({display_content.name(), display_content.data()});
       }
+      for (auto calib_info : frame_msg_.variables().variables()) {
+        calib_container_.insert(
+            {calib_info.name(),
+             {calib_info.name(), std::stof(calib_info.data().c_str()),
+              std::stof(calib_info.data_upper_bound().c_str()),
+              std::stof(calib_info.data_lower_bound().c_str()),
+              std::stof(calib_info.data_init().c_str())}});
+      }
     }
+    cal_var_.Clear();
+    for (auto pair4loop : calib_container_) {
+      auto ptr_calib = cal_var_.add_variables();
+      ptr_calib->set_name(pair4loop.second.name_);
+      ptr_calib->set_data(std::to_string(pair4loop.second.var_));
+      ptr_calib->set_data_upper_bound(std::to_string(pair4loop.second.max_));
+      ptr_calib->set_data_lower_bound(std::to_string(pair4loop.second.min_));
+      ptr_calib->set_data_init(std::to_string(pair4loop.second.init_));
+    }
+    calib_publisher_.publish(cal_var_);
   }
 
   bool get_GLElements(OPENGL_ELEMENT& gl_ele) const {
@@ -75,7 +105,7 @@ class DataDispatcher final : public Singleton {
     return true;
   }
 
-  bool get_BasicDisplayInfo(std::string& info) {
+  bool get_BasicDisplayInfo(std::string& info) const {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
     if (!msg_validity_checking()) {
       return false;
@@ -93,16 +123,17 @@ class DataDispatcher final : public Singleton {
       if (content_name == atd::utility::DISPLAY_FLAG_AUTO) {
         int mode_code = std::stoi(single_content.data());
         if (mode_code == 0) {
-          auto_info = "Manual";
-        } else if (mode_code == 1) {
           auto_info = "Acc";
+        } else if (mode_code == 1) {
+          auto_info = "Manual";
         } else if (mode_code == 2) {
           auto_info = "Auto";
         } else {
           auto_info = "Abnormal";
         }
       } else if (content_name == atd::utility::DISPLAY_SPEED) {
-        display_speed.append(single_content.data());
+        float spd = std::stof(single_content.data().c_str());
+        display_speed.append(std::to_string(spd * 3.6));
       } else if (content_name == atd::utility::DISPLAY_STEER) {
         display_steer.append(single_content.data());
       } else if (content_name == atd::utility::DISPLAY_DESIRED_ACC) {
@@ -132,12 +163,31 @@ class DataDispatcher final : public Singleton {
     return true;
   }
 
-  bool get_LatestFrame(std::map<std::string, std::string>& umap) {
+  bool get_LatestFrame(std::map<std::string, std::string>& umap) const {
     unique_readguard<WfirstRWLock> rwguard(rwlock_);
     if (!msg_validity_checking()) {
       return false;
     }
     umap = variables_;
+    return true;
+  }
+
+  bool get_CalibInfo(std::map<std::string, CalibrationVariable>& umap) const {
+    unique_readguard<WfirstRWLock> rwguard(rwlock_);
+    if (!msg_validity_checking()) {
+      return false;
+    }
+    umap = calib_container_;
+    return true;
+  }
+
+  bool set_CalibrationInfo(const std::string name, float var) {
+    unique_writeguard<WfirstRWLock> rwguard(rwlock_);
+    auto itr = calib_container_.find(name);
+    if (itr == calib_container_.end()) {
+      return false;
+    }
+    itr->second.var_ = var;
     return true;
   }
 
@@ -147,7 +197,8 @@ class DataDispatcher final : public Singleton {
     std::stringstream sstm;
     sstm << "########### "
          << "FRAME NO. " << msg.title().counter_no() << ", TIME STAMP "
-         << msg.title().time_stamp() << ", ELAPSE " << msg.title().time_stamp() - last_timestamp << "ms ###########"
+         << msg.title().time_stamp() << ", ELAPSE "
+         << msg.title().time_stamp() - last_timestamp << "ms ###########"
          << "\n";
     for (uint32_t index = 0; index < msg.log().content_size(); index++) {
       switch (msg.log().content(index).level()) {
@@ -209,6 +260,12 @@ class DataDispatcher final : public Singleton {
                                                       "PlanningLog"};
 
   std::deque<atd::protocol::MONITOR_MSG> data_quene_;
+
+  Proto_Messages<atd::protocol::DISPLAY_CALIBRATION> cal_var_;
+  LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>>
+      calib_publisher_{LCM_MODE::SENDER, "PlanningCalib"};
+
+  std::map<std::string, CalibrationVariable> calib_container_;
 
   mutable WfirstRWLock rwlock_;
 

@@ -8,7 +8,7 @@
 namespace atd {
 namespace utility {
 
-static const std::string DISPLAY_SPEED{"spd_kph"};
+static const std::string DISPLAY_SPEED{"spd_ms"};
 static const std::string DISPLAY_STEER{"steer_deg"};
 static const std::string DISPLAY_FLAG_AUTO{"flag_auto"};
 static const std::string DISPLAY_DESIRED_ACC{"des_acc_ms"};
@@ -28,12 +28,33 @@ class DebugLogging : public Singleton {
   atd::protocol::DISPLAY_BOX* get_PtrElementBox();
   atd::protocol::DISPLAY_LINE* get_PtrElementLine();
   atd::protocol::DISPLAY_PLOYNOMIAL* get_PtrElementPoly();
-  atd::protocol::VARIABLE* get_PtrDisplayElement();
+  atd::protocol::VARIABLE* get_PtrElementDisplay();
+  std::pair<float, bool> get_CalibVariables(const std::string&);
+  void try_register_Calibration(const std::string&, float&, float, float,
+                                float);
 
  private:
   Proto_Messages<atd::protocol::MONITOR_MSG> log_frame_;
   LCM_Proxy<Proto_Messages<atd::protocol::MONITOR_MSG>> log_publisher_{
       LCM_MODE::SENDER, "PlanningLog"};
+
+  Proto_Messages<atd::protocol::DISPLAY_CALIBRATION> cal_var_;
+  LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>> calib_listener_{
+      LCM_MODE::READER, "PlanningCalib"};
+
+  class CalibrationVariable {
+   public:
+    CalibrationVariable(const std::string& str, float& var, float max,
+                        float min, float init)
+        : name_(str), var_(var), max_(max), min_(min), init_(init) {}
+    std::string name_;
+    float& var_;
+    float max_;
+    float min_;
+    float init_;
+  };
+
+  std::map<std::string, CalibrationVariable> calib_container_;
 
  private:
   DebugLogging();
@@ -98,5 +119,12 @@ class Writer {
       ->get_PtrElementPoly()
 #define GET_DISPLAY_POINTER                                       \
   atd::utility::Singleton::instance<atd::utility::DebugLogging>() \
-      ->get_PtrDisplayElement()
-
+      ->get_PtrElementDisplay()
+#define REGISTER_FLOAT_AS_CALIBRATION(variable, upper, lower, init)          \
+  static float variable = init;                                              \
+  static bool flag_calibration_run_once_##variable = true;                   \
+  if (flag_calibration_run_once_##variable) {                                \
+    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
+        ->try_register_Calibration(#variable, variable, upper, lower, init); \
+    flag_calibration_run_once_##variable = false;                            \
+  }

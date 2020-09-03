@@ -104,9 +104,12 @@ class DataMonitor {
   }
 
  public:
-  const std::string name_;
+  const std::string get_Name() const { return name_; }
+  void Disable() { enable_ = false; }
+  void Enable() { enable_ = true; }
 
  private:
+  const std::string name_;
   bool enable_ = true;
   int sample_range = monitor_max_buffer;
   struct line_frame {

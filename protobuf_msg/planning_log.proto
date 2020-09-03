@@ -34,7 +34,7 @@ message DISPLAY_BOX {
   string discription = 6;
 }
 
-message OPENGL_ELEMENT{
+message OPENGL_ELEMENT {
   repeated DISPLAY_POINT point_set = 1;
   repeated DISPLAY_PLOYNOMIAL ploy_set = 2;
   repeated DISPLAY_LINE line_set = 3;
@@ -68,9 +68,22 @@ message DISPLAY_CONTENT {
   repeated VARIABLE content = 1;
 }
 
+message CALIBRATION_VARIABLE {
+  string name = 1;
+  string data = 2;
+  string data_upper_bound = 3;
+  string data_lower_bound = 4;
+  string data_init = 5;
+}
+
+message DISPLAY_CALIBRATION {
+  repeated CALIBRATION_VARIABLE variables = 1;
+}
+
 message MONITOR_MSG {
   FRAME_HEADER title = 1;
   LOG_CONTENT log = 2;
   OPENGL_ELEMENT gl_element = 3;
   DISPLAY_CONTENT display_element = 4;
+  DISPLAY_CALIBRATION variables = 5;
 }

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "data_monitor.hpp"
+#include "modules/common/tools/logging/debug_logging.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
 #include "modules/neo_adp/imgui_module/imgui.h"
@@ -11,6 +12,7 @@ struct Switches4SubWindows {
   bool show_demo_window = false;
   bool show_log_window = false;
   bool show_data_monitor = false;
+  bool show_calibration_console = false;
 } switches;
 
 static void HelpMarker(const char* desc) {
@@ -37,6 +39,7 @@ static void Show_Custom_Window() {
                                                 // open/close state
   ImGui::Checkbox("Log Info", &switches.show_log_window);
   ImGui::Checkbox("Data Monitor", &switches.show_data_monitor);
+  ImGui::Checkbox("Calibration Console", &switches.show_calibration_console);
 
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -97,8 +100,16 @@ static void Show_DataMonitor(bool* swth) {
     static int monitor_counter = 0;
     monitor_set.push_back(new DataMonitor(std::to_string(++monitor_counter)));
   }
+  ImGui::SameLine();
+  static bool enable_all = true;
+  ImGui::Checkbox("Enable All", &enable_all);
 
   ImGui::Separator();
+  if (!enable_all) {
+    for (auto single_monitor : monitor_set) {
+      single_monitor->Disable();
+    }
+  }
   for (auto single_monitor : monitor_set) {
     single_monitor->Render();
   }
@@ -114,6 +125,47 @@ static void Show_DataMonitor(bool* swth) {
   ImGui::End();
 }
 
+static void Show_Calibration_Console(bool* swth) {
+  if (!(*swth)) return;
+
+  static std::map<std::string, DataDispatcher::CalibrationVariable> calib_info;
+  atd::utility::Singleton::instance<DataDispatcher>()->get_CalibInfo(
+      calib_info);
+
+  ImGui::Begin("Calibration Console", swth);
+
+  if (calib_info.empty()) {
+    ImGui::Text("No Calibration Variable Detected");
+  } else {
+    for (auto& calib_var : calib_info) {
+      std::string button_name = "Input ";
+      button_name.append(calib_var.second.name_);
+      button_name.append(" by keyboard");
+      bool focus = ImGui::Button(button_name.c_str());
+      ImGui::SameLine();
+
+      std::string reset_botton_name = "Reset ";
+      reset_botton_name.append(calib_var.second.name_);
+      if (ImGui::Button(reset_botton_name.c_str())){
+        calib_var.second.var_ = calib_var.second.init_;
+      }
+
+      std::string slider_name;
+      slider_name.append(std::to_string(calib_var.second.var_));
+      if (focus) ImGui::SetKeyboardFocusHere();
+      ImGui::SliderFloat(calib_var.second.name_.c_str(), &calib_var.second.var_,
+                         calib_var.second.min_, calib_var.second.max_);
+
+      atd::utility::Singleton::instance<DataDispatcher>()->set_CalibrationInfo(
+          calib_var.second.name_, calib_var.second.var_);
+      ImGui::Separator();
+    }
+  }
+
+  if (ImGui::Button("Close")) switches.show_calibration_console = false;
+  ImGui::End();
+}
+
 static void Imgui_Drawing() {
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL3_NewFrame();
@@ -125,6 +177,7 @@ static void Imgui_Drawing() {
     ImGui::ShowDemoWindow(&switches.show_demo_window);
   Show_Log_Window(&switches.show_log_window);
   Show_DataMonitor(&switches.show_data_monitor);
+  Show_Calibration_Console(&switches.show_calibration_console);
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
