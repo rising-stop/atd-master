@@ -114,22 +114,37 @@ template <typename MSG_TYPE>
 void LCM_Proxy<MSG_TYPE>::receiver_spin() {
   ptr_lcm_->subscribe(channel_, &LCM_Proxy::catch_LCM_buffers, this);
   while (!flag_shutdown_spin_) {
-    ptr_lcm_->handle();
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    if (ptr_lcm_->good()) {
+      ptr_lcm_->handle();
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    } else {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      if (init()) {
+        ptr_lcm_->subscribe(channel_, &LCM_Proxy::catch_LCM_buffers, this);
+      }
+    }
   }
+}
+
+template <typename MSG_TYPE>
+bool LCM_Proxy<MSG_TYPE>::init() {
+  if (ptr_lcm_) {
+    delete ptr_lcm_;
+  }
+  std::string lcm_init_param = "udpm://";
+  const char* udpm = "239.255.76.67:7667";
+  lcm_init_param.append(udpm);
+  lcm_init_param.append("?ttl=");
+  lcm_init_param.append(std::to_string(ttl_));
+  ptr_lcm_ = new lcm::LCM(lcm_init_param);
+  return ptr_lcm_->good();
 }
 
 template <typename MSG_TYPE>
 LCM_Proxy<MSG_TYPE>::LCM_Proxy(LCM_MODE mode, const std::string& channel,
                                int ttl, int buffer_size)
-    : mode_(mode), channel_(channel), buffer_size_(buffer_size) {
-  std::string lcm_init_param = "udpm://";
-  const char* udpm = "239.255.76.67:7667";
-  lcm_init_param.append(udpm);
-  lcm_init_param.append("?ttl=");
-  lcm_init_param.append(std::to_string(ttl));
-  ptr_lcm_ = new lcm::LCM(lcm_init_param);
-
+    : mode_(mode), channel_(channel), ttl_(ttl), buffer_size_(buffer_size) {
+  init();
   switch (mode_) {
     case SENDER:
       break;

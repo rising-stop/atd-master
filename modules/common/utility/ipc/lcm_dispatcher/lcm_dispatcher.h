@@ -56,6 +56,7 @@ class LCM_Proxy {
   bool subscribe(BASE_MSG_TYPE&);
 
  protected:
+  bool init();
   bool is_Good() const;
   void catch_LCM_buffers(const lcm::ReceiveBuffer*, const std::string&);
   void receiver_spin();
@@ -70,6 +71,7 @@ class LCM_Proxy {
   std::thread* spin_handler_ = nullptr;
   ThreadSafe_Deque<BASE_MSG_TYPE> buffers_;
   const int buffer_size_;
+  const int ttl_;
 
  public:
   LCM_Proxy() = delete;
