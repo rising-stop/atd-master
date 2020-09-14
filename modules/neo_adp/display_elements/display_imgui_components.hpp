@@ -105,9 +105,18 @@ static void Show_DataMonitor(bool* swth) {
   ImGui::Checkbox("Enable All", &enable_all);
 
   ImGui::Separator();
+  static bool enable_once_flag = false;
   if (!enable_all) {
     for (auto single_monitor : monitor_set) {
       single_monitor->Disable();
+    }
+    enable_once_flag = true;
+  } else {
+    if (enable_once_flag) {
+      for (auto single_monitor : monitor_set) {
+        single_monitor->Enable();
+      }
+      enable_once_flag = false;
     }
   }
   for (auto single_monitor : monitor_set) {
@@ -134,30 +143,63 @@ static void Show_Calibration_Console(bool* swth) {
 
   ImGui::Begin("Calibration Console", swth);
 
+  static std::map<std::string, bool> dynamic_calib_list;
+  for (auto single_calib_info : calib_info) {
+    dynamic_calib_list.insert({single_calib_info.first, false});
+  }
+  auto itr_dyn_cal_list = dynamic_calib_list.begin();
+  while (itr_dyn_cal_list != dynamic_calib_list.end()) {
+    if (calib_info.find(itr_dyn_cal_list->first) == calib_info.end()) {
+      itr_dyn_cal_list = dynamic_calib_list.erase(itr_dyn_cal_list);
+    } else {
+      itr_dyn_cal_list++;
+    }
+  }
+
+  if (ImGui::Button("Calibration_Switch")) ImGui::OpenPopup("Calibration_List");
+  if (ImGui::BeginPopup("Calibration_List")) {
+    for (auto& menu_item : dynamic_calib_list)
+      ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second));
+    ImGui::EndPopup();
+  }
+
+  ImGui::SameLine();
+  static bool calib_enable = false;
+  ImGui::Checkbox("Enable", &calib_enable);
+  ImGui::Separator();
+
   if (calib_info.empty()) {
     ImGui::Text("No Calibration Variable Detected");
   } else {
-    for (auto& calib_var : calib_info) {
+    for (auto calib_name : dynamic_calib_list) {
+      if (!calib_name.second) {
+        continue;
+      }
+      auto calib_var = calib_info.find(calib_name.first);
       std::string button_name = "Input ";
-      button_name.append(calib_var.second.name_);
+      button_name.append(calib_var->second.name_);
       button_name.append(" by keyboard");
       bool focus = ImGui::Button(button_name.c_str());
       ImGui::SameLine();
 
       std::string reset_botton_name = "Reset ";
-      reset_botton_name.append(calib_var.second.name_);
-      if (ImGui::Button(reset_botton_name.c_str())){
-        calib_var.second.var_ = calib_var.second.init_;
+      reset_botton_name.append(calib_var->second.name_);
+      if (ImGui::Button(reset_botton_name.c_str())) {
+        calib_var->second.var_ = calib_var->second.init_;
       }
 
       std::string slider_name;
-      slider_name.append(std::to_string(calib_var.second.var_));
+      slider_name.append(std::to_string(calib_var->second.var_));
       if (focus) ImGui::SetKeyboardFocusHere();
-      ImGui::SliderFloat(calib_var.second.name_.c_str(), &calib_var.second.var_,
-                         calib_var.second.min_, calib_var.second.max_);
+      ImGui::SliderFloat(calib_var->second.name_.c_str(),
+                         &calib_var->second.var_, calib_var->second.min_,
+                         calib_var->second.max_);
+      if (calib_enable) {
+        atd::utility::Singleton::instance<DataDispatcher>()
+            ->set_CalibrationInfo(calib_var->second.name_,
+                                  calib_var->second.var_);
+      }
 
-      atd::utility::Singleton::instance<DataDispatcher>()->set_CalibrationInfo(
-          calib_var.second.name_, calib_var.second.var_);
       ImGui::Separator();
     }
   }

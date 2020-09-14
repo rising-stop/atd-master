@@ -11,7 +11,8 @@
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
 #include "modules/neo_adp/imgui_module/imgui.h"
 
-constexpr int monitor_max_buffer = 600; /* time_buffer  (s) */
+constexpr int monitor_max_buffer =
+    DataDispatcher_MaxBufferSize; /* time_buffer  (s) */
 constexpr int monitor_min_buffer = 10;
 
 class DataMonitor {
@@ -98,7 +99,8 @@ class DataMonitor {
         line_data.second.data.push_back(std::stof(frame_[line_data.first]));
       } catch (...) {
         line_data.second.data.push_back(0.0f);
-        std::cerr << "update_frame(): stof throw a exception" << std::endl;
+        std::cerr << "update_frame(): stof throw a exception, error input: "
+                  << frame_[line_data.first] << ", name: " << line_data.first << std::endl;
       }
     }
   }

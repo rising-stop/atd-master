@@ -8,7 +8,7 @@
 using namespace atd::utility;
 using namespace atd::protocol;
 
-constexpr int DataDispatcher_MaxBufferSize = 600;
+constexpr int DataDispatcher_MaxBufferSize = 1800;
 
 class DataDispatcher final : public Singleton {
   friend class Singleton;
