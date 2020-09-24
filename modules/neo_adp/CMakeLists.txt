@@ -10,6 +10,9 @@ file(GLOB_RECURSE PROJECT_HEADERS
   "imgui_module/*.h"
   "imgui-opengl3/*.h"
   "libs/*.h"
+  "imgui_implement/*.h"
+  "opengl_implement/*.h"
+  "data_service/*.h"
   "../../protobuf_msg/*.h")
 #set source files:*.cpp, *.c, *.cc in this project
 file(GLOB_RECURSE PROJECT_SOURCES
@@ -18,6 +21,9 @@ file(GLOB_RECURSE PROJECT_SOURCES
   "libs/*.c"
   "display_elements/*.hpp"
   "display_elements/*.cc"
+  "imgui_implement/*.cc"
+  "opengl_implement/*.cc"
+  "data_service/*.cc"
   "../../protobuf_msg/*.cc"
   "main.cc")
 #set library files: *.lib in this project

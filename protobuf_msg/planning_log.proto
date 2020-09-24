@@ -47,7 +47,22 @@ enum SECURITY_INFO {
   ERROR = 2;
 }
 
-message VARIABLE {
+message FLOAT_VAR {
+  string name = 1;
+  float data = 2;
+}
+
+message INT_VAR {
+  string name = 1;
+  float data = 2;
+}
+
+message UINT_VAR {
+  string name = 1;
+  float data = 2;
+}
+
+message NORMAL_VAR {
   string name = 1;
   string data = 2;
 }
@@ -57,7 +72,10 @@ message FRAME_CONTENT {
   uint64 line_no = 2;
   string file_name = 3;
   repeated string str_msg = 4;
-  repeated VARIABLE variables = 5;
+  repeated FLOAT_VAR float_vars = 5;
+  repeated INT_VAR int_vars = 6;
+  repeated UINT_VAR uint_vars = 7;
+  repeated NORMAL_VAR normal_vars = 8;
 }
 
 message LOG_CONTENT {
@@ -65,10 +83,38 @@ message LOG_CONTENT {
 }
 
 message DISPLAY_CONTENT {
-  repeated VARIABLE content = 1;
+  repeated string str_msg = 1;
+  repeated FLOAT_VAR float_vars = 2;
+  repeated INT_VAR int_vars = 3;
+  repeated UINT_VAR uint_vars = 4;
+  repeated NORMAL_VAR normal_vars = 5;
 }
 
-message CALIBRATION_VARIABLE {
+message CALIBRATION_FLOAT {
+  string name = 1;
+  float data = 2;
+  float data_upper_bound = 3;
+  float data_lower_bound = 4;
+  float data_init = 5;
+}
+
+message CALIBRATION_INT {
+  string name = 1;
+  int32 data = 2;
+  int32 data_upper_bound = 3;
+  int32 data_lower_bound = 4;
+  int32 data_init = 5;
+}
+
+message CALIBRATION_UINT {
+  string name = 1;
+  uint32 data = 2;
+  uint32 data_upper_bound = 3;
+  uint32 data_lower_bound = 4;
+  uint32 data_init = 5;
+}
+
+message CALIBRATION_NORMAL {
   string name = 1;
   string data = 2;
   string data_upper_bound = 3;
@@ -77,7 +123,10 @@ message CALIBRATION_VARIABLE {
 }
 
 message DISPLAY_CALIBRATION {
-  repeated CALIBRATION_VARIABLE variables = 1;
+  repeated CALIBRATION_FLOAT calib_float = 1;
+  repeated CALIBRATION_INT calib_int = 2;
+  repeated CALIBRATION_UINT calib_uint = 3;
+  repeated CALIBRATION_NORMAL calib_normal = 4;
 }
 
 message MONITOR_MSG {
@@ -85,5 +134,5 @@ message MONITOR_MSG {
   LOG_CONTENT log = 2;
   OPENGL_ELEMENT gl_element = 3;
   DISPLAY_CONTENT display_element = 4;
-  DISPLAY_CALIBRATION variables = 5;
+  DISPLAY_CALIBRATION calibrations = 5;
 }

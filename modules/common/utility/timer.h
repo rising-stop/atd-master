@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdlib.h>
+#include <time.h>
+
 #include <chrono>
 
 #include "thread_safe.h"
@@ -43,6 +46,11 @@ class Runtime_Calculator : public Singleton {
   }
 
   time_stick Now() { return time_point_cast<Duration>(system_clock::now()); }
+
+  float get_Rand() {
+    srand(static_cast<unsigned int>(time(NULL)));
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX + 1);
+  }
 
  private:
   ThreadSafe_HashMap<std::string, time_stick> time_probe_;

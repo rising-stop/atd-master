@@ -1,21 +1,25 @@
-#pragma once
+#include "imgui_implement.h"
 
-#include <vector>
+Switches4SubWindows ImGui_Components::switches;
 
-#include "data_monitor.hpp"
-#include "modules/common/tools/logging/debug_logging.h"
-#include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
-#include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
-#include "modules/neo_adp/imgui_module/imgui.h"
+void ImGui_Components::Imgui_Drawing() {
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
 
-struct Switches4SubWindows {
-  bool show_demo_window = false;
-  bool show_log_window = false;
-  bool show_data_monitor = false;
-  bool show_calibration_console = false;
-} switches;
+  Show_Custom_Window();
+  if (switches.show_demo_window)
+    ImGui::ShowDemoWindow(&switches.show_demo_window);
+  Show_Log_Window(&switches.show_log_window);
+  Show_DataMonitor(&switches.show_data_monitor);
+  Show_Calibration_Console(&switches.show_calibration_console);
 
-static void HelpMarker(const char* desc) {
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ImGui_Components::HelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered()) {
     ImGui::BeginTooltip();
@@ -26,7 +30,7 @@ static void HelpMarker(const char* desc) {
   }
 }
 
-static void Show_Custom_Window() {
+void ImGui_Components::Show_Custom_Window() {
   static float f = 0.0f;
   static int counter = 0;
 
@@ -46,7 +50,7 @@ static void Show_Custom_Window() {
   ImGui::End();
 }
 
-static void Show_Log_Window(bool* swth) {
+void ImGui_Components::Show_Log_Window(bool* swth) {
   if (!(*swth)) return;
   static std::string log_content;
   static ImVec4 text_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -90,7 +94,7 @@ static void Show_Log_Window(bool* swth) {
   ImGui::End();
 }
 
-static void Show_DataMonitor(bool* swth) {
+void ImGui_Components::Show_DataMonitor(bool* swth) {
   if (!(*swth)) return;
 
   static std::vector<DataMonitor*> monitor_set;
@@ -134,7 +138,7 @@ static void Show_DataMonitor(bool* swth) {
   ImGui::End();
 }
 
-static void Show_Calibration_Console(bool* swth) {
+void ImGui_Components::Show_Calibration_Console(bool* swth) {
   if (!(*swth)) return;
 
   static std::map<std::string, DataDispatcher::CalibrationVariable> calib_info;
@@ -206,21 +210,4 @@ static void Show_Calibration_Console(bool* swth) {
 
   if (ImGui::Button("Close")) switches.show_calibration_console = false;
   ImGui::End();
-}
-
-static void Imgui_Drawing() {
-  // Start the Dear ImGui frame
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
-  Show_Custom_Window();
-  if (switches.show_demo_window)
-    ImGui::ShowDemoWindow(&switches.show_demo_window);
-  Show_Log_Window(&switches.show_log_window);
-  Show_DataMonitor(&switches.show_data_monitor);
-  Show_Calibration_Console(&switches.show_calibration_console);
-
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

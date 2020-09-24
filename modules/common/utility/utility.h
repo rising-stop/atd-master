@@ -116,9 +116,7 @@ class Factory {
                                                  Args &&... args) {
     auto result = create_ObjectOrNull(id, args...);
     if (!result) {
-      std::stringstream sstm;
-      sstm << "not found " << id << " in factory";
-      throw CommonException();
+      CUSTOM_EXCEPTION("not found ", id, " in factory");
     }
     return result;
   }
