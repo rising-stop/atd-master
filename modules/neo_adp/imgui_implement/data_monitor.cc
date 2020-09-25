@@ -2,135 +2,162 @@
 
 #include "modules/common/common_header.h"
 
-void DataObserver::Render() override {}
+void DataObserver::Render() override {
+  std::string range_slider_name{"Range: "};
+  range_slider_name.append(id_);
+  ImGui::SliderInt(range_slider_name.c_str(), &sample_range_,
+                   DataMonitor_Min_BufferSize, DataMonitor_Max_BufferSize);
+  std::string focus_slider_name{"Focus: "};
+  focus_slider_name.append(id_);
+  ImGui::SliderInt(focus_slider_name.c_str(), &sample_focus_, sample_range_,
+                   DataMonitor_Max_BufferSize);
+
+  std::string botton_name{"Sheet: "};
+  botton_name.append(id_);
+
+  if (ImGui::Button(botton_name.c_str())) ImGui::OpenPopup(id_.c_str());
+
+  if (ImGui::BeginPopup(name_.c_str())) {
+    menu_handler();
+    ImGui::EndPopup();
+  }
+  plot_render();
+  ImGui::Separator();
+}
+
+void DataObserver::menu_handler() {
+  for (const auto& signal : data_list_) {
+    if (ob_list_.insert(std::make_pair(signal.first, menu_info())).second) {
+      register_signal(signal.first);
+    }
+  }
+
+  for (auto& menu_item : ob_list_) {
+    bool detach_detect = menu_item.second.flag_activate_;
+    ImGui::MenuItem(menu_item.first.c_str(), "",
+                    &(menu_item.second.flag_activate_));
+    if (detach_detect && !menu_item.second.flag_activate_) {
+      unregister_signal(signal.first);
+    }
+    if (data_list_.find(menu_item.first) == data_list_.cend()) {
+      menu_item.second.info_ = "offline";
+    } else {
+      menu_item.second.info_ =
+          std::to_string(data_list_.at(menu_item.first).data.back());
+    }
+  }
+}
+
+void DataObserver::plot_render() {
+  std::vector<ImU32> line_colors;
+  std::vector<std::string> overlay_text;
+
+  float v_min = FLT_MAX;
+  float v_max = -FLT_MAX;
+
+  for (auto& signal : ob_list_) {
+    if (!signal.second.flag_activate_) {
+      continue;
+    }
+    ImGui::ColorEdit4(signal.first.c_str(),
+                      (float*)&color_dispatcher_[signal.second]);
+    ImGui::SameLine();
+    ImGui::Text(signal.second.info_);
+    line_colors.push_back(
+        ImGui::ColorConvertFloat4ToU32(color_dispatcher_.at(signal.first)));
+    overlay_text.push_back(signal.first);
+    v_min = std::fmin(v_min, data_list_[signal.first].lower_bound);
+    v_max = std::fmax(v_max, data_list_[signal.first].upper_bound);
+  }
+  ImGui::MulitPlot(
+      name_.c_str(),
+      [&](const std::string name, int idx) -> float {
+        return data_list_[name].data.at(DataMonitor_Max_BufferSize -
+                                        sample_range_ + idx);
+      },
+      sample_range_, 0, line_colors, overlay_text, v_min, v_max,
+      ImVec2(0, 160));
+}
 
 const int DataObserver::get_ID() { return id_; }
 
-void DataObserver::Disable() { enable_ = false; }
-
-void DataObserver::Enable() { enable_ = true; }
-
 bool DataObserver::register_signal(const string& id) {
-  auto citr_id = data_list_.find(id);
-  if (citr_id == data_list_.cend()) {
-    return false;
-  }
-  ob_list_.insert(id);
   if (signal_counter_ < default_color_set_num) {
     ImVec4 line_color = default_color_list[signal_counter_];
-    color_dispatcher_.insert{std::make_pair(id, line_color)};
+    if (!color_dispatcher_.insert(std::make_pair(id, line_color)).second) {
+      return false;
+    }
   } else {
     ImVec4 line_color = {TIMER->get_Rand(), TIMER->get_Rand(),
                          TIMER->get_Rand(), 0.7f};
-    color_dispatcher_.insert{std::make_pair(id, line_color)};
+    if (!color_dispatcher_.insert(std::make_pair(id, line_color)).second) {
+      return false;
+    }
   }
   signal_counter_++;
+  return true;
 }
 
 bool DataObserver::unregister_signal(const string& id) {
-  auto ob_id = ob_list_.find(id);
-  if (ob_id == ob_list_.cend()) {
-    return false;
-  }
-  ob_list_.erase(ob_id);
-
   auto color_id = color_dispatcher_.find(id);
   if (color_id == color_dispatcher_.cend()) {
     return false;
   }
   color_dispatcher_.erase(color_id);
+  return true;
 }
 
 DataObserver::DataObserver(const int id,
                            const std::map<std::string, line_frame>& data)
     : id_(id), data_list_(data) {}
 
+/**
+ * ********************************************
+ * @def  Class DataMonitor
+ * ********************************************
+ */
+
 void DataMonitor::Render() {
-  std::string slider_name{"Range: "};
-  slider_name.append(name_);
-  ImGui::SliderInt(slider_name.c_str(), &sample_range, monitor_min_buffer,
-                   monitor_max_buffer);
-  std::string botton_name{"Sheet: "};
-  botton_name.append(name_);
-
-  if (ImGui::Button(botton_name.c_str())) ImGui::OpenPopup(name_.c_str());
-
+  if (ImGui::Button("Monitor - Add on")) {
+    observer_set_.push_back(
+        new DataObserver(++monitor_counter_, data_repository_));
+  }
   ImGui::SameLine();
-  std::string check_box_name{"Enable Sheet "};
-  check_box_name.append(name_);
-  ImGui::Checkbox(check_box_name.c_str(), &enable_);
-  if (enable_) {
-    update_frame();
-  }
-  if (ImGui::BeginPopup(name_.c_str())) {
-    for (auto& menu_item : menu_content_)
-      ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second.enable));
-    ImGui::EndPopup();
-  }
+  ImGui::Checkbox("Enable All", &enable_all_);
 
-  std::vector<ImU32> line_colors;
-  std::vector<std::string> overlay_text;
-
-  int line_index = 0;
-  for (auto& line : menu_content_) {
-    if (!line.second.enable) {
-      continue;
-    }
-    ImGui::ColorEdit4(line.first.c_str(), (float*)&line.second.line_color);
-    ImGui::SameLine();
-    ImGui::Text(std::to_string(line.second.data.back()).c_str());
-    line_colors.push_back(
-        ImGui::ColorConvertFloat4ToU32(line.second.line_color));
-    overlay_text.push_back(line.first);
-  }
-  ImGui::MulitPlot(
-      name_.c_str(),
-      [&](const std::string name, int idx) -> float {
-        int data_size = menu_content_[name].data.size();
-        return menu_content_[name].data.at(data_size - sample_range + idx);
-      },
-      sample_range, 0, line_colors, overlay_text, -1.0f, 1.0f, ImVec2(0, 160));
   ImGui::Separator();
-}
 
-void DataMonitor::update_frame() {
-  if (!atd::utility::Singleton::instance<DataDispatcher>()->get_LatestFrame(
-          frame_)) {
+  if (enable_all) {
+    update_data_base();
   }
 
-  for (auto item_pos : frame_) {
-    menu_content_.insert({item_pos.first, line_frame()});
+  for (auto single_monitor : observer_set_) {
+    single_monitor->Render();
   }
 
-  std::set<std::string> selected_set;
-  for (auto& menu_item : menu_content_) {
-    if (menu_item.second.enable) {
-      selected_set.insert(menu_item.first);
-    }
-  }
-
-  auto itr_data = menu_content_.begin();
-  while (itr_data != menu_content_.end()) {
-    if (frame_.find(itr_data->first) == frame_.end()) {
-      itr_data = menu_content_.erase(itr_data);
-    } else {
-      itr_data++;
-    }
-  }
-
-  for (auto& line_data : menu_content_) {
-    line_data.second.data.pop_front();
-    try {
-      line_data.second.data.push_back(std::stof(frame_[line_data.first]));
-    } catch (...) {
-      line_data.second.data.push_back(0.0f);
-      std::cerr << "update_frame(): stof throw a exception, error input: "
-                << frame_[line_data.first] << ", name: " << line_data.first
-                << std::endl;
+  if (ImGui::Button("Monitor - Remove")) {
+    if (observer_set_.size()) {
+      delete observer_set_.back();
+      observer_set_.pop_back();
     }
   }
 }
 
-const std::string DataMonitor::get_Name() const { return name_; }
-void DataMonitor::Disable() { enable_ = false; }
-void DataMonitor::Enable() { enable_ = true; }
+bool DataMonitor::update_data_base() {
+  std::map<std::string, float> frame_data;
+  if (!atd::utility::Singleton::instance<DataDispatcher>()
+           ->get_DataMonitor_LatestFrame(frame_data)) {
+    return false;
+  }
+  for (auto signal : frame_data) {
+    auto res_ins =
+        data_repository_.insert(std::make_pair(signal.first, line_frame()));
+    data_repository[signal.first].data.pop_front();
+    data_repository[signal.first].data.push_back(signal.second);
+    data_repository[signal.first].upper_bound =
+        std::fmax(data_repository[signal.first].upper_bound, signal.second);
+    data_repository[signal.first].lower_bound =
+        std::fmin(data_repository[signal.first].lower_bound, signal.second);
+  }
+  return true;
+}

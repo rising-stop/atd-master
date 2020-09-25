@@ -18,17 +18,7 @@ class DataObserver : public ImGui_Components {
 
   const int get_ID();
 
-  /**
-   * @brief stop update date from DataMonitor
-   */
-  void Disable();
-
-  /**
-   * @brief resume update date from DataMonitor
-   */
-  void Enable();
-
- protected:
+ private:
   /**
    * @brief add a signal
    */
@@ -38,6 +28,16 @@ class DataObserver : public ImGui_Components {
    * @brief remove a signal
    */
   bool unregister_signal(const string&);
+
+  /**
+   * @brief handle selected menu
+   */
+  void menu_handler();
+
+  /**
+   * @brief updating plot data according to ob_list_
+   */
+  void plot_render();
 
  private:
   /**
@@ -50,14 +50,25 @@ class DataObserver : public ImGui_Components {
   /**
    * @brief user interested signal list, are selected by user
    */
-  std::set<std::string> ob_list_;
+  struct menu_info {
+    bool flag_activate_ = false;
+    std::string info_ = "";
+  };
+  std::map<std::string, menu_info> ob_list_;
+
   /**
    * @brief the color signal curve used
    */
   std::map<std::string, ImVec4> color_dispatcher_;
 
-  bool enable_ = true;
   int signal_counter_ = 0;
+
+  /**
+   * @brief adjustable slider parameter calculation, decide the range of
+   * data focus
+   */
+  int sample_range_ = DataMonitor_Max_BufferSize;
+  int sample_focus_ = DataMonitor_Max_BufferSize;
 
  private:
   static const int default_color_set_num = 5;
@@ -94,7 +105,7 @@ class DataMonitor : public ImGui_Components {
   /**
    * @brief receiving new data
    */
-  void update_data_base();
+  bool update_data_base();
 
  private:
   struct line_frame {
@@ -104,8 +115,12 @@ class DataMonitor : public ImGui_Components {
     float lower_bound = 0.0f;
   };
 
-  std::set<std::string> signal_list_;
   std::map<std::string, line_frame> data_repository_;
+
+  std::vector<DataObserver*> observer_set_;
+
+  uint32_t monitor_counter_ = 0;
+  bool enable_all_ = true;
 
  public:
   DataMonitor() = default;

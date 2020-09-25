@@ -96,44 +96,10 @@ void ImGui_Components::Show_Log_Window(bool* swth) {
 
 void ImGui_Components::Show_DataMonitor(bool* swth) {
   if (!(*swth)) return;
-
-  static std::vector<DataMonitor*> monitor_set;
-
+  static DataMonitor monitor_;
   ImGui::Begin("Data Monitor", swth);
-  if (ImGui::Button("Monitor - Add on")) {
-    static int monitor_counter = 0;
-    monitor_set.push_back(new DataMonitor(std::to_string(++monitor_counter)));
-  }
-  ImGui::SameLine();
-  static bool enable_all = true;
-  ImGui::Checkbox("Enable All", &enable_all);
-
   ImGui::Separator();
-  static bool enable_once_flag = false;
-  if (!enable_all) {
-    for (auto single_monitor : monitor_set) {
-      single_monitor->Disable();
-    }
-    enable_once_flag = true;
-  } else {
-    if (enable_once_flag) {
-      for (auto single_monitor : monitor_set) {
-        single_monitor->Enable();
-      }
-      enable_once_flag = false;
-    }
-  }
-  for (auto single_monitor : monitor_set) {
-    single_monitor->Render();
-  }
-
-  if (ImGui::Button("Monitor - Remove")) {
-    if (monitor_set.size()) {
-      delete monitor_set.back();
-      monitor_set.pop_back();
-    }
-  }
-
+  monitor_.Render();
   if (ImGui::Button("Close")) switches.show_data_monitor = false;
   ImGui::End();
 }

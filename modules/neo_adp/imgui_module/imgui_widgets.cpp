@@ -7142,32 +7142,32 @@ int ImGui::MulitPlotEx(
 
   // Determine scale from values if not specified
   // if (scale_min == FLT_MAX || scale_max == FLT_MAX) {
-  float v_min = FLT_MAX;
-  float v_max = -FLT_MAX;
-  for (int index = 0; index < data_set_num; index++) {
-    for (int i = 0; i < values_count; i++) {
-      const float v = values_getter(overlay_text.at(index), i);
-      if (v != v)  // Ignore NaN values
-        continue;
-      v_min = ImMin(v_min, v);
-      v_max = ImMax(v_max, v);
-    }
-  }
+  // float v_min = FLT_MAX;
+  // float v_max = -FLT_MAX;
+  // for (int index = 0; index < data_set_num; index++) {
+  //   for (int i = 0; i < values_count; i++) {
+  //     const float v = values_getter(overlay_text.at(index), i);
+  //     if (v != v)  // Ignore NaN values
+  //       continue;
+  //     v_min = ImMin(v_min, v);
+  //     v_max = ImMax(v_max, v);
+  //   }
+  // }
   const float min_plot_size = 0.01f;
   float scale_top =
-      (v_max + v_min) / 2.0f + std::max(min_plot_size, (v_max - v_min) * 0.8f);
+      (scale_max + scale_min) / 2.0f + std::max(min_plot_size, (scale_max - scale_min) * 0.8f);
   float scale_bottom =
-      (v_max + v_min) / 2.0f - std::max(min_plot_size, (v_max - v_min) * 0.8f);
-  if (scale_max > 0.0f) {
-    if (scale_max < min_plot_size) {
-      scale_max = min_plot_size;
-    }
-  }
-  if (scale_min < 0.0f) {
-    if (scale_min > -min_plot_size) {
-      scale_min = -min_plot_size;
-    }
-  }
+      (scale_max + scale_min) / 2.0f - std::max(min_plot_size, (scale_max - scale_min) * 0.8f);
+  // if (scale_max > 0.0f) {
+  //   if (scale_max < min_plot_size) {
+  //     scale_max = min_plot_size;
+  //   }
+  // }
+  // if (scale_min < 0.0f) {
+  //   if (scale_min > -min_plot_size) {
+  //     scale_min = -min_plot_size;
+  //   }
+  // }
   // if (scale_min == FLT_MAX) scale_min = v_min;
   // if (scale_max == FLT_MAX) scale_max = v_max;
   // }

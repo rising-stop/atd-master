@@ -128,12 +128,12 @@ bool DataDispatcher::get_BasicDisplayInfo(std::string& info) const {
 }
 
 bool DataDispatcher::get_DataMonitor_LatestFrame(
-    std::map<std::string, std::string>& umap) const {
+    std::map<std::string, float>& umap) const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_);
   if (!msg_validity_checking()) {
     return false;
   }
-  umap = variables_;
+  umap = data_monitor_summary_;
   return true;
 }
 

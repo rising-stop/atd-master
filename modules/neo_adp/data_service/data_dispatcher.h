@@ -25,7 +25,7 @@ class DataDispatcher final : public Singleton {
   bool get_BasicDisplayInfo(std::string& info) const;
 
   bool get_DataMonitor_LatestFrame(
-      std::map<std::string, std::string>& umap) const;
+      std::map<std::string, float>& umap) const;
 
   bool get_CalibInfo_As_Float(
       std::map<std::string, CalibrationVariable<float>>& umap) const;
