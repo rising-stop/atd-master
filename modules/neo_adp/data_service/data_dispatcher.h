@@ -18,14 +18,19 @@ class DataDispatcher final : public Singleton {
    */
   void spin();
 
-  bool get_LogFrame(std::string& log) const;
+  bool get_LatestFrame(MONITOR_MSG& frame) const;
 
-  bool get_TotalLogFrame(std::string& log) const;
+  bool get_LatestHeader(FRAME_HEADER& frame) const;
 
-  bool get_BasicDisplayInfo(std::string& info) const;
+  bool get_LatestLogInfo(LOG_CONTENT& frame) const;
 
-  bool get_DataMonitor_LatestFrame(
-      std::map<std::string, float>& umap) const;
+  bool get_LatestGLElement(OPENGL_ELEMENT& frame) const;
+
+  bool get_LatestDisplayContent(DISPLAY_CONTENT& frame) const;
+
+  bool get_LatestDisplayCalib(DISPLAY_CALIBRATION& frame) const;
+
+  bool get_DataMonitor_LatestFrame(std::map<std::string, float>& umap) const;
 
   bool get_CalibInfo_As_Float(
       std::map<std::string, CalibrationVariable<float>>& umap) const;
@@ -34,13 +39,11 @@ class DataDispatcher final : public Singleton {
   bool get_CalibInfo_As_UInt(
       std::map<std::string, CalibrationVariable<uint32_t>>& umap) const;
 
-  bool set_CalibrationInfo_As_Float(const std::string name, float var);
-  bool set_CalibrationInfo_As_Int(const std::string name, int var);
-  bool set_CalibrationInfo_As_UInt(const std::string name, uint32_t var);
+  void set_CalibrationInfo_As_Float(const std::string name, float var);
+  void set_CalibrationInfo_As_Int(const std::string name, int var);
+  void set_CalibrationInfo_As_UInt(const std::string name, uint32_t var);
 
  private:
-  void parse_LogContent(const MONITOR_MSG& msg, std::string& log) const;
-
   bool msg_validity_checking() const;
 
  private:
@@ -62,16 +65,15 @@ class DataDispatcher final : public Singleton {
   std::map<std::string, float> data_monitor_summary_;
 
   /**
-   * @brief data base for log monitor
-   */
-  std::string log_summary_;
-
-  /**
    * @brief real time calibrations
    */
   std::map<std::string, CalibrationVariable<int>> calib_container_int_;
   std::map<std::string, CalibrationVariable<uint32_t>> calib_container_uint_;
   std::map<std::string, CalibrationVariable<float>> calib_container_float_;
+
+  std::map<std::string, std::pair<int, int>> calib_dynamic_int_;
+  std::map<std::string, std::pair<int, uint>> calib_dynamic_uint_;
+  std::map<std::string, std::pair<int, float>> calib_dynamic_float_;
 
  private:
   mutable WfirstRWLock rwlock_;

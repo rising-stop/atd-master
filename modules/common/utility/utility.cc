@@ -6,10 +6,6 @@ namespace utility {
 std::mutex Singleton::register_lock_;
 std::unordered_map<Singleton::SGLTN_ID, Singleton *> Singleton::registry_;
 
-void CString::cstring_cat(char *str, const char *str_cat) {
-  strcat(str, str_cat);
-}
-
 FinateStateMachine::State::State(const std::string &id) { set_ID(id); }
 
 void FinateStateMachine::State::set_ID(const std::string &id) { id_ = id; }

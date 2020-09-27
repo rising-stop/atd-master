@@ -4,12 +4,10 @@ namespace atd {
 namespace utility {
 
 template <typename... ARG>
-void CString::cstring_cat(char *str, const char *str_cat, ARG &&... args) {
-  if (!str) {
-    str = new char;
-  }
-  strcat(str, str_cat);
-  cstring_cat(str, std::forward<ARG>(args)...);
+std::string CString::cstring_cat(const char *str_cat, ARG &&... args) {
+  std::string res;
+  sprintf(res.data(), str_cat, std::forward<ARG>(args)...);
+  return res;
 }
 
 template <typename METHOD>

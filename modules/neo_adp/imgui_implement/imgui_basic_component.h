@@ -8,6 +8,9 @@ class ImGui_Components {
  public:
   virtual void render() = 0;
 
+ protected:
+  void HelpMarker(const char* desc);
+
  public:
   ImGui_Components() = default;
   ~ImGui_Components() = default;

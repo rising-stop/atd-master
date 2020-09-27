@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "modules/common/common_header.h"
 
 /**
@@ -22,14 +20,25 @@
 /**
  * @brief max buffer size for data monitor
  */
-#define DataMonitor_Min_BufferSize = 10;
+#define DataMonitor_Min_BufferSize 10
+
+/**
+ * @brief time out for waiting planning responsing the calibration variable's
+ * alternation
+ */
+#define Calibrator_TimeOut 10
+
+struct line_frame {
+  std::deque<float> data = std::deque<float>(DataMonitor_Max_BufferSize, 0.0f);
+  float upper_bound = 0.0f;
+  float lower_bound = 0.0f;
+};
 
 template <typename T>
 class CalibrationVariable {
  public:
-  CalibrationVariable(const std::string& str, T var, T max, T min, T init)
-      : name_(str), var_(var), max_(max), min_(min), init_(init) {}
-  std::string name_;
+  CalibrationVariable(T var, T max, T min, T init)
+      : var_(var), max_(max), min_(min), init_(init) {}
   T var_;
   T max_;
   T min_;

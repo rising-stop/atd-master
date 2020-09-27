@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include <cstring>
+#include <string>
+#include <stdlib.h>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -173,9 +174,7 @@ class Singleton {
 class CString {
  public:
   template <typename... ARG>
-  static void cstring_cat(char *, const char *, ARG &&...);
-
-  static void cstring_cat(char *, const char *);
+  static std::string cstring_cat(const char *, ARG &&...);
 
   template <typename METHOD>
   static void cstring_split(const std::string &split_line, const char comma,
