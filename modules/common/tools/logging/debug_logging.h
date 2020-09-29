@@ -5,16 +5,16 @@
 #include "modules/common/utility/utility.h"
 #include "protobuf_msg/planning_log.pb.h"
 
+#define DISPLAY_SPEED "spd_ms"
+#define DISPLAY_STEER "steer_deg"
+#define DISPLAY_FLAG_AUTO "flag_auto"
+#define DISPLAY_DESIRED_ACC "des_acc_ms"
+#define DISPLAY_ACTUAL_ACC "act_acc_ms"
+#define DISPLAY_DTC "DTC_code"
+#define DISPLAY_SETTING_SPEED "setting_spd_ms"
+
 namespace atd {
 namespace utility {
-
-static const std::string DISPLAY_SPEED{"spd_ms"};
-static const std::string DISPLAY_STEER{"steer_deg"};
-static const std::string DISPLAY_FLAG_AUTO{"flag_auto"};
-static const std::string DISPLAY_DESIRED_ACC{"des_acc_ms"};
-static const std::string DISPLAY_ACTUAL_ACC{"act_acc_ms"};
-static const std::string DISPLAY_DTC{"DTC_code"};
-static const std::string DISPLAY_SETTING_SPEED{"setting_spd_ms"};
 
 enum SECURITY_INFO : int { INFO = 0, WARNING = 1, ERROR = 2 };
 
@@ -28,10 +28,19 @@ class DebugLogging : public Singleton {
   atd::protocol::DISPLAY_BOX* get_PtrElementBox();
   atd::protocol::DISPLAY_LINE* get_PtrElementLine();
   atd::protocol::DISPLAY_PLOYNOMIAL* get_PtrElementPoly();
-  atd::protocol::VARIABLE* get_PtrElementDisplay();
-  std::pair<float, bool> get_CalibVariables(const std::string&);
-  void try_register_Calibration(const std::string&, float&, float, float,
-                                float);
+
+  atd::protocol::FLOAT_VAR* get_PtrElementDisplay_As_Float();
+  atd::protocol::INT_VAR* get_PtrElementDisplay_As_Int();
+  atd::protocol::UINT_VAR* get_PtrElementDisplay_As_UInt();
+  google::protobuf::string* get_PtrElementDisplay_As_String();
+
+  atd::protocol::FRAME_CONTENT* get_PtrLogFrame();
+
+  void try_register_FloatCalibration(const std::string&, float&, float, float,
+                                     float);
+  void try_register_IntCalibration(const std::string&, int&, int, int, int);
+  void try_register_UIntCalibration(const std::string&, uint32_t&, uint32_t,
+                                    uint32_t, uint32_t);
 
  private:
   Proto_Messages<atd::protocol::MONITOR_MSG> log_frame_;
@@ -42,19 +51,21 @@ class DebugLogging : public Singleton {
   LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>> calib_listener_{
       LCM_MODE::READER, "PlanningCalib"};
 
+  template <typename T>
   class CalibrationVariable {
    public:
-    CalibrationVariable(const std::string& str, float& var, float max,
-                        float min, float init)
+    CalibrationVariable(const std::string& str, T& var, T max, T min, T init)
         : name_(str), var_(var), max_(max), min_(min), init_(init) {}
     std::string name_;
-    float& var_;
-    float max_;
-    float min_;
-    float init_;
+    T& var_;
+    T max_;
+    T min_;
+    T init_;
   };
 
-  std::map<std::string, CalibrationVariable> calib_container_;
+  std::map<std::string, CalibrationVariable<float>> float_calib_container_;
+  std::map<std::string, CalibrationVariable<int>> int_calib_container_;
+  std::map<std::string, CalibrationVariable<uint32_t>> uint_calib_container_;
 
  private:
   DebugLogging();

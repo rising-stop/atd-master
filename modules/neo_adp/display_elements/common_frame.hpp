@@ -6,9 +6,9 @@
 #include <functional>
 #include <iostream>
 
-#include "data_dispatcher.hpp"
+#include "modules/neo_adp/data_service/data_dispatcher.h"
 #include "debug_draw.hpp"
-#include "display_imgui_components.hpp"
+#include "modules/neo_adp/imgui_implement/imgui_implement.h"
 #include "modules/common/utility/utility.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
@@ -605,7 +605,7 @@ class OpenGL_Frame : public atd::utility::Singleton {
       glfwSwapBuffers(ptr_mainwindow_);
 
       single_Frame();
-      Imgui_Drawing();
+      ImGui_ComponentManager::Imgui_Drawing();
 
       // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       // glClear(GL_COLOR_BUFFER_BIT);

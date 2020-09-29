@@ -107,7 +107,7 @@ Writer& Writer::construct() { return *this; }
 
 void Writer::init() {
   ptr_content_ =
-      atd::utility::Singleton::instance<DebugLogging>()->get_PtrFrame();
+      atd::utility::Singleton::instance<DebugLogging>()->get_PtrLogFrame();
 }
 
 }  // namespace utility

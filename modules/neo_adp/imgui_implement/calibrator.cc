@@ -18,40 +18,109 @@ void Calibrator::render() {
   ImGui::Checkbox("Enable", &enable_);
   ImGui::Separator();
 
-  if (calib_info.empty()) {
+  if (float_menu_status_.empty() && int_menu_status_.empty() &&
+      uint_menu_status_.empty()) {
     ImGui::Text("No Calibration Variable Detected");
   } else {
-    for (auto calib_name : dynamic_calib_list) {
-      if (!calib_name.second) {
-        continue;
-      }
-      auto calib_var = calib_info.find(calib_name.first);
-      std::string button_name = "Input ";
-      button_name.append(calib_var->second.name_);
-      button_name.append(" by keyboard");
-      bool focus = ImGui::Button(button_name.c_str());
-      ImGui::SameLine();
+    render_CalibConsole_As_Float();
+    render_CalibConsole_As_Int();
+    render_CalibConsole_As_UInt();
+  }
+}
 
-      std::string reset_botton_name = "Reset ";
-      reset_botton_name.append(calib_var->second.name_);
-      if (ImGui::Button(reset_botton_name.c_str())) {
-        calib_var->second.var_ = calib_var->second.init_;
-      }
-
-      std::string slider_name;
-      slider_name.append(std::to_string(calib_var->second.var_));
-      if (focus) ImGui::SetKeyboardFocusHere();
-      ImGui::SliderFloat(calib_var->second.name_.c_str(),
-                         &calib_var->second.var_, calib_var->second.min_,
-                         calib_var->second.max_);
-      if (calib_enable) {
-        atd::utility::Singleton::instance<DataDispatcher>()
-            ->set_CalibrationInfo(calib_var->second.name_,
-                                  calib_var->second.var_);
-      }
-
-      ImGui::Separator();
+void Calibrator::render_CalibConsole_As_Float() {
+  for (auto calib_name : float_menu_status_) {
+    if (!calib_name.second) {
+      continue;
     }
+    auto calib_var = float_calib_var_.find(calib_name.first);
+    std::string button_name = "Input ";
+    button_name.append(calib_var->first);
+    button_name.append(" by keyboard");
+    bool focus = ImGui::Button(button_name.c_str());
+    ImGui::SameLine();
+
+    std::string reset_botton_name = "Reset ";
+    reset_botton_name.append(calib_var->first);
+    if (ImGui::Button(reset_botton_name.c_str())) {
+      calib_var->second.var_ = calib_var->second.init_;
+    }
+
+    std::string slider_name;
+    slider_name.append(std::to_string(calib_var->second.var_));
+    if (focus) ImGui::SetKeyboardFocusHere();
+    float current_val = calib_var->second.var_;
+    ImGui::SliderFloat(calib_var->first.c_str(), &current_val,
+                       calib_var->second.min_, calib_var->second.max_);
+    if (enable_) {
+      atd::utility::Singleton::instance<DataDispatcher>()
+          ->set_CalibrationInfo_As_Float(calib_var->first, current_val);
+    }
+    ImGui::Separator();
+  }
+}
+
+void Calibrator::render_CalibConsole_As_Int() {
+  for (auto calib_name : int_menu_status_) {
+    if (!calib_name.second) {
+      continue;
+    }
+    auto calib_var = int_calib_var_.find(calib_name.first);
+    std::string button_name = "Input ";
+    button_name.append(calib_var->first);
+    button_name.append(" by keyboard");
+    bool focus = ImGui::Button(button_name.c_str());
+    ImGui::SameLine();
+
+    std::string reset_botton_name = "Reset ";
+    reset_botton_name.append(calib_var->first);
+    if (ImGui::Button(reset_botton_name.c_str())) {
+      calib_var->second.var_ = calib_var->second.init_;
+    }
+
+    std::string slider_name;
+    slider_name.append(std::to_string(calib_var->second.var_));
+    if (focus) ImGui::SetKeyboardFocusHere();
+    int current_val = calib_var->second.var_;
+    ImGui::SliderInt(calib_var->first.c_str(), &current_val,
+                     calib_var->second.min_, calib_var->second.max_);
+    if (enable_) {
+      atd::utility::Singleton::instance<DataDispatcher>()
+          ->set_CalibrationInfo_As_Int(calib_var->first, current_val);
+    }
+    ImGui::Separator();
+  }
+}
+
+void Calibrator::render_CalibConsole_As_UInt() {
+  for (auto calib_name : uint_menu_status_) {
+    if (!calib_name.second) {
+      continue;
+    }
+    auto calib_var = uint_calib_var_.find(calib_name.first);
+    std::string button_name = "Input ";
+    button_name.append(calib_var->first);
+    button_name.append(" by keyboard");
+    bool focus = ImGui::Button(button_name.c_str());
+    ImGui::SameLine();
+
+    std::string reset_botton_name = "Reset ";
+    reset_botton_name.append(calib_var->first);
+    if (ImGui::Button(reset_botton_name.c_str())) {
+      calib_var->second.var_ = calib_var->second.init_;
+    }
+
+    std::string slider_name;
+    slider_name.append(std::to_string(calib_var->second.var_));
+    if (focus) ImGui::SetKeyboardFocusHere();
+    int current_val = calib_var->second.var_;
+    ImGui::SliderInt(calib_var->first.c_str(), &current_val,
+                     calib_var->second.min_, calib_var->second.max_);
+    if (enable_) {
+      atd::utility::Singleton::instance<DataDispatcher>()
+          ->set_CalibrationInfo_As_Int(calib_var->first, current_val);
+    }
+    ImGui::Separator();
   }
 }
 

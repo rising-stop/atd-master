@@ -8,6 +8,12 @@ class Calibrator : public ImGui_Components {
  private:
   void select_ActivatedMenu();
 
+  void render_CalibConsole_As_Float();
+
+  void render_CalibConsole_As_Int();
+
+  void render_CalibConsole_As_UInt();
+
   std::map<std::string, CalibrationVariable<float>> float_calib_var_;
   std::map<std::string, CalibrationVariable<int32_t>> int_calib_var_;
   std::map<std::string, CalibrationVariable<uint32_t>> uint_calib_var_;
