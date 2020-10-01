@@ -5,8 +5,8 @@ using namespace atd::utility;
 using namespace atd::protocol;
 
 void init() {
-  atd::utility::Singleton::try_register<atd::utility::Runtime_Calculator<>>();
-  atd::utility::Singleton::try_register<atd::utility::Runtime_Counter>();
+  atd::utility::Singleton::try_register<Runtime_Calculator<>>();
+  atd::utility::Singleton::try_register<Runtime_Counter>();
   atd::utility::Singleton::try_register<OpenGL_Frame>();
   atd::utility::Singleton::try_register<DataDispatcher>();
 

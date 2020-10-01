@@ -6,21 +6,17 @@ class Calibrator : public ImGui_Components {
   virtual void render() override;
 
  private:
+  void udpate_Database();
   void select_ActivatedMenu();
+  void render_CalibConsole();
 
-  void render_CalibConsole_As_Float();
+ private:
+  /**
+   * @brief data base for calibrator
+   */
+  Any_CalibrationRepository calib_repository_;
 
-  void render_CalibConsole_As_Int();
-
-  void render_CalibConsole_As_UInt();
-
-  std::map<std::string, CalibrationVariable<float>> float_calib_var_;
-  std::map<std::string, CalibrationVariable<int32_t>> int_calib_var_;
-  std::map<std::string, CalibrationVariable<uint32_t>> uint_calib_var_;
-
-  std::map<std::string, bool> float_menu_status_;
-  std::map<std::string, bool> int_menu_status_;
-  std::map<std::string, bool> uint_menu_status_;
+  std::map<std::string, bool> menu_status_;
 
   bool enable_ = false;
 

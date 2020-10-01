@@ -1,7 +1,7 @@
 #include "data_dispatcher.h"
 
-void DataDispatcher::spin() {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_);
+void DataDispatcher::updata_Database() {
+  unique_writeguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_reciver_.subscribe(frame_msg_)) {
     return;
   }
@@ -39,53 +39,39 @@ void DataDispatcher::spin() {
   for (const auto& var : frame_msg_.calibrations().calib_uint()) {
     data_monitor_summary_.insert({var.name(), static_cast<float>(var.data())});
   }
+}
 
-  /* for updating calibrator data base */
-
-  calib_container_float_.clear();
-  for (const auto& var : frame_msg_.calibrations().calib_float()) {
-    calib_container_float_.insert(
-        {var.name(),
-         CalibrationVariable<float>(var.data(), var.data_upper_bound(),
-                                    var.data_lower_bound(), var.data_init())});
-  }
-  calib_container_int_.clear();
-  for (const auto& var : frame_msg_.calibrations().calib_int()) {
-    calib_container_int_.insert(
-        {var.name(),
-         CalibrationVariable<int>(var.data(), var.data_upper_bound(),
-                                  var.data_lower_bound(), var.data_init())});
-  }
-  calib_container_uint_.clear();
-  for (const auto& var : frame_msg_.calibrations().calib_uint()) {
-    calib_container_uint_.insert(
-        {var.name(),
-         CalibrationVariable<uint>(var.data(), var.data_upper_bound(),
-                                   var.data_lower_bound(), var.data_init())});
-  }
-
-  cal_var_.Clear();
-  for (const auto& calib_item : calib_dynamic_float_) {
-    auto ptr_float = cal_var_.add_calib_float();
-    ptr_float->set_name(calib_item.first);
-    ptr_float->set_data(calib_item.second.second);
-  }
-  for (const auto& calib_item : calib_dynamic_int_) {
-    auto ptr_int = cal_var_.add_calib_int();
-    ptr_int->set_name(calib_item.first);
-    ptr_int->set_data(calib_item.second.second);
-  }
-  for (const auto& calib_item : calib_dynamic_uint_) {
-    auto ptr_uint = cal_var_.add_calib_uint();
-    ptr_uint->set_name(calib_item.first);
-    ptr_uint->set_data(calib_item.second.second);
-  }
-
+void DataDispatcher::send_CalibrationAlternation() {
+  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
   calib_publisher_.publish(cal_var_);
+  cal_var_.Clear();
+}
+
+void DataDispatcher::set_AlteredCalibration(const std::string& name,
+                                            float var) {
+  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+
+  auto ptr_float = cal_var_.add_calib_float();
+  ptr_float->set_name(name);
+  ptr_float->set_data(var);
+}
+
+void DataDispatcher::set_AlteredCalibration(const std::string& name, int var) {
+  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+  auto ptr_int = cal_var_.add_calib_int();
+  ptr_int->set_name(name);
+  ptr_int->set_data(var);
+}
+
+void DataDispatcher::set_AlteredCalibration(const std::string& name, uint var) {
+  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+  auto ptr_uint = cal_var_.add_calib_uint();
+  ptr_uint->set_name(name);
+  ptr_uint->set_data(var);
 }
 
 bool DataDispatcher::get_LatestFrame(MONITOR_MSG& frame) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
     return false;
   }
@@ -94,7 +80,7 @@ bool DataDispatcher::get_LatestFrame(MONITOR_MSG& frame) const {
 }
 
 bool DataDispatcher::get_BasicDisplayInfo(std::string& info) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
     return false;
   }
@@ -153,7 +139,7 @@ bool DataDispatcher::get_BasicDisplayInfo(std::string& info) const {
 
 bool DataDispatcher::get_DataMonitor_LatestFrame(
     std::map<std::string, float>& umap) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
     return false;
   }
@@ -174,132 +160,5 @@ bool DataDispatcher::msg_validity_checking() const {
     time_out_counter = 0;
   }
   last_time_stamp = frame_msg_.title().time_stamp();
-  return true;
-}
-
-void DataDispatcher::set_CalibrationInfo_As_Float(const std::string name,
-                                                  float var) {
-  // calib_dynamic_float_
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_);
-  auto itr_name = calib_container_float_.find(name);
-  if (itr_name == calib_container_float_.end()) {
-    return;
-  }
-  auto itr_dyn_name = calib_dynamic_float_.find(name);
-  if (itr_dyn_name != calib_dynamic_float_.end()) {
-    if (
-        /* difference exists */
-        fabs(itr_name->second.var_ - itr_dyn_name->second.second) > 1e-4f) {
-      if (/* time limit not reached */
-          itr_dyn_name->second.first > 0) {
-        itr_dyn_name->second.first--;
-      } else {
-        calib_dynamic_float_.erase(itr_dyn_name);
-      }
-    } else {
-      calib_dynamic_float_.erase(itr_dyn_name);
-    }
-  } else {
-    if (
-        /* difference exists */
-        fabs(itr_name->second.var_ - var) > 1e-4f) {
-      calib_dynamic_float_.insert({name, {Calibrator_TimeOut, var}});
-    } else {
-      /* none */
-    }
-  }
-}
-
-void DataDispatcher::set_CalibrationInfo_As_Int(const std::string name,
-                                                int var) {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_);
-  auto itr_name = calib_container_int_.find(name);
-  if (itr_name == calib_container_int_.end()) {
-    return;
-  }
-  auto itr_dyn_name = calib_dynamic_int_.find(name);
-  if (itr_dyn_name != calib_dynamic_int_.end()) {
-    if (
-        /* difference exists */
-        itr_name->second.var_ == itr_dyn_name->second.second) {
-      if (/* time limit not reached */
-          itr_dyn_name->second.first > 0) {
-        itr_dyn_name->second.first--;
-      } else {
-        calib_dynamic_int_.erase(itr_dyn_name);
-      }
-    } else {
-      calib_dynamic_int_.erase(itr_dyn_name);
-    }
-  } else {
-    if (
-        /* difference exists */
-        itr_name->second.var_ == var) {
-      calib_dynamic_int_.insert({name, {Calibrator_TimeOut, var}});
-    } else {
-      /* none */
-    }
-  }
-}
-
-void DataDispatcher::set_CalibrationInfo_As_UInt(const std::string name,
-                                                 uint32_t var) {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_);
-  auto itr_name = calib_container_uint_.find(name);
-  if (itr_name == calib_container_uint_.end()) {
-    return;
-  }
-  auto itr_dyn_name = calib_dynamic_uint_.find(name);
-  if (itr_dyn_name != calib_dynamic_uint_.end()) {
-    if (
-        /* difference exists */
-        itr_name->second.var_ == itr_dyn_name->second.second) {
-      if (/* time limit not reached */
-          itr_dyn_name->second.first > 0) {
-        itr_dyn_name->second.first--;
-      } else {
-        calib_dynamic_uint_.erase(itr_dyn_name);
-      }
-    } else {
-      calib_dynamic_uint_.erase(itr_dyn_name);
-    }
-  } else {
-    if (
-        /* difference exists */
-        itr_name->second.var_ == var) {
-      calib_dynamic_uint_.insert({name, {Calibrator_TimeOut, var}});
-    } else {
-      /* none */
-    }
-  }
-}
-
-bool DataDispatcher::get_CalibInfo_As_Float(
-    std::map<std::string, CalibrationVariable<float>>& umap) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
-  if (!msg_validity_checking()) {
-    return false;
-  }
-  umap = calib_container_float_;
-  return true;
-}
-
-bool DataDispatcher::get_CalibInfo_As_Int(
-    std::map<std::string, CalibrationVariable<int>>& umap) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
-  if (!msg_validity_checking()) {
-    return false;
-  }
-  umap = calib_container_int_;
-  return true;
-}
-
-bool DataDispatcher::get_CalibInfo_As_UInt(
-    std::map<std::string, CalibrationVariable<uint32_t>>& umap) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_);
-  if (!msg_validity_checking()) {
-    return false;
-  }
-  umap = calib_container_uint_;
   return true;
 }
