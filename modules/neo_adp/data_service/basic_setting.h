@@ -60,32 +60,32 @@ class CalibrationVariable {
 
 class Any_CalibrationRepository {
  public:
-  template <typename T>
-  std::pair<const CalibrationVariable<T>*, bool> get_RegisteredCalib(
-      const std::string& name) {
-    std::string type_name = typeid(T).name();
-    auto itr_type = calib_repository_.find(type_name);
-    if (itr_type == calib_repository_.end()) {
-      return {nullptr, false};
+  void get_RegisteredCalibSet(std::vector<std::string>& list) const {
+    list.clear();
+    size_t capacity = calib_repository_.size();
+    list.resize(capacity);
+    size_t counter = 0u;
+    for (const auto& item : calib_repository_) {
+      list[counter++] = item.first;
     }
-    auto itr_name = calib_repository_[type_name].find(name);
-    if (itr_name == calib_repository_[type_name].end()) {
-      return {nullptr, false};
+  }
+
+  std::pair<const std::pair<std::string, void*>&, bool> get_RegisteredCalib(
+      const std::string& name) const {
+    auto itr_name = calib_repository_.find(name);
+    if (itr_name == calib_repository_.end()) {
+      return {{"", nullptr}, false};
     }
-    return {dynamic_cast<CalibrationVariable<T>*>(itr_name->second), true};
+    return {itr_name->second, true};
   }
 
   template <typename T>
   bool set_calib(const std::string& name, const T& var) {
+    auto itr_name = calib_repository_.find(name);
+    if (itr_name == calib_repository_.end()) {
+      return false;
+    }
     std::string type_name = typeid(T).name();
-    auto itr_type = calib_repository_.find(type_name);
-    if (itr_type == calib_repository_.end()) {
-      return false;
-    }
-    auto itr_name = calib_repository_[type_name].find(name);
-    if (itr_name == calib_repository_[type_name].end()) {
-      return false;
-    }
     dynamic_cast<CalibrationVariable<T>*>(itr_name->second)->set_Var(var);
     return true;
   }
@@ -96,20 +96,22 @@ class Any_CalibrationRepository {
     return insert(name, create_CalibrationVariable(var, max, min, init));
   }
 
+  void clear() { calib_repository_.clear(); }
+
+  void remove_Calib(const std::string& name) {
+    auto res_find = calib_repository_.find(name);
+    if (res_find != calib_repository_.end()) {
+      calib_repository_.erase(res_find);
+    }
+  }
+
  private:
   template <typename T>
   std::pair<CalibrationVariable<T>*, bool> insert(
       const std::string& name, CalibrationVariable<T>* ptr_calib) {
     std::string type_name = typeid(T).name();
-    auto itr_type = calib_repository_.find(type_name);
-    if (itr_type == calib_repository_.end()) {
-      calib_repository_.insert(std::make_pair(
-          type_name, std::map<std::string, void*>({std::make_pair(
-                         name, static_cast<void*>(ptr_calib))})));
-      return {ptr_calib, true};
-    }
-    auto ins_res = calib_repository_[type_name].insert(
-        std::make_pair(name, static_cast<void*>(ptr_calib)));
+    auto ins_res = calib_repository_.insert(std::make_pair(
+        name, std::make_pair(type_name, static_cast<void*>(ptr_calib))));
     if (ins_res.second) {
       return {ptr_calib, true};
     }
@@ -126,15 +128,13 @@ class Any_CalibrationRepository {
   }
 
  private:
-  std::map<std::string, std::map<std::string, void*>> calib_repository_;
+  std::map<std::string, std::pair<std::string, void*>> calib_repository_;
 
  public:
   Any_CalibrationRepository() = default;
   ~Any_CalibrationRepository() {
     for (auto& type_set : calib_repository_) {
-      for (auto& var : type_set.second) {
-        delete var.second;
-      }
+      delete type_set.second.second;
     }
   }
 };

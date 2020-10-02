@@ -1,170 +1,190 @@
 #include "calibrator.h"
 
 void Calibrator::render() {
-  select_ActivatedMenu();
+  active_MenuItem();
 
   if (ImGui::Button("Calibration_Switch")) ImGui::OpenPopup("Calibration_List");
   if (ImGui::BeginPopup("Calibration_List")) {
-    for (auto& menu_item : float_menu_status_)
-      ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second));
-    for (auto& menu_item : int_menu_status_)
-      ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second));
-    for (auto& menu_item : uint_menu_status_)
+    for (auto& menu_item : menu_status_)
       ImGui::MenuItem(menu_item.first.c_str(), "", &(menu_item.second));
     ImGui::EndPopup();
   }
 
   ImGui::SameLine();
   ImGui::Checkbox("Enable", &enable_);
+
+  render_CalibConsole();
+  ImGui::Spacing();
   ImGui::Separator();
 
-  if (float_menu_status_.empty() && int_menu_status_.empty() &&
-      uint_menu_status_.empty()) {
+  if (menu_status_.empty()) {
     ImGui::Text("No Calibration Variable Detected");
   } else {
-    render_CalibConsole_As_Float();
-    render_CalibConsole_As_Int();
-    render_CalibConsole_As_UInt();
   }
 }
 
-void Calibrator::render_CalibConsole_As_Float() {
-  for (auto calib_name : float_menu_status_) {
+void Calibrator::udpate_Database() {
+  static atd::protocol::DISPLAY_CALIBRATION calib_frame;
+  atd::utility::Singleton::instance<DataDispatcher>()->get_LatestDisplayCalib(
+      calib_frame);
+  for (const auto& float_var : calib_frame.calib_float()) {
+    auto reg_res = calib_repository_.register_Calibration(
+        float_var.name(), float_var.data(), float_var.data_upper_bound(),
+        float_var.data_lower_bound(), float_var.data_init());
+    if (!reg_res.second) {
+      reg_res.first->set_Var(float_var.data());
+    }
+  }
+  for (const auto& int_var : calib_frame.calib_int()) {
+    auto reg_res = calib_repository_.register_Calibration(
+        int_var.name(), int_var.data(), int_var.data_upper_bound(),
+        int_var.data_lower_bound(), int_var.data_init());
+    if (!reg_res.second) {
+      reg_res.first->set_Var(int_var.data());
+    }
+  }
+  for (const auto& uint_var : calib_frame.calib_uint()) {
+    auto reg_res = calib_repository_.register_Calibration(
+        uint_var.name(), uint_var.data(), uint_var.data_upper_bound(),
+        uint_var.data_lower_bound(), uint_var.data_init());
+    if (!reg_res.second) {
+      reg_res.first->set_Var(uint_var.data());
+    }
+  }
+}
+
+void Calibrator::render_CalibConsole() const {
+  for (auto calib_name : menu_status_) {
     if (!calib_name.second) {
       continue;
     }
-    auto calib_var = float_calib_var_.find(calib_name.first);
-    std::string button_name = "Input ";
-    button_name.append(calib_var->first);
-    button_name.append(" by keyboard");
-    bool focus = ImGui::Button(button_name.c_str());
-    ImGui::SameLine();
-
-    std::string reset_botton_name = "Reset ";
-    reset_botton_name.append(calib_var->first);
-    if (ImGui::Button(reset_botton_name.c_str())) {
-      calib_var->second.var_ = calib_var->second.init_;
+    auto calib_item = calib_repository_.get_RegisteredCalib(calib_name.first);
+    if (calib_item.second) {
+      if (calib_item.first.first == typeid(float).name()) {
+        auto ptr_calib = static_cast<const CalibrationVariable<float>*>(
+            calib_item.first.second);
+        render_FloatConsole(calib_item.first.first, ptr_calib);
+      } else if (calib_item.first.first == typeid(int).name()) {
+        auto ptr_calib = static_cast<const CalibrationVariable<int>*>(
+            calib_item.first.second);
+        render_IntConsole(calib_item.first.first, ptr_calib);
+      } else if (calib_item.first.first == typeid(uint32_t).name()) {
+        auto ptr_calib = static_cast<const CalibrationVariable<uint32_t>*>(
+            calib_item.first.second);
+        render_IntConsole(calib_item.first.first, ptr_calib);
+      } else {
+      }
     }
-
-    std::string slider_name;
-    slider_name.append(std::to_string(calib_var->second.var_));
-    if (focus) ImGui::SetKeyboardFocusHere();
-    float current_val = calib_var->second.var_;
-    ImGui::SliderFloat(calib_var->first.c_str(), &current_val,
-                       calib_var->second.min_, calib_var->second.max_);
-    if (enable_) {
-      atd::utility::Singleton::instance<DataDispatcher>()
-          ->set_CalibrationInfo_As_Float(calib_var->first, current_val);
-    }
-    ImGui::Separator();
   }
 }
 
-void Calibrator::render_CalibConsole_As_Int() {
-  for (auto calib_name : int_menu_status_) {
-    if (!calib_name.second) {
+void Calibrator::render_FloatConsole(
+    const std::string& name, const CalibrationVariable<float>* var) const {
+  std::string button_name = "Input ";
+  button_name.append(name);
+  button_name.append(" by keyboard");
+  bool focus = ImGui::Button(button_name.c_str());
+  ImGui::SameLine();
+
+  std::string reset_botton_name = "Reset ";
+  reset_botton_name.append(name);
+  if (ImGui::Button(reset_botton_name.c_str())) {
+    // calib_var->second.var_ = calib_var->second.init_;
+  }
+
+  std::string slider_name;
+  slider_name.append(
+      atd::utility::CString::cstring_cat("%.6f", var->get_Var()));
+  if (focus) ImGui::SetKeyboardFocusHere();
+  float current_val = var->get_Var();
+  ImGui::SliderFloat(name.c_str(), &current_val, var->get_Min(),
+                     var->get_Max());
+  // if (enable_) {
+  //   atd::utility::Singleton::instance<DataDispatcher>()
+  //       ->set_CalibrationInfo_As_Float(calib_var->first, current_val);
+  // }
+  ImGui::Separator();
+}
+
+void Calibrator::render_IntConsole(const std::string& name,
+                                   const CalibrationVariable<int>* var) const {
+  std::string button_name = "Input ";
+  button_name.append(name);
+  button_name.append(" by keyboard");
+  bool focus = ImGui::Button(button_name.c_str());
+  ImGui::SameLine();
+
+  std::string reset_botton_name = "Reset ";
+  reset_botton_name.append(name);
+  if (ImGui::Button(reset_botton_name.c_str())) {
+    // calib_var->second.var_ = calib_var->second.init_;
+  }
+
+  std::string slider_name;
+  slider_name.append(atd::utility::CString::cstring_cat("%d", var->get_Var()));
+  if (focus) ImGui::SetKeyboardFocusHere();
+  int current_val = var->get_Var();
+  ImGui::SliderInt(name.c_str(), &current_val, var->get_Min(), var->get_Max());
+  // if (enable_) {
+  //   atd::utility::Singleton::instance<DataDispatcher>()
+  //       ->set_CalibrationInfo_As_Float(calib_var->first, current_val);
+  // }
+  ImGui::Separator();
+}
+
+void Calibrator::render_IntConsole(
+    const std::string& name, const CalibrationVariable<uint32_t>* var) const {
+  std::string button_name = "Input ";
+  button_name.append(name);
+  button_name.append(" by keyboard");
+  bool focus = ImGui::Button(button_name.c_str());
+  ImGui::SameLine();
+
+  std::string reset_botton_name = "Reset ";
+  reset_botton_name.append(name);
+  if (ImGui::Button(reset_botton_name.c_str())) {
+    // calib_var->second.var_ = calib_var->second.init_;
+  }
+
+  std::string slider_name;
+  slider_name.append(atd::utility::CString::cstring_cat("%d", var->get_Var()));
+  if (focus) ImGui::SetKeyboardFocusHere();
+  int current_val = (var->get_Var() > INT32_MAX) ? INT32_MAX : var->get_Var();
+  int upper_bound = (var->get_Max() > INT32_MAX) ? INT32_MAX : var->get_Max();
+  int lower_bound = (var->get_Min() > INT32_MAX) ? INT32_MAX : var->get_Min();
+
+  ImGui::SliderInt(name.c_str(), &current_val, lower_bound, upper_bound);
+  // if (enable_) {
+  //   atd::utility::Singleton::instance<DataDispatcher>()
+  //       ->set_CalibrationInfo_As_Float(calib_var->first, current_val);
+  // }
+  ImGui::Separator();
+}
+
+void Calibrator::active_MenuItem() {
+  std::vector<std::string> registered_calib_list;
+  calib_repository_.get_RegisteredCalibSet(registered_calib_list);
+  for (const auto& item : registered_calib_list) {
+    menu_status_.insert({item, false});
+  }
+}
+
+void Calibrator::remove_ZombieMenuItem() {
+  std::vector<std::string> active_menu_item;
+  for (const auto& item : menu_status_) {
+    if (item.second) {
+      active_menu_item.push_back(item.first);
+    }
+  }
+  menu_status_.clear();
+  active_MenuItem();
+  for (const auto& act_item : active_menu_item) {
+    auto find_res = menu_status_.find(act_item);
+    if (find_res == menu_status_.end()) {
       continue;
     }
-    auto calib_var = int_calib_var_.find(calib_name.first);
-    std::string button_name = "Input ";
-    button_name.append(calib_var->first);
-    button_name.append(" by keyboard");
-    bool focus = ImGui::Button(button_name.c_str());
-    ImGui::SameLine();
-
-    std::string reset_botton_name = "Reset ";
-    reset_botton_name.append(calib_var->first);
-    if (ImGui::Button(reset_botton_name.c_str())) {
-      calib_var->second.var_ = calib_var->second.init_;
-    }
-
-    std::string slider_name;
-    slider_name.append(std::to_string(calib_var->second.var_));
-    if (focus) ImGui::SetKeyboardFocusHere();
-    int current_val = calib_var->second.var_;
-    ImGui::SliderInt(calib_var->first.c_str(), &current_val,
-                     calib_var->second.min_, calib_var->second.max_);
-    if (enable_) {
-      atd::utility::Singleton::instance<DataDispatcher>()
-          ->set_CalibrationInfo_As_Int(calib_var->first, current_val);
-    }
-    ImGui::Separator();
+    find_res->second = true;
   }
 }
 
-void Calibrator::render_CalibConsole_As_UInt() {
-  for (auto calib_name : uint_menu_status_) {
-    if (!calib_name.second) {
-      continue;
-    }
-    auto calib_var = uint_calib_var_.find(calib_name.first);
-    std::string button_name = "Input ";
-    button_name.append(calib_var->first);
-    button_name.append(" by keyboard");
-    bool focus = ImGui::Button(button_name.c_str());
-    ImGui::SameLine();
-
-    std::string reset_botton_name = "Reset ";
-    reset_botton_name.append(calib_var->first);
-    if (ImGui::Button(reset_botton_name.c_str())) {
-      calib_var->second.var_ = calib_var->second.init_;
-    }
-
-    std::string slider_name;
-    slider_name.append(std::to_string(calib_var->second.var_));
-    if (focus) ImGui::SetKeyboardFocusHere();
-    int current_val = calib_var->second.var_;
-    ImGui::SliderInt(calib_var->first.c_str(), &current_val,
-                     calib_var->second.min_, calib_var->second.max_);
-    if (enable_) {
-      atd::utility::Singleton::instance<DataDispatcher>()
-          ->set_CalibrationInfo_As_Int(calib_var->first, current_val);
-    }
-    ImGui::Separator();
-  }
-}
-
-void Calibrator::select_ActivatedMenu() {
-  atd::utility::Singleton::instance<DataDispatcher>()->get_CalibInfo_As_Float(
-      float_calib_var_);
-  atd::utility::Singleton::instance<DataDispatcher>()->get_CalibInfo_As_Int(
-      int_calib_var_);
-  atd::utility::Singleton::instance<DataDispatcher>()->get_CalibInfo_As_UInt(
-      uint_calib_var_);
-
-  for (auto single_calib_info : float_calib_var_) {
-    float_menu_status_.insert({single_calib_info.first, false});
-  }
-  auto itr_dyn_cal_list = float_menu_status_.begin();
-  while (itr_dyn_cal_list != float_menu_status_.end()) {
-    if (float_calib_var_.find(itr_dyn_cal_list->first) ==
-        float_calib_var_.end()) {
-      itr_dyn_cal_list = float_menu_status_.erase(itr_dyn_cal_list);
-    } else {
-      itr_dyn_cal_list++;
-    }
-  }
-  auto itr_dyn_cal_list = int_menu_status_.begin();
-  for (auto single_calib_info : int_calib_var_) {
-    int_menu_status_.insert({single_calib_info.first, false});
-  }
-  while (itr_dyn_cal_list != int_menu_status_.end()) {
-    if (int_calib_var_.find(itr_dyn_cal_list->first) == int_calib_var_.end()) {
-      itr_dyn_cal_list = int_menu_status_.erase(itr_dyn_cal_list);
-    } else {
-      itr_dyn_cal_list++;
-    }
-  }
-  auto itr_dyn_cal_list = uint_menu_status_.begin();
-  for (auto single_calib_info : uint_calib_var_) {
-    uint_menu_status_.insert({single_calib_info.first, false});
-  }
-  while (itr_dyn_cal_list != uint_menu_status_.end()) {
-    if (uint_calib_var_.find(itr_dyn_cal_list->first) ==
-        uint_calib_var_.end()) {
-      itr_dyn_cal_list = uint_menu_status_.erase(itr_dyn_cal_list);
-    } else {
-      itr_dyn_cal_list++;
-    }
-  }
-}
+void Calibrator::command_CalibOnline(){}
