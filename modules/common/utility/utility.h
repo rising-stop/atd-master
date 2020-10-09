@@ -232,49 +232,6 @@ class FinateStateMachine {
   virtual ~FinateStateMachine() = default;
 };
 
-class Any_Repository {
- public:
-  template <typename T, typename... ARGS>
-  std::pair<std::shared_ptr<T>, bool> try_RegisterVar(const std::string &name,
-                                                      ARGS &&... args);
-
-  template <typename T>
-  std::pair<const std::shared_ptr<T>, bool> get_RegisteredVar(
-      const std::string &name) const;
-
-  template <typename T>
-  std::pair<std::shared_ptr<T>, bool> get_MutableRegisteredVar(
-      const std::string &name);
-
-  void clear() { var_repository_.clear(); }
-
-  void remove_Var(const std::string &name) {
-    auto res_find = var_repository_.find(name);
-    if (res_find != var_repository_.end()) {
-      var_repository_.erase(res_find);
-    }
-  }
-
- private:
-  template <typename T, typename... ARGS>
-  std::pair<std::shared_ptr<T>, bool> insert(const std::string &name,
-                                             ARGS &&... args);
-
- private:
-  struct Variable {
-    std::shared_ptr<void> pointer_;
-    std::string type_name_;
-    size_t hash_code_ = 0u;
-    size_t size_ = 0u;
-  };
-
-  std::map<std::string, Variable> var_repository_;
-
- public:
-  Any_Repository() = default;
-  ~Any_Repository() = default;
-};
-
 }  // namespace utility
 }  // namespace atd
 

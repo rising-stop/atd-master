@@ -1,5 +1,6 @@
 #pragma once
 
+#include "modules/common/utility/any_repository.h"
 #include "modules/common/utility/ipc/lcm_dispatcher/lcm_dispatcher.h"
 #include "modules/common/utility/timer.h"
 #include "modules/common/utility/utility.h"
@@ -18,6 +19,30 @@ namespace atd {
 namespace utility {
 
 enum SECURITY_INFO : int { INFO = 0, WARNING = 1, ERROR = 2 };
+
+template <typename T>
+class CalibrationVariable {
+ public:
+  CalibrationVariable(T var, T max, T min, T init)
+      : var_(var), max_(max), min_(min), init_(init) {}
+
+ public:
+  inline void set_Var(const T& var) { var_ = var; }
+  inline void set_Max(const T& max) { max_ = max; }
+  inline void set_Min(const T& min) { min_ = min; }
+  inline void set_Init(const T& init) { init_ = init; }
+
+  inline const T& get_Var() const { return var_; }
+  inline const T& get_Max() const { return max_; }
+  inline const T& get_Min() const { return min_; }
+  inline const T& get_Init() const { return init_; }
+
+ private:
+  T var_;
+  T max_;
+  T min_;
+  T init_;
+};
 
 class DebugLogging : public Singleton {
   friend class Singleton;
@@ -41,7 +66,12 @@ class DebugLogging : public Singleton {
   bool try_register_Calibration(const std::string&, const T&, const T&,
                                 const T&);
   template <typename T>
-  std::pair<T, bool> try_fetch_Calibration(const std::string&) const;
+  const std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
+  try_fetch_Calibration(const std::string&) const;
+
+  template <typename T>
+  std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
+  try_fetch_MutableCalibration(const std::string&);
 
  private:
   Proto_Messages<atd::protocol::MONITOR_MSG> log_frame_;
@@ -52,7 +82,7 @@ class DebugLogging : public Singleton {
   LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>> calib_listener_{
       LCM_MODE::READER, "PlanningCalib"};
 
-  Any_CalibrationRepository calib_repository_;
+  Any_Repository calib_repository_;
 
  private:
   DebugLogging();

@@ -13,13 +13,13 @@ class Calibrator : public ImGui_Components {
   void active_MenuItem();
   void remove_ZombieMenuItem();
 
-  void render_CalibConsole() const;
+  void render_CalibConsole();
   void render_FloatConsole(const std::string&,
-                           const CalibrationVariable<float>*) const;
+                           const CalibrationVariable<float>*);
   void render_IntConsole(const std::string&,
-                         const CalibrationVariable<int>*) const;
+                         const CalibrationVariable<int>*);
   void render_UIntConsole(const std::string&,
-                         const CalibrationVariable<uint32_t>*) const;
+                          const CalibrationVariable<uint32_t>*);
 
   template <typename T>
   void fill_CalibrationSender(const std::string& name, const T& val);
@@ -30,7 +30,7 @@ class Calibrator : public ImGui_Components {
   /**
    * @brief data base for calibrator
    */
-  Any_CalibrationRepository calib_repository_;
+  atd::utility::Any_Repository calib_repository_;
 
   std::map<std::string, bool> menu_status_;
 

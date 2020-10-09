@@ -14,13 +14,29 @@ void DebugLogging::reset_Frame() {
 
   calib_listener_.subscribe(cal_var_);
   for (const auto& calib4loop : cal_var_.calib_float()) {
-    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
+    auto find_res =
+        calib_repository_.get_MutableRegisteredVar<CalibrationVariable<float>>(
+            calib4loop.name());
+    if (find_res.second) {
+      find_res.first->set_Var(calib4loop.data());
+    }
   }
   for (const auto& calib4loop : cal_var_.calib_int()) {
-    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
+    auto find_res =
+        calib_repository_.get_MutableRegisteredVar<CalibrationVariable<int>>(
+            calib4loop.name());
+    if (find_res.second) {
+      find_res.first->set_Var(calib4loop.data());
+    }
   }
   for (const auto& calib4loop : cal_var_.calib_uint()) {
-    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
+    auto find_res =
+        calib_repository_
+            .get_MutableRegisteredVar<CalibrationVariable<uint32_t>>(
+                calib4loop.name());
+    if (find_res.second) {
+      find_res.first->set_Var(calib4loop.data());
+    }
   }
 }
 
@@ -50,45 +66,34 @@ atd::protocol::NORMAL_VAR* DebugLogging::get_PtrElementDisplay_As_String() {
 }
 
 void DebugLogging::publish_Frame() {
-  std::vector<std::pair<std::string, std::string>> calib_list;
-  calib_repository_.get_RegisteredCalibSet(calib_list);
-  for (auto name4loop : calib_list) {
-    if (name4loop.second == typeid(float).name()) {
+  for (auto& pair4loop : calib_repository_) {
+    if (pair4loop.second.hash_code_ == typeid(float).hash_code()) {
       auto ptr_var = log_frame_.mutable_calibrations()->add_calib_float();
-      auto find_res =
-          calib_repository_.get_RegisteredCalib<float>(name4loop.first);
-      if (!find_res.second) {
-        continue;
-      }
-      ptr_var->set_name(name4loop.first);
-      ptr_var->set_data(find_res.first->get_Var());
-      ptr_var->set_data_upper_bound(find_res.first->get_Max());
-      ptr_var->set_data_lower_bound(find_res.first->get_Min());
-      ptr_var->set_data_init(find_res.first->get_Init());
-    } else if (name4loop.second == typeid(int).name()) {
+      auto ptr_source = std::static_pointer_cast<CalibrationVariable<float>>(
+          pair4loop.second.pointer_);
+      ptr_var->set_name(pair4loop.first);
+      ptr_var->set_data(ptr_source->get_Var());
+      ptr_var->set_data_upper_bound(ptr_source->get_Max());
+      ptr_var->set_data_lower_bound(ptr_source->get_Min());
+      ptr_var->set_data_init(ptr_source->get_Init());
+    } else if (pair4loop.second.hash_code_ == typeid(int).hash_code()) {
       auto ptr_var = log_frame_.mutable_calibrations()->add_calib_int();
-      auto find_res =
-          calib_repository_.get_RegisteredCalib<int>(name4loop.first);
-      if (!find_res.second) {
-        continue;
-      }
-      ptr_var->set_name(name4loop.first);
-      ptr_var->set_data(find_res.first->get_Var());
-      ptr_var->set_data_upper_bound(find_res.first->get_Max());
-      ptr_var->set_data_lower_bound(find_res.first->get_Min());
-      ptr_var->set_data_init(find_res.first->get_Init());
-    } else if (name4loop.second == typeid(uint32_t).name()) {
+      auto ptr_source = std::static_pointer_cast<CalibrationVariable<int>>(
+          pair4loop.second.pointer_);
+      ptr_var->set_name(pair4loop.first);
+      ptr_var->set_data(ptr_source->get_Var());
+      ptr_var->set_data_upper_bound(ptr_source->get_Max());
+      ptr_var->set_data_lower_bound(ptr_source->get_Min());
+      ptr_var->set_data_init(ptr_source->get_Init());
+    } else if (pair4loop.second.hash_code_ == typeid(uint32_t).hash_code()) {
       auto ptr_var = log_frame_.mutable_calibrations()->add_calib_uint();
-      auto find_res =
-          calib_repository_.get_RegisteredCalib<uint32_t>(name4loop.first);
-      if (!find_res.second) {
-        continue;
-      }
-      ptr_var->set_name(name4loop.first);
-      ptr_var->set_data(find_res.first->get_Var());
-      ptr_var->set_data_upper_bound(find_res.first->get_Max());
-      ptr_var->set_data_lower_bound(find_res.first->get_Min());
-      ptr_var->set_data_init(find_res.first->get_Init());
+      auto ptr_source = std::static_pointer_cast<CalibrationVariable<uint32_t>>(
+          pair4loop.second.pointer_);
+      ptr_var->set_name(pair4loop.first);
+      ptr_var->set_data(ptr_source->get_Var());
+      ptr_var->set_data_upper_bound(ptr_source->get_Max());
+      ptr_var->set_data_lower_bound(ptr_source->get_Min());
+      ptr_var->set_data_init(ptr_source->get_Init());
     } else {
     }
   }

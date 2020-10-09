@@ -41,34 +41,34 @@ void DataDispatcher::updata_Database() {
   }
 }
 
-void DataDispatcher::send_CalibrationAlternation() {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-  calib_publisher_.publish(cal_var_);
-  cal_var_.Clear();
-}
+// void DataDispatcher::send_CalibrationAlternation() {
+//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+//   calib_publisher_.publish(cal_var_);
+//   cal_var_.Clear();
+// }
 
-void DataDispatcher::set_AlteredCalibration(const std::string& name,
-                                            float var) {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+// void DataDispatcher::set_AlteredCalibration(const std::string& name,
+//                                             float var) {
+//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
 
-  auto ptr_float = cal_var_.add_calib_float();
-  ptr_float->set_name(name);
-  ptr_float->set_data(var);
-}
+//   auto ptr_float = cal_var_.add_calib_float();
+//   ptr_float->set_name(name);
+//   ptr_float->set_data(var);
+// }
 
-void DataDispatcher::set_AlteredCalibration(const std::string& name, int var) {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-  auto ptr_int = cal_var_.add_calib_int();
-  ptr_int->set_name(name);
-  ptr_int->set_data(var);
-}
+// void DataDispatcher::set_AlteredCalibration(const std::string& name, int var) {
+//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+//   auto ptr_int = cal_var_.add_calib_int();
+//   ptr_int->set_name(name);
+//   ptr_int->set_data(var);
+// }
 
-void DataDispatcher::set_AlteredCalibration(const std::string& name, uint var) {
-  unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-  auto ptr_uint = cal_var_.add_calib_uint();
-  ptr_uint->set_name(name);
-  ptr_uint->set_data(var);
-}
+// void DataDispatcher::set_AlteredCalibration(const std::string& name, uint var) {
+//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
+//   auto ptr_uint = cal_var_.add_calib_uint();
+//   ptr_uint->set_name(name);
+//   ptr_uint->set_data(var);
+// }
 
 bool DataDispatcher::get_LatestFrame(MONITOR_MSG& frame) const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);

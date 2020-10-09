@@ -10,18 +10,31 @@ bool DebugLogging::try_register_Calibration(const std::string& name,
   if (max < min) {
     CUSTOM_EXCEPTION("calibration variable max is lower than min");
   }
-  return calib_repository_.register_Calibration(name, init, max, min, init)
-      .second;
+  return calib_repository_.try_RegisterVar(name, init, max, min, init).second;
 }
 
 template <typename T>
-std::pair<T, bool> DebugLogging::try_fetch_Calibration(
-    const std::string& name) const {
-  auto fetch_res = calib_repository_.get_RegisteredCalib<T>(name);
+const std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
+DebugLogging::try_fetch_Calibration(const std::string& name) const {
+  auto fetch_res = calib_repository_.get_RegisteredVar(name);
   if (fetch_res.second) {
-    return {fetch_res.first, true};
+    return {std::static_pointer_cast<CalibrationVariable<T>>(
+                fetch_res.first->pointer_),
+            true};
   }
-  return {T(), false};
+  return {nullptr, false};
+}
+
+template <typename T>
+std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
+DebugLogging::try_fetch_MutableCalibration(const std::string& name) {
+  auto fetch_res = calib_repository_.get_MutableRegisteredVar(name);
+  if (fetch_res.second) {
+    return {std::static_pointer_cast<CalibrationVariable<T>>(
+                fetch_res.first->pointer_),
+            true};
+  }
+  return {nullptr, false};
 }
 
 }  // namespace utility
