@@ -23,4 +23,4 @@ class LogMonitor : public ImGui_Components {
  public:
   LogMonitor() = default;
   ~LogMonitor() = default;
-}
+};

@@ -1,6 +1,6 @@
 #include "gl_implement.h"
 
-void GL_Implement::drawLabel(co nst ThreadData &td, ddVec3_In pos,
+void GL_Implement::drawLabel(const ThreadData &td, ddVec3_In pos,
                              const char *name) {
   if (!keys.showLabels) {
     return;
@@ -54,7 +54,8 @@ void GL_Implement::convert_BoxData(ddVec3 *corner_points, ddVec3 origin,
 
 void GL_Implement::draw_PlanningElements(const ThreadData &td) {
   static atd::protocol::OPENGL_ELEMENT adp_msg;
-  atd::utility::Singleton::instance<DataDispatcher>()->get_GLElements(adp_msg);
+  atd::utility::Singleton::instance<DataDispatcher>()->get_LatestGLElement(
+      adp_msg);
 
   ddVec3 origin = {0.0f, 0.0f, 0.0f};
   drawLabel(td, origin, "ego vehicle");
@@ -137,21 +138,77 @@ void GL_Implement::draw_PlanningElements(const ThreadData &td) {
 }
 
 void GL_Implement::drawText(const ThreadData &td) {
+  static atd::protocol::DISPLAY_CONTENT basic_info;
   // HUD text:
   const ddVec3 textColor = {1.0f, 1.0f, 1.0f};
   const ddVec3 textPos2D = {10.0f, 15.0f, 0.0f};
   dd::screenText(td.ddContext, "[SPACE]  to toggle labels and grid on/off",
                  textPos2D, textColor, 0.55f);
-
   const ddVec3 displayColor = {0.9f, 0.9f, 0.9f};
   const ddVec3 displayPos2D = {10.0f, 45.0f, 0.0f};
 
-  static std::string basic_info;
+  std::string display_text;
   if (!atd::utility::Singleton::instance<DataDispatcher>()
-           ->get_BasicDisplayInfo(basic_info)) {
-    basic_info = "System OffLine";
+           ->get_LatestDisplayContent(basic_info)) {
+    display_text = "System OffLine";
+  } else {
+    // "AutoDriving\nSpeed(kph): 11.0\nSteer(deg): 11.0"
+    std::string auto_info{"Offline"};
+    std::string display_speed{"Speed(kph): "};
+    std::string display_steer{"Steer(deg): "};
+    std::string display_des_acc{"DeAcc(ms2): "};
+    std::string display_act_acc{"AtAcc(ms2): "};
+    std::string display_DTC{"DTC code: "};
+    std::string display_setting_spd{"DeSpd(kph): "};
+    for (auto single_content : basic_info.int_vars()) {
+      auto content_name = single_content.name();
+      if (content_name == DISPLAY_FLAG_AUTO) {
+        int mode_code = single_content.data();
+        if (mode_code == 5) {
+          auto_info = "Acc";
+        } else if (mode_code == 0) {
+          auto_info = "Manual";
+        } else if (mode_code == 2) {
+          auto_info = "Auto";
+        } else {
+          auto_info = "Abnormal";
+        }
+      }
+    }
+    for (auto single_content : basic_info.float_vars()) {
+      auto content_name = single_content.name();
+      if (content_name == DISPLAY_SPEED) {
+        float spd = single_content.data();
+        display_speed.append(std::to_string(spd * 3.6));
+      } else if (content_name == DISPLAY_STEER) {
+        display_steer.append(std::to_string(single_content.data()));
+      } else if (content_name == DISPLAY_DESIRED_ACC) {
+        display_des_acc.append(std::to_string(single_content.data()));
+      } else if (content_name == DISPLAY_ACTUAL_ACC) {
+        display_act_acc.append(std::to_string(single_content.data()));
+      } else if (content_name == DISPLAY_DTC) {
+        display_DTC.append(std::to_string(single_content.data()));
+      } else if (content_name == DISPLAY_SETTING_SPEED) {
+        display_setting_spd.append(std::to_string(single_content.data()));
+      }
+    }
+    display_text.clear();
+    display_text.append(auto_info);
+    display_text.append("\n");
+    display_text.append(display_setting_spd);
+    display_text.append("\n");
+    display_text.append(display_speed);
+    display_text.append("\n");
+    display_text.append(display_steer);
+    display_text.append("\n");
+    display_text.append(display_des_acc);
+    display_text.append("\n");
+    display_text.append(display_act_acc);
+    display_text.append("\n");
+    display_text.append(display_DTC);
   }
-  dd::screenText(td.ddContext, basic_info.c_str(), displayPos2D, displayColor,
+
+  dd::screenText(td.ddContext, display_text.c_str(), displayPos2D, displayColor,
                  0.55f);
 }
 
@@ -160,7 +217,7 @@ void GL_Implement::drawFrustum(const ThreadData &td) {
   const ddVec3 origin = {-8.0f, 0.5f, 14.0f};
   drawLabel(td, origin, "frustum + axes");
 
-  // The frustum will depict a fake camera:
+  // The fsrustum will depict a fake camera:
   const Matrix4 proj =
       Matrix4::perspective(degToRad(45.0f), 800.0f / 600.0f, 0.5f, 4.0f);
   const Matrix4 view =

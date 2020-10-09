@@ -28,6 +28,11 @@
  */
 #define Calibrator_TimeOut 10
 
+/**
+ * @brief times new value of some calibration sended
+ */
+#define Calibrator_AlterCommand_SendTime 3
+
 struct line_frame {
   std::deque<float> data = std::deque<float>(DataMonitor_Max_BufferSize, 0.0f);
   float upper_bound = 0.0f;
@@ -58,83 +63,86 @@ class CalibrationVariable {
   T init_;
 };
 
-class Any_CalibrationRepository {
+class Any_Repository {
  public:
-  void get_RegisteredCalibSet(std::vector<std::string>& list) const {
+  template <typename T, typename... ARGS>
+  std::pair<std::shared_ptr<T>, bool> try_RegisterVar(const std::string& name,
+                                                      ARGS&&... args) {
+    return insert(name,
+                  create_CalibrationVariable(std::forward<ARGS>(args)...));
+  }
+
+  void get_RegisteredSet(
+      std::vector<std::pair<std::string, std::string>>& list) const {
     list.clear();
-    size_t capacity = calib_repository_.size();
+    size_t capacity = var_repository_.size();
     list.resize(capacity);
     size_t counter = 0u;
-    for (const auto& item : calib_repository_) {
-      list[counter++] = item.first;
+    for (const auto& item : var_repository_) {
+      list[counter++] = std::make_pair(item.first, item.second.first);
     }
   }
 
-  std::pair<const std::pair<std::string, void*>&, bool> get_RegisteredCalib(
+  template <typename T>
+  std::pair<const std::shared_ptr<T>, bool> get_RegisteredVar(
       const std::string& name) const {
-    auto itr_name = calib_repository_.find(name);
-    if (itr_name == calib_repository_.end()) {
-      return {{"", nullptr}, false};
+    auto itr_name = var_repository_.find(name);
+    if (itr_name == var_repository_.end()) {
+      return {nullptr, false};
     }
-    return {itr_name->second, true};
+    if (typeid(T).name() != itr_name->first) {
+      return {nullptr, false};
+    }
+    return {static_cast<std::shared_ptr<T>>(itr_name->second.second), true};
   }
 
   template <typename T>
-  bool set_calib(const std::string& name, const T& var) {
-    auto itr_name = calib_repository_.find(name);
-    if (itr_name == calib_repository_.end()) {
-      return false;
+  std::pair<std::shared_ptr<T>, bool> get_MutableRegisteredVar(
+      const std::string& name) {
+    auto itr_name = var_repository_.find(name);
+    if (itr_name == var_repository_.end()) {
+      return {nullptr, false};
     }
-    std::string type_name = typeid(T).name();
-    dynamic_cast<CalibrationVariable<T>*>(itr_name->second)->set_Var(var);
-    return true;
+    if (typeid(T).name() != itr_name->first) {
+      return {nullptr, false};
+    }
+    return {static_cast<std::shared_ptr<T>>(itr_name->second.second), true};
   }
 
-  template <typename T>
-  std::pair<CalibrationVariable<T>*, bool> register_Calibration(
-      const std::string& name, T var, T max, T min, T init) {
-    return insert(name, create_CalibrationVariable(var, max, min, init));
-  }
+  void clear() { var_repository_.clear(); }
 
-  void clear() { calib_repository_.clear(); }
-
-  void remove_Calib(const std::string& name) {
-    auto res_find = calib_repository_.find(name);
-    if (res_find != calib_repository_.end()) {
-      calib_repository_.erase(res_find);
+  void remove_Var(const std::string& name) {
+    auto res_find = var_repository_.find(name);
+    if (res_find != var_repository_.end()) {
+      var_repository_.erase(res_find);
     }
   }
 
  private:
   template <typename T>
-  std::pair<CalibrationVariable<T>*, bool> insert(
-      const std::string& name, CalibrationVariable<T>* ptr_calib) {
+  std::pair<std::shared_ptr<T>, bool> insert(const std::string& name,
+                                             std::shared_ptr<T> ptr_calib) {
     std::string type_name = typeid(T).name();
-    auto ins_res = calib_repository_.insert(std::make_pair(
-        name, std::make_pair(type_name, static_cast<void*>(ptr_calib))));
+    auto ins_res = var_repository_.insert(std::make_pair(
+        name, std::make_pair(type_name,
+                             static_cast<std::shared_ptr<void>>(ptr_calib))));
     if (ins_res.second) {
       return {ptr_calib, true};
     }
     delete ptr_calib;
-    return {dynamic_cast<CalibrationVariable<T>*>(ins_res.first->second),
-            false};
+    return {static_cast<std::shared_ptr<T>>(ins_res.first->second), false};
   }
 
-  template <typename T>
-  CalibrationVariable<T>* create_CalibrationVariable(const std::string& str,
-                                                     T var, T max, T min,
-                                                     T init) const {
-    return new CalibrationVariable<T>(str, var, max, min, init);
+  template <typename T, typename... ARGS>
+  std::shared_ptr<T> create_CalibrationVariable(ARGS&&... args) const {
+    return std::make_shared<T>(std::forward<ARGS>(args)...);
   }
 
  private:
-  std::map<std::string, std::pair<std::string, void*>> calib_repository_;
+  std::map<std::string, std::pair<std::string, std::shared_ptr<void*>>>
+      var_repository_;
 
  public:
-  Any_CalibrationRepository() = default;
-  ~Any_CalibrationRepository() {
-    for (auto& type_set : calib_repository_) {
-      delete type_set.second.second;
-    }
-  }
+  Any_Repository() = default;
+  ~Any_Repository() = default;
 };

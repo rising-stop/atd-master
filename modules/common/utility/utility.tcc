@@ -41,5 +41,51 @@ void CString::cstring_split(const std::string &split_line, const char comma,
   }
 }
 
+template <typename T, typename... ARGS>
+std::pair<std::shared_ptr<T>, bool> Any_Repository::insert(
+    const std::string &name, ARGS &&... args) {
+  size_t type_name = typeid(T).hash_code();
+  auto ptr_var = std::make_shared<T>(std::forward<ARGS>(args)...);
+  auto ins_res = var_repository_.insert(std::make_pair(
+      name,
+      std::make_pair(type_name, static_cast<std::shared_ptr<void>>(ptr_var))));
+  if (ins_res.second) {
+    return {ptr_var, true};
+  }
+  return {static_cast<std::shared_ptr<T>>(ins_res.first->second), false};
+}
+
+template <typename T, typename... ARGS>
+std::pair<std::shared_ptr<T>, bool> Any_Repository::try_RegisterVar(
+    const std::string &name, ARGS &&... args) {
+  return insert<T>(name, std::forward<ARGS>(args)...);
+}
+
+template <typename T>
+std::pair<const std::shared_ptr<T>, bool> Any_Repository::get_RegisteredVar(
+    const std::string &name) const {
+  auto itr_name = var_repository_.find(name);
+  if (itr_name == var_repository_.end()) {
+    return {nullptr, false};
+  }
+  if (typeid(T).hash_code() != itr_name->first) {
+    return {nullptr, false};
+  }
+  return {static_cast<std::shared_ptr<T>>(itr_name->second.second), true};
+}
+
+template <typename T>
+std::pair<std::shared_ptr<T>, bool> Any_Repository::get_MutableRegisteredVar(
+    const std::string &name) {
+  auto itr_name = var_repository_.find(name);
+  if (itr_name == var_repository_.end()) {
+    return {nullptr, false};
+  }
+  if (typeid(T).hash_code() != itr_name->first) {
+    return {nullptr, false};
+  }
+  return {static_cast<std::shared_ptr<T>>(itr_name->second.second), true};
+}
+
 }  // namespace utility
 }  // namespace atd

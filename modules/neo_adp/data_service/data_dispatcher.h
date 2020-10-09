@@ -49,10 +49,7 @@ class DataDispatcher final : public Singleton {
    */
   Proto_Messages<MONITOR_MSG> frame_msg_;
   LCM_Proxy<Proto_Messages<MONITOR_MSG>> msg_reciver_{LCM_MODE::READER,
-                                                      "PlanningLog"};
-  Proto_Messages<atd::protocol::DISPLAY_CALIBRATION> cal_var_;
-  LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>>
-      calib_publisher_{LCM_MODE::SENDER, "PlanningCalib"};
+                                                   "PlanningLog"};
 
   /**
    * @brief data base for data-monitor

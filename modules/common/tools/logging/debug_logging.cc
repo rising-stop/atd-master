@@ -13,12 +13,14 @@ void DebugLogging::reset_Frame() {
   log_frame_.mutable_title()->set_counter_no(COUNTER("planning_log"));
 
   calib_listener_.subscribe(cal_var_);
-  for (auto& var4loop : cal_var_.variables()) {
-    auto itr = calib_container_.find(var4loop.name());
-    if (itr == calib_container_.end()) {
-      continue;
-    }
-    itr->second.var_ = std::stof(var4loop.data().c_str());
+  for (const auto& calib4loop : cal_var_.calib_float()) {
+    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
+  }
+  for (const auto& calib4loop : cal_var_.calib_int()) {
+    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
+  }
+  for (const auto& calib4loop : cal_var_.calib_uint()) {
+    calib_repository_.set_calib(calib4loop.name(), calib4loop.data());
   }
 }
 
@@ -34,44 +36,61 @@ atd::protocol::DISPLAY_LINE* DebugLogging::get_PtrElementLine() {
 atd::protocol::DISPLAY_PLOYNOMIAL* DebugLogging::get_PtrElementPoly() {
   return log_frame_.mutable_gl_element()->add_ploy_set();
 }
-atd::protocol::VARIABLE* DebugLogging::get_PtrElementDisplay() {
-  return log_frame_.mutable_display_element()->add_content();
+atd::protocol::FLOAT_VAR* DebugLogging::get_PtrElementDisplay_As_Float() {
+  return log_frame_.mutable_display_element()->add_float_vars();
 }
-
-std::pair<float, bool> DebugLogging::get_CalibVariables(
-    const std::string& name) {
-  auto itr_target = calib_container_.find(name);
-  if (itr_target == calib_container_.end()) {
-    return {0.0f, false};
-  }
-  return {itr_target->second.var_, true};
+atd::protocol::INT_VAR* DebugLogging::get_PtrElementDisplay_As_Int() {
+  return log_frame_.mutable_display_element()->add_int_vars();
 }
-
-void DebugLogging::try_register_Calibration(const std::string& name, float& var,
-                                            float max, float min,
-                                            float init_var) {
-  if (max < min) {
-    CUSTOM_EXCEPTION("calibration variable max is lower than min");
-  }
-  auto ins_res =
-      calib_container_.insert({name, {name, var, max, min, init_var}});
-  if (!ins_res.second) {
-    CUSTOM_EXCEPTION("calibration variable ", name, " has been registered");
-  }
-  ins_res.first->second.var_ = std::min(std::max(min, init_var), max);
-  ins_res.first->second.max_ = max;
-  ins_res.first->second.min_ = min;
-  ins_res.first->second.init_ = init_var;
+atd::protocol::UINT_VAR* DebugLogging::get_PtrElementDisplay_As_UInt() {
+  return log_frame_.mutable_display_element()->add_uint_vars();
+}
+atd::protocol::NORMAL_VAR* DebugLogging::get_PtrElementDisplay_As_String() {
+  return log_frame_.mutable_display_element()->add_normal_vars();
 }
 
 void DebugLogging::publish_Frame() {
-  for (auto pair4loop : calib_container_) {
-    auto ptr_var = log_frame_.mutable_variables()->add_variables();
-    ptr_var->set_name(pair4loop.second.name_);
-    ptr_var->set_data(std::to_string(pair4loop.second.var_));
-    ptr_var->set_data_upper_bound(std::to_string(pair4loop.second.max_));
-    ptr_var->set_data_lower_bound(std::to_string(pair4loop.second.min_));
-    ptr_var->set_data_init(std::to_string(pair4loop.second.init_));
+  std::vector<std::pair<std::string, std::string>> calib_list;
+  calib_repository_.get_RegisteredCalibSet(calib_list);
+  for (auto name4loop : calib_list) {
+    if (name4loop.second == typeid(float).name()) {
+      auto ptr_var = log_frame_.mutable_calibrations()->add_calib_float();
+      auto find_res =
+          calib_repository_.get_RegisteredCalib<float>(name4loop.first);
+      if (!find_res.second) {
+        continue;
+      }
+      ptr_var->set_name(name4loop.first);
+      ptr_var->set_data(find_res.first->get_Var());
+      ptr_var->set_data_upper_bound(find_res.first->get_Max());
+      ptr_var->set_data_lower_bound(find_res.first->get_Min());
+      ptr_var->set_data_init(find_res.first->get_Init());
+    } else if (name4loop.second == typeid(int).name()) {
+      auto ptr_var = log_frame_.mutable_calibrations()->add_calib_int();
+      auto find_res =
+          calib_repository_.get_RegisteredCalib<int>(name4loop.first);
+      if (!find_res.second) {
+        continue;
+      }
+      ptr_var->set_name(name4loop.first);
+      ptr_var->set_data(find_res.first->get_Var());
+      ptr_var->set_data_upper_bound(find_res.first->get_Max());
+      ptr_var->set_data_lower_bound(find_res.first->get_Min());
+      ptr_var->set_data_init(find_res.first->get_Init());
+    } else if (name4loop.second == typeid(uint32_t).name()) {
+      auto ptr_var = log_frame_.mutable_calibrations()->add_calib_uint();
+      auto find_res =
+          calib_repository_.get_RegisteredCalib<uint32_t>(name4loop.first);
+      if (!find_res.second) {
+        continue;
+      }
+      ptr_var->set_name(name4loop.first);
+      ptr_var->set_data(find_res.first->get_Var());
+      ptr_var->set_data_upper_bound(find_res.first->get_Max());
+      ptr_var->set_data_lower_bound(find_res.first->get_Min());
+      ptr_var->set_data_init(find_res.first->get_Init());
+    } else {
+    }
   }
   log_publisher_.publish(log_frame_);
 }

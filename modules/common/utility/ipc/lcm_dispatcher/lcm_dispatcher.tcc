@@ -77,7 +77,12 @@ void LCM_Proxy<MSG_TYPE>::publisher_spin() {
     if (!lcm_rbuf) {
       continue;
     }
-    ptr_lcm_->publish(channel_, lcm_rbuf->data, lcm_rbuf->data_size);
+    if (ptr_lcm_->good()) {
+      ptr_lcm_->publish(channel_, lcm_rbuf->data, lcm_rbuf->data_size);
+    } else {
+      init();
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
 }
 

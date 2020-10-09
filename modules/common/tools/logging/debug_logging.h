@@ -3,6 +3,7 @@
 #include "modules/common/utility/ipc/lcm_dispatcher/lcm_dispatcher.h"
 #include "modules/common/utility/timer.h"
 #include "modules/common/utility/utility.h"
+#include "modules/neo_adp/data_service/basic_setting.h"
 #include "protobuf_msg/planning_log.pb.h"
 
 #define DISPLAY_SPEED "spd_ms"
@@ -32,15 +33,15 @@ class DebugLogging : public Singleton {
   atd::protocol::FLOAT_VAR* get_PtrElementDisplay_As_Float();
   atd::protocol::INT_VAR* get_PtrElementDisplay_As_Int();
   atd::protocol::UINT_VAR* get_PtrElementDisplay_As_UInt();
-  google::protobuf::string* get_PtrElementDisplay_As_String();
+  atd::protocol::NORMAL_VAR* get_PtrElementDisplay_As_String();
 
   atd::protocol::FRAME_CONTENT* get_PtrLogFrame();
 
-  void try_register_FloatCalibration(const std::string&, float&, float, float,
-                                     float);
-  void try_register_IntCalibration(const std::string&, int&, int, int, int);
-  void try_register_UIntCalibration(const std::string&, uint32_t&, uint32_t,
-                                    uint32_t, uint32_t);
+  template <typename T>
+  bool try_register_Calibration(const std::string&, const T&, const T&,
+                                const T&);
+  template <typename T>
+  std::pair<T, bool> try_fetch_Calibration(const std::string&) const;
 
  private:
   Proto_Messages<atd::protocol::MONITOR_MSG> log_frame_;
@@ -51,21 +52,7 @@ class DebugLogging : public Singleton {
   LCM_Proxy<Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>> calib_listener_{
       LCM_MODE::READER, "PlanningCalib"};
 
-  template <typename T>
-  class CalibrationVariable {
-   public:
-    CalibrationVariable(const std::string& str, T& var, T max, T min, T init)
-        : name_(str), var_(var), max_(max), min_(min), init_(init) {}
-    std::string name_;
-    T& var_;
-    T max_;
-    T min_;
-    T init_;
-  };
-
-  std::map<std::string, CalibrationVariable<float>> float_calib_container_;
-  std::map<std::string, CalibrationVariable<int>> int_calib_container_;
-  std::map<std::string, CalibrationVariable<uint32_t>> uint_calib_container_;
+  Any_CalibrationRepository calib_repository_;
 
  private:
   DebugLogging();
@@ -76,7 +63,7 @@ class StringConverter {
  public:
   template <typename T>
   std::string operator()(const T& var) {
-    return std::to_string(static_cast<float>(var));
+    return std::to_string(var);
   }
 
   StringConverter() = default;
@@ -88,11 +75,32 @@ class Writer {
   Writer& construct();
 
   template <typename T, typename TO_STRING = StringConverter>
-  Writer& LogVar(const std::string& arg_name, const T& arg,
-                 TO_STRING func = StringConverter()) {
-    auto ptr_var = ptr_content_->add_variables();
+  Writer& LogNormal(const std::string& arg_name, const T& arg,
+                    TO_STRING func = StringConverter()) {
+    auto ptr_var = ptr_content_->add_normal_vars();
     ptr_var->set_name(arg_name);
     ptr_var->set_data(func(arg));
+    return *this;
+  }
+
+  Writer& LogFloat(const std::string& arg_name, const float& arg) {
+    auto ptr_var = ptr_content_->add_float_vars();
+    ptr_var->set_name(arg_name);
+    ptr_var->set_data(arg);
+    return *this;
+  }
+
+  Writer& LogInt(const std::string& arg_name, const int& arg) {
+    auto ptr_var = ptr_content_->add_int_vars();
+    ptr_var->set_name(arg_name);
+    ptr_var->set_data(arg);
+    return *this;
+  }
+
+  Writer& LogUInt(const std::string& arg_name, const uint32_t& arg) {
+    auto ptr_var = ptr_content_->add_uint_vars();
+    ptr_var->set_name(arg_name);
+    ptr_var->set_data(arg);
     return *this;
   }
 
