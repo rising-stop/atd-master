@@ -104,7 +104,7 @@ void Calibrator::render_FloatConsole(const std::string& name,
 
   std::string reset_botton_name = "Reset ";
   reset_botton_name.append(name);
-  bool is_reset = ImGui::Button(reset_botton_name.c_str()));
+  bool is_reset = ImGui::Button(reset_botton_name.c_str());
 
   std::string slider_name;
   slider_name.append(
@@ -135,7 +135,7 @@ void Calibrator::render_IntConsole(const std::string& name,
 
   std::string reset_botton_name = "Reset ";
   reset_botton_name.append(name);
-  bool is_reset = ImGui::Button(reset_botton_name.c_str()));
+  bool is_reset = ImGui::Button(reset_botton_name.c_str());
 
   std::string slider_name;
   slider_name.append(atd::utility::CString::cstring_cat("%d", var->get_Var()));
@@ -164,7 +164,7 @@ void Calibrator::render_UIntConsole(const std::string& name,
 
   std::string reset_botton_name = "Reset ";
   reset_botton_name.append(name);
-  bool is_reset = ImGui::Button(reset_botton_name.c_str()));
+  bool is_reset = ImGui::Button(reset_botton_name.c_str());
 
   std::string slider_name;
   slider_name.append(atd::utility::CString::cstring_cat("%d", var->get_Var()));

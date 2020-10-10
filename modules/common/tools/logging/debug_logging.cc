@@ -64,6 +64,9 @@ atd::protocol::UINT_VAR* DebugLogging::get_PtrElementDisplay_As_UInt() {
 atd::protocol::NORMAL_VAR* DebugLogging::get_PtrElementDisplay_As_String() {
   return log_frame_.mutable_display_element()->add_normal_vars();
 }
+atd::protocol::FRAME_CONTENT* DebugLogging::get_PtrLogFrame(){
+  return log_frame_.mutable_log()->add_content();
+}
 
 void DebugLogging::publish_Frame() {
   for (auto& pair4loop : calib_repository_) {

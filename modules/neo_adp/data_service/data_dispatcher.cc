@@ -41,41 +41,57 @@ void DataDispatcher::updata_Database() {
   }
 }
 
-// void DataDispatcher::send_CalibrationAlternation() {
-//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-//   calib_publisher_.publish(cal_var_);
-//   cal_var_.Clear();
-// }
-
-// void DataDispatcher::set_AlteredCalibration(const std::string& name,
-//                                             float var) {
-//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-
-//   auto ptr_float = cal_var_.add_calib_float();
-//   ptr_float->set_name(name);
-//   ptr_float->set_data(var);
-// }
-
-// void DataDispatcher::set_AlteredCalibration(const std::string& name, int var) {
-//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-//   auto ptr_int = cal_var_.add_calib_int();
-//   ptr_int->set_name(name);
-//   ptr_int->set_data(var);
-// }
-
-// void DataDispatcher::set_AlteredCalibration(const std::string& name, uint var) {
-//   unique_writeguard<WfirstRWLock> rwguard(rwlock_cal_var_);
-//   auto ptr_uint = cal_var_.add_calib_uint();
-//   ptr_uint->set_name(name);
-//   ptr_uint->set_data(var);
-// }
-
 bool DataDispatcher::get_LatestFrame(MONITOR_MSG& frame) const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
     return false;
   }
   frame = frame_msg_;
+  return true;
+}
+
+bool DataDispatcher::get_LatestHeader(FRAME_HEADER& frame) const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return false;
+  }
+  frame = frame_msg_.title();
+  return true;
+}
+
+bool DataDispatcher::get_LatestLogInfo(LOG_CONTENT& frame) const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return false;
+  }
+  frame = frame_msg_.log();
+  return true;
+}
+
+bool DataDispatcher::get_LatestGLElement(OPENGL_ELEMENT& frame) const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return false;
+  }
+  frame = frame_msg_.gl_element();
+  return true;
+}
+
+bool DataDispatcher::get_LatestDisplayContent(DISPLAY_CONTENT& frame) const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return false;
+  }
+  frame = frame_msg_.display_element();
+  return true;
+}
+
+bool DataDispatcher::get_LatestDisplayCalib(DISPLAY_CALIBRATION& frame) const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return false;
+  }
+  frame = frame_msg_.calibrations();
   return true;
 }
 

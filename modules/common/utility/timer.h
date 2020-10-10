@@ -49,7 +49,7 @@ class Runtime_Calculator : public Singleton {
 
   float get_Rand() {
     srand(static_cast<unsigned int>(time(NULL)));
-    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX + 1);
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
   }
 
  private:

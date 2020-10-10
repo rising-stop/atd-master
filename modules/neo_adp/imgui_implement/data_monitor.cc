@@ -33,8 +33,11 @@ void DataObserver::render() {
   ImGui::Separator();
 }
 
+void DataObserver::set_DisplayHeader(uint32_t header) { header_ = header; }
+void DataObserver::set_DisplayTailer(uint32_t tailer) { tailer_ = tailer; }
+
 void DataObserver::menu_handler() {
-  for (const auto& signal : data_list_) {
+  for (auto& signal : data_list_) {
     if (ob_list_.insert(std::make_pair(signal.first, menu_info())).second) {
       register_signal(signal.first);
     }
@@ -51,7 +54,7 @@ void DataObserver::menu_handler() {
       menu_item.second.info_ = "offline";
     } else {
       menu_item.second.info_ =
-          std::to_string(data_list_.at(menu_item.first).data.back());
+          std::to_string(data_list_.at(menu_item.first).data_.back());
     }
   }
 }
@@ -74,14 +77,14 @@ void DataObserver::plot_render() {
     line_colors.push_back(
         ImGui::ColorConvertFloat4ToU32(color_dispatcher_.at(signal.first)));
     overlay_text.push_back(signal.first);
-    v_min = std::fmin(v_min, data_list_.at(signal.first).lower_bound);
-    v_max = std::fmax(v_max, data_list_.at(signal.first).upper_bound);
+    v_min = std::fmin(v_min, data_list_.at(signal.first).lower_bound_);
+    v_max = std::fmax(v_max, data_list_.at(signal.first).upper_bound_);
   }
   ImGui::MulitPlot(
       id_,
       [&](const std::string name, int idx) -> float {
-        return data_list_.at(name).data.at(DataMonitor_Max_BufferSize -
-                                           sample_range_ + idx);
+        return data_list_.at(name).data_.at(DataMonitor_Max_BufferSize -
+                                            sample_range_ + idx);
       },
       sample_range_, 0, line_colors, overlay_text, v_min, v_max,
       ImVec2(0, 160));
@@ -130,6 +133,15 @@ DataObserver::DataObserver(const std::string& id,
  */
 
 void DataMonitor::render() {
+  std::string range_slider_name{"Range: "};
+  range_slider_name.append(id_);
+  ImGui::SliderInt(range_slider_name.c_str(), &sample_range_,
+                   DataMonitor_Min_BufferSize, DataMonitor_Max_BufferSize);
+  std::string focus_slider_name{"Focus: "};
+  focus_slider_name.append(id_);
+  ImGui::SliderInt(focus_slider_name.c_str(), &sample_focus_, sample_range_,
+                   DataMonitor_Max_BufferSize);
+
   if (ImGui::Button("Monitor - Add on")) {
     observer_set_.push_back(new DataObserver(
         atd::utility::CString::cstring_cat("%d", ++monitor_counter_),
@@ -165,12 +177,14 @@ bool DataMonitor::update_data_base() {
   for (auto signal : frame_data) {
     auto res_ins =
         data_repository_.insert(std::make_pair(signal.first, line_frame()));
-    data_repository_[signal.first].data.pop_front();
-    data_repository_[signal.first].data.push_back(signal.second);
-    data_repository_[signal.first].upper_bound =
-        std::fmax(data_repository_[signal.first].upper_bound, signal.second);
-    data_repository_[signal.first].lower_bound =
-        std::fmin(data_repository_[signal.first].lower_bound, signal.second);
+    data_repository_[signal.first].data_.pop_front();
+    data_repository_[signal.first].data_.push_back(signal.second);
+    data_repository_[signal.first].upper_bound_ =
+        std::fmax(data_repository_[signal.first].upper_bound_, signal.second);
+    data_repository_[signal.first].lower_bound_ =
+        std::fmin(data_repository_[signal.first].lower_bound_, signal.second);
   }
   return true;
 }
+
+void DataMonitor::set_name(const std::string& name) { name_ = name; }

@@ -18,12 +18,6 @@ class DataDispatcher final : public Singleton {
    */
   void updata_Database();
 
-  // void send_CalibrationAlternation();
-
-  // void set_AlteredCalibration(const std::string&, float);
-  // void set_AlteredCalibration(const std::string&, int);
-  // void set_AlteredCalibration(const std::string&, uint);
-
   bool get_LatestFrame(MONITOR_MSG& frame) const;
 
   bool get_LatestHeader(FRAME_HEADER& frame) const;

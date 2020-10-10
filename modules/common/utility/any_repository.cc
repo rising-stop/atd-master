@@ -61,7 +61,7 @@ Any_Repository_iterator& Any_Repository_iterator::operator++() {
 }
 Any_Repository_iterator Any_Repository_iterator::operator++(int) {
   auto itr_old = *this;
-  this->decrement();
+  this->increment();
   return itr_old;
 }
 

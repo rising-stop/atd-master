@@ -28,6 +28,13 @@ class Any_Repository {
           type_name_(name),
           hash_code_(hash_code),
           size_(size) {}
+
+    Variable(std::shared_ptr<void> &&pointer, const std::string &name,
+             const size_t &hash_code, const size_t &size)
+        : pointer_(pointer),
+          type_name_(name),
+          hash_code_(hash_code),
+          size_(size) {}
   };
 
  public:
@@ -118,7 +125,6 @@ class const_Any_Repository_iterator {
   const Any_Repository *ptr_any_ = nullptr;
 
   void increment();
-  void decrement();
 };
 
 /**

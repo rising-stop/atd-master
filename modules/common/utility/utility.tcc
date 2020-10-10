@@ -1,13 +1,19 @@
 #include "utility.h"
+#include <cstring>
 
 namespace atd {
 namespace utility {
 
 template <typename... ARG>
 std::string CString::cstring_cat(const char *str_cat, ARG &&... args) {
-  std::string res;
-  sprintf(res.data(), str_cat, std::forward<ARG>(args)...);
-  return res;
+  int char_num = strlen(str_cat) + 12 * sizeof...(ARG);
+  char *str_container = new char[char_num];
+  while (!sprintf(str_container, str_cat, std::forward<ARG>(args)...)) {
+    delete[] str_container;
+    char_num += 12 * sizeof...(ARG);
+    str_container = new char[char_num];
+  }
+  return std::string(str_container);
 }
 
 template <typename METHOD>

@@ -18,33 +18,6 @@ namespace atd {
 namespace utility {
 
 /**
- * @brief Macro SINGLETON
- * declare class as the singleton, using default constructor
- */
-// #define SINGLETON(TYPE)                              \
-//  public:                                             \
-//   static TYPE *instance() {                          \
-//     std::lock_guard<std::mutex> lk(instance_mutex_); \
-//     std::call_once(flag_init_, &init);               \
-//     return instance_;                                \
-//   }                                                  \
-//                                                      \
-//  private:                                            \
-//   static void init() { instance_ = new TYPE(); }     \
-//   static TYPE *instance_;                            \
-//   static std::once_flag flag_init_;                  \
-//   static std::mutex instance_mutex_;                 \
-//   TYPE() = default;                                  \
-//   ~TYPE() = default;                                 \
-//   TYPE(const TYPE &) = delete;                       \
-//   TYPE(TYPE &&) = delete;
-
-// #define SINGLETON_MEMBER_REGISTER(TYPE) \
-//   TYPE *TYPE::instance_ = nullptr;      \
-//   std::once_flag TYPE::flag_init_;      \
-//   std::mutex TYPE::instance_mutex_;
-
-/**
  * @class Factory
  * @brief Implements a Factory design pattern with Register and Create methods
  *

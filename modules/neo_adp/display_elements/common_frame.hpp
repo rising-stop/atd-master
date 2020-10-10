@@ -599,7 +599,7 @@ class OpenGL_Frame : public atd::utility::Singleton {
     while (!glfwWindowShouldClose(ptr_mainwindow_)) {
       const double t0s = glfwGetTime();
 
-      atd::utility::Singleton::instance<DataDispatcher>()->spin();
+      atd::utility::Singleton::instance<DataDispatcher>()->updata_Database();
 
       glfwPollEvents();  // checking outsource events
       glfwSwapBuffers(ptr_mainwindow_);

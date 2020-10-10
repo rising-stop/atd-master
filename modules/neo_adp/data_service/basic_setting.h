@@ -33,8 +33,3 @@
  */
 #define Calibrator_AlterCommand_SendTime 3
 
-struct line_frame {
-  std::deque<float> data = std::deque<float>(DataMonitor_Max_BufferSize, 0.0f);
-  float upper_bound = 0.0f;
-  float lower_bound = 0.0f;
-};

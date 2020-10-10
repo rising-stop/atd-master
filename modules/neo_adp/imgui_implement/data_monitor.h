@@ -9,6 +9,12 @@
 #include "imgui_basic_component.h"
 #include "modules/neo_adp/data_service/data_dispatcher.h"
 
+struct line_frame {
+  std::deque<float> data_;
+  float upper_bound_ = 0.0f;
+  float lower_bound_ = 0.0f;
+};
+
 class DataObserver : public ImGui_Components {
  public:
   /**
@@ -17,6 +23,9 @@ class DataObserver : public ImGui_Components {
   virtual void render() override;
 
   const std::string& get_ID();
+
+  void set_DisplayHeader(uint32_t header);
+  void set_DisplayTailer(uint32_t tailer);
 
  private:
   /**
@@ -61,14 +70,16 @@ class DataObserver : public ImGui_Components {
    */
   std::map<std::string, ImVec4> color_dispatcher_;
 
-  int signal_counter_ = 0;
+  uint32_t signal_counter_ = 0;
 
-  /**
-   * @brief adjustable slider parameter calculation, decide the range of
-   * data focus
-   */
-  int sample_range_ = DataMonitor_Max_BufferSize;
-  int sample_focus_ = DataMonitor_Max_BufferSize;
+  // /**
+  //  * @brief adjustable slider parameter calculation, decide the range of
+  //  * data focus
+  //  */
+  // int sample_range_ = DataMonitor_Max_BufferSize;
+  // int sample_focus_ = DataMonitor_Max_BufferSize;
+  uint32_t header_ = 0;
+  uint32_t tailer_ = 0;
 
  private:
   static const int default_color_set_num = 5;
@@ -87,6 +98,8 @@ class DataMonitor : public ImGui_Components {
    */
   virtual void render() override;
 
+  void set_name(const std::string&);
+
  private:
   /**
    * @brief receiving new data
@@ -94,6 +107,8 @@ class DataMonitor : public ImGui_Components {
   bool update_data_base();
 
  private:
+  std::string name_;
+
   std::map<std::string, line_frame> data_repository_;
 
   std::vector<DataObserver*> observer_set_;
