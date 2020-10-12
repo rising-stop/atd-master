@@ -7184,13 +7184,41 @@ int ImGui::MulitPlotEx(
     const float inv_scale = 1.0f / (scale_top - scale_bottom);
 
     const ImU32 col_hovered = GetColorU32(ImGuiCol_PlotLinesHovered);
+    const ImU32 col_zero_line =
+        ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
+    const ImU32 col_text =
+        ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
     ImVec2 pos_key_top{std::min(g.IO.MousePos.x, inner_bb.Max.x),
                        inner_bb.Min.y};
     ImVec2 pos_key_bottom{std::min(g.IO.MousePos.x, inner_bb.Max.x),
                           inner_bb.Max.y};
-
     window->DrawList->AddLine(pos_key_top, pos_key_bottom, col_hovered);
+
+    const int num_ref_hline = 5;
+    float ref_line_interval = (inner_bb.Max.y - inner_bb.Min.y) / (num_ref_hline - 1);
+
+    for (int no4loop = 0; no4loop < num_ref_hline; no4loop++) {
+      float cord_y = inner_bb.Min.y + ref_line_interval * no4loop;
+      window->DrawList->AddLine({inner_bb.Max.x, cord_y},
+                                {inner_bb.Min.x, cord_y}, col_zero_line);
+    }
+    std::string upper_str = std::to_string(scale_top),
+                lower_str = std::to_string(scale_bottom);
+    const float single_text_size = 7.0f;
+    window->DrawList->AddText(
+        {inner_bb.Max.x - single_text_size * upper_str.size(), inner_bb.Min.y},
+        col_text, upper_str.c_str());
+    window->DrawList->AddText(
+        {inner_bb.Max.x - single_text_size * lower_str.size(),
+         inner_bb.Max.y - 2 * single_text_size},
+        col_text, lower_str.c_str());
+    float ref_vline_x = inner_bb.Min.x;
+    while (ref_vline_x < inner_bb.Max.x) {
+      window->DrawList->AddLine({ref_vline_x, inner_bb.Min.y},
+                                {ref_vline_x, inner_bb.Max.y}, col_zero_line);
+      ref_vline_x += ref_line_interval;
+    }
 
     for (int index = 0; index < data_set_num; index++) {
       float v0 = 0.0f;
@@ -7436,7 +7464,7 @@ void ImGui::MulitPlot(
     std::function<float(const std::string&, int)> values_getter,
     int values_count, int values_offset, const std::vector<ImU32>& colors,
     const std::vector<std::string>& overlay_text, float scale_min,
-    float scale_max, ImVec2 frame_size, bool flag_is_auto) {
+    float scale_max, ImVec2 frame_size) {
   MulitPlotEx(label, values_getter, values_count, values_offset, colors,
               overlay_text, scale_min, scale_max, frame_size);
 }

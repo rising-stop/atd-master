@@ -81,6 +81,9 @@ class DataObserver : public ImGui_Components {
   uint32_t header_ = 0;
   uint32_t tailer_ = DataMonitor_Min_BufferSize;
 
+  bool flag_auto_zoom_ = true;
+  float plot_limit_[2] = {0.1, -0.1};
+
  private:
   static const int default_color_set_num = 5;
   static const float default_color_list[default_color_set_num][4];
@@ -100,6 +103,8 @@ class DataMonitor : public ImGui_Components {
 
   void set_name(const std::string&);
 
+  void set_MaxBufferSize(uint32_t);
+
  private:
   /**
    * @brief receiving new data
@@ -107,6 +112,11 @@ class DataMonitor : public ImGui_Components {
   bool update_data_base();
 
  private:
+  uint32_t max_buffer_size_ = DataMonitor_Max_BufferSize;
+
+  int sample_range_ = DataMonitor_Max_BufferSize;
+  int sample_focus_ = DataMonitor_Max_BufferSize;
+
   std::string name_;
 
   std::map<std::string, line_frame> data_repository_;
@@ -118,5 +128,6 @@ class DataMonitor : public ImGui_Components {
 
  public:
   DataMonitor() = default;
+  DataMonitor(const std::string&, uint32_t);
   ~DataMonitor() = default;
 };

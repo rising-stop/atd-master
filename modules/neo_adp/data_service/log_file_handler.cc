@@ -6,7 +6,7 @@ bool LCM_File_Handler::open_LogFile(const std::string& name) {
   }
   name_ = name;
   mode_ = READ;
-  auto ptr_file = std::make_shared<lcm::LogFile>((name, "r"));
+  auto ptr_file = std::make_shared<lcm::LogFile>(name, "r");
   if (!ptr_file->good()) {
     return false;
   }
@@ -19,7 +19,7 @@ bool LCM_File_Handler::create_LogFile(const std::string& name) {
   }
   name_ = name;
   mode_ = WRITE;
-  auto ptr_file = std::make_shared<lcm::LogFile>((name, "w"));
+  auto ptr_file = std::make_shared<lcm::LogFile>(name, "w");
   if (!ptr_file->good()) {
     return false;
   }

@@ -11,15 +11,6 @@ const float
         {175.0f / 255.0f, 215.0f / 255.0f, 237.0f / 255.0f, 0.7f}};
 
 void DataObserver::render() {
-  std::string range_slider_name{"Range: "};
-  range_slider_name.append(id_);
-  ImGui::SliderInt(range_slider_name.c_str(), &sample_range_,
-                   DataMonitor_Min_BufferSize, DataMonitor_Max_BufferSize);
-  std::string focus_slider_name{"Focus: "};
-  focus_slider_name.append(id_);
-  ImGui::SliderInt(focus_slider_name.c_str(), &sample_focus_, sample_range_,
-                   DataMonitor_Max_BufferSize);
-
   std::string botton_name{"Sheet: "};
   botton_name.append(id_);
 
@@ -28,6 +19,12 @@ void DataObserver::render() {
   if (ImGui::BeginPopup(id_.c_str())) {
     menu_handler();
     ImGui::EndPopup();
+  }
+  ImGui::SameLine();
+  ImGui::Checkbox("Auto Zoom", &flag_auto_zoom_);
+  ImGui::InputFloat2("Plot Bounds", plot_limit_);
+  if (plot_limit_[0] < plot_limit_[1]) {
+    plot_limit_[0] = plot_limit_[1] + 0.1;
   }
   plot_render();
   ImGui::Separator();
@@ -95,6 +92,19 @@ void DataObserver::plot_render() {
     overlay_text.push_back(signal.first);
     v_max = std::fmax(v_max, data_list_.at(signal.first).upper_bound_);
     v_min = std::fmin(v_min, data_list_.at(signal.first).lower_bound_);
+  }
+
+  if (flag_auto_zoom_) {
+    v_max = plot_limit_[0];
+    v_min = plot_limit_[1];
+  } else {
+    if (ob_list_.empty()) {
+      plot_limit_[0] = 0.1;
+      plot_limit_[1] = -0.1;
+    } else {
+      plot_limit_[0] = v_max;
+      plot_limit_[1] = v_min;
+    }
   }
 
   uint32_t sample_range = DataMonitor_Min_BufferSize;
@@ -168,20 +178,22 @@ DataObserver::DataObserver(const std::string& id,
  */
 
 void DataMonitor::render() {
-  std::string range_slider_name{"Range: "};
-  range_slider_name.append(id_);
-  ImGui::SliderInt(range_slider_name.c_str(), &sample_range_,
-                   DataMonitor_Min_BufferSize, DataMonitor_Max_BufferSize);
-  std::string focus_slider_name{"Focus: "};
-  focus_slider_name.append(id_);
-  ImGui::SliderInt(focus_slider_name.c_str(), &sample_focus_, sample_range_,
-                   DataMonitor_Max_BufferSize);
+  ImGui::SliderInt("Range: ", &sample_range_, DataMonitor_Min_BufferSize,
+                   max_buffer_size_);
+  std::string focus_slider_name{};
+  ImGui::SliderInt("Focus: ", &sample_focus_, sample_range_, max_buffer_size_);
 
   if (ImGui::Button("Monitor - Add on")) {
     observer_set_.push_back(new DataObserver(
         atd::utility::CString::cstring_cat("%d", ++monitor_counter_),
         data_repository_));
   }
+
+  for (auto& ptr_observer : observer_set_) {
+    ptr_observer->set_DisplayHeader(sample_focus_ - sample_range_);
+    ptr_observer->set_DisplayTailer(sample_focus_);
+  }
+
   ImGui::SameLine();
   ImGui::Checkbox("Enable All", &enable_all_);
 
@@ -223,3 +235,8 @@ bool DataMonitor::update_data_base() {
 }
 
 void DataMonitor::set_name(const std::string& name) { name_ = name; }
+
+void DataMonitor::set_MaxBufferSize(uint32_t size) { max_buffer_size_ = size; }
+
+DataMonitor::DataMonitor(const std::string& name, uint32_t size)
+    : name_(name), max_buffer_size_(size) {}

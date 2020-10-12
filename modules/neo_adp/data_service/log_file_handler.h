@@ -16,7 +16,7 @@ class LCM_File_Handler {
   bool create_LogFile(const std::string&);
 
  protected:
-  virtual void init(std::shared_ptr<lcm::LogFile>) = 0;
+  virtual void init(std::shared_ptr<lcm::LogFile>) {}
   LCMFILE_MODE mode_ = DEFAULT;
   std::string name_;
 
@@ -51,7 +51,7 @@ class PlanningLog_Writer : public LCM_File_Handler {
   void listening(const atd::protocol::MONITOR_MSG&);
 
  protected:
- std::string name_;
+  std::string name_;
   virtual void init(std::shared_ptr<lcm::LogFile>) override;
 
  private:

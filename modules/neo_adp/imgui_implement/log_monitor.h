@@ -20,7 +20,7 @@ class LogMonitor : public ImGui_Components {
 
   void AddLog(const char* fmt, ...);
 
-  void Draw(const char* title);
+  void Draw();
 
   ImGuiTextBuffer Buf_;
   ImGuiTextFilter Filter_;

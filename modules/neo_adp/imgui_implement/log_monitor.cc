@@ -30,7 +30,8 @@ void LogMonitor::render() {
   //     ImGui::TextColored(text_color_, log4loop.c_str());
   //   }
 
-  ImGui::EndChild();
+  // ImGui::EndChild();
+  Draw();
 }
 
 void LogMonitor::parse_LogContent(const atd::protocol::FRAME_HEADER& header,
@@ -118,11 +119,7 @@ void LogMonitor::AddLog(const char* fmt, ...) {
     if (Buf_[old_size] == '\n') LineOffsets_.push_back(old_size + 1);
 }
 
-void LogMonitor::Draw(const char* title) {
-  if (!ImGui::Begin(title)) {
-    ImGui::End();
-    return;
-  }
+void LogMonitor::Draw() {
 
   // Options menu
   if (ImGui::BeginPopup("Options")) {
@@ -203,5 +200,4 @@ void LogMonitor::Draw(const char* title) {
     ImGui::SetScrollHereY(1.0f);
 
   ImGui::EndChild();
-  ImGui::End();
 }
