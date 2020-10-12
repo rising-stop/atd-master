@@ -7113,6 +7113,7 @@ int ImGui::MulitPlotEx(
     int values_count, int values_offset, const std::vector<ImU32>& colors,
     const std::vector<std::string>& overlay_text, float scale_min,
     float scale_max, ImVec2 frame_size) {
+
   ImGuiContext& g = *GImGui;
   ImGuiWindow* window = GetCurrentWindow();
   if (window->SkipItems) return -1;
@@ -7140,37 +7141,11 @@ int ImGui::MulitPlotEx(
   if (!ItemAdd(total_bb, 0, &frame_bb)) return -1;
   const bool hovered = ItemHoverable(frame_bb, id);
 
-  // Determine scale from values if not specified
-  // if (scale_min == FLT_MAX || scale_max == FLT_MAX) {
-  // float v_min = FLT_MAX;
-  // float v_max = -FLT_MAX;
-  // for (int index = 0; index < data_set_num; index++) {
-  //   for (int i = 0; i < values_count; i++) {
-  //     const float v = values_getter(overlay_text.at(index), i);
-  //     if (v != v)  // Ignore NaN values
-  //       continue;
-  //     v_min = ImMin(v_min, v);
-  //     v_max = ImMax(v_max, v);
-  //   }
-  // }
   const float min_plot_size = 0.01f;
   float scale_top =
       (scale_max + scale_min) / 2.0f + std::max(min_plot_size, (scale_max - scale_min) * 0.8f);
   float scale_bottom =
       (scale_max + scale_min) / 2.0f - std::max(min_plot_size, (scale_max - scale_min) * 0.8f);
-  // if (scale_max > 0.0f) {
-  //   if (scale_max < min_plot_size) {
-  //     scale_max = min_plot_size;
-  //   }
-  // }
-  // if (scale_min < 0.0f) {
-  //   if (scale_min > -min_plot_size) {
-  //     scale_min = -min_plot_size;
-  //   }
-  // }
-  // if (scale_min == FLT_MAX) scale_min = v_min;
-  // if (scale_max == FLT_MAX) scale_max = v_max;
-  // }
 
   RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true,
               style.FrameRounding);
@@ -7192,7 +7167,7 @@ int ImGui::MulitPlotEx(
       std::string tip_info;
       for (int index = 0; index < data_set_num; index++) {
         float v0 =
-            values_getter(overlay_text.at(index), (v_idx) % values_count);
+            values_getter(overlay_text.at(index), values_offset + (v_idx) % values_count);
         tip_info.append(overlay_text[index]);
         tip_info.append(" : ");
         tip_info.append(std::to_string(v0));
@@ -7221,7 +7196,7 @@ int ImGui::MulitPlotEx(
       float v0 = 0.0f;
       if (!overlay_text.empty()) {
         float v0 =
-            values_getter(overlay_text.at(index), (index) % values_count);
+            values_getter(overlay_text.at(index), values_offset);
       }
       float t0 = 0.0f;
       ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_bottom) * inv_scale));
@@ -7231,7 +7206,7 @@ int ImGui::MulitPlotEx(
         const int v1_idx = (int)(t0 * item_count + 0.5f);
         IM_ASSERT(v1_idx >= 0 && v1_idx < values_count);
         const float v1 =
-            values_getter(overlay_text.at(index), (v1_idx + 1) % values_count);
+            values_getter(overlay_text.at(index), values_offset + (v1_idx + 1) % values_count);
         const ImVec2 tp1 =
             ImVec2(t1, 1.0f - ImSaturate((v1 - scale_bottom) * inv_scale));
 
@@ -7461,7 +7436,7 @@ void ImGui::MulitPlot(
     std::function<float(const std::string&, int)> values_getter,
     int values_count, int values_offset, const std::vector<ImU32>& colors,
     const std::vector<std::string>& overlay_text, float scale_min,
-    float scale_max, ImVec2 frame_size) {
+    float scale_max, ImVec2 frame_size, bool flag_is_auto) {
   MulitPlotEx(label, values_getter, values_count, values_offset, colors,
               overlay_text, scale_min, scale_max, frame_size);
 }

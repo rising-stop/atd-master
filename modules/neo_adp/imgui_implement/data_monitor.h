@@ -79,7 +79,7 @@ class DataObserver : public ImGui_Components {
   // int sample_range_ = DataMonitor_Max_BufferSize;
   // int sample_focus_ = DataMonitor_Max_BufferSize;
   uint32_t header_ = 0;
-  uint32_t tailer_ = 0;
+  uint32_t tailer_ = DataMonitor_Min_BufferSize;
 
  private:
   static const int default_color_set_num = 5;
