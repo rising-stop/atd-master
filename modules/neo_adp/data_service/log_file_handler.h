@@ -11,14 +11,19 @@ enum LCMFILE_MODE : int { DEFAULT = 0, WRITE = 1, READ = 2 };
 class LCM_File_Handler {
  public:
   bool open_LogFile(const std::string&);
-
- public:
   bool create_LogFile(const std::string&);
+  LCMFILE_MODE get_Mode() const;
+  const std::string& get_Name() const;
 
  protected:
-  virtual void init(std::shared_ptr<lcm::LogFile>) {}
+  virtual bool init() {}
+  bool good() const;
+  bool file_init(const std::string&, LCMFILE_MODE);
+
+  bool flag_is_initalized_ = false;
   LCMFILE_MODE mode_ = DEFAULT;
   std::string name_;
+  std::shared_ptr<lcm::LogFile> ptr_file_;
 
  public:
   LCM_File_Handler(const std::string&, LCMFILE_MODE);
@@ -30,13 +35,12 @@ class PlanningLog_Reader : public LCM_File_Handler {
       std::vector<atd::protocol::MONITOR_MSG>::const_iterator;
 
  public:
-  uint64_t get_TotalSize();
-  const atd::protocol::MONITOR_MSG& get_PlanningMessage(uint64_t) const;
-  std::pair<const_iterator, const_iterator> get_PlanningMessage(uint64_t,
-                                                                uint64_t);
+  uint32_t get_TotalSize();
+  std::pair<const_iterator, const_iterator> get_PlanningMessage(uint32_t,
+                                                                uint32_t);
 
  protected:
-  virtual void init(std::shared_ptr<lcm::LogFile>) override;
+  virtual bool init() override;
 
  private:
   std::vector<atd::protocol::MONITOR_MSG> log_content_;
@@ -44,6 +48,7 @@ class PlanningLog_Reader : public LCM_File_Handler {
  public:
   PlanningLog_Reader() = default;
   PlanningLog_Reader(const std::string& name);
+  ~PlanningLog_Reader() = default;
 };
 
 class PlanningLog_Writer : public LCM_File_Handler {
@@ -52,10 +57,7 @@ class PlanningLog_Writer : public LCM_File_Handler {
 
  protected:
   std::string name_;
-  virtual void init(std::shared_ptr<lcm::LogFile>) override;
-
- private:
-  std::shared_ptr<lcm::LogFile> ptr_file_;
+  virtual bool init() override;
 
  public:
   PlanningLog_Writer() = default;
