@@ -6,12 +6,12 @@
 #include <functional>
 #include <iostream>
 
-#include "modules/neo_adp/data_service/data_dispatcher.h"
 #include "debug_draw.hpp"
-#include "modules/neo_adp/imgui_implement/imgui_implement.h"
 #include "modules/common/utility/utility.h"
+#include "modules/neo_adp/data_service/data_repository.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_glfw.h"
 #include "modules/neo_adp/imgui-opengl3/imgui_impl_opengl3.h"
+#include "modules/neo_adp/imgui_implement/imgui_implement.h"
 #include "modules/neo_adp/imgui_module/imgui.h"
 #include "modules/neo_adp/libs/gl3w/GL/gl3w.h"
 #include "modules/neo_adp/libs/glfw/include/GLFW/glfw3.h"
@@ -599,7 +599,7 @@ class OpenGL_Frame : public atd::utility::Singleton {
     while (!glfwWindowShouldClose(ptr_mainwindow_)) {
       const double t0s = glfwGetTime();
 
-      atd::utility::Singleton::instance<DataDispatcher>()->updata_Database();
+      atd::utility::Singleton::instance<DataRepository>()->update();
 
       glfwPollEvents();  // checking outsource events
       glfwSwapBuffers(ptr_mainwindow_);

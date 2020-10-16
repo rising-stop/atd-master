@@ -55,7 +55,7 @@ void ImGui_ComponentManager::Show_Log_Window(bool* swth) {
 
 void ImGui_ComponentManager::Show_DataMonitor(bool* swth) {
   if (!(*swth)) return;
-  static DataMonitor monitor_;
+  static DataObserver_Manager monitor_;
   ImGui::Begin("Data Monitor", swth);
   ImGui::Separator();
   monitor_.render();

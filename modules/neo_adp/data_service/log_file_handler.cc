@@ -77,15 +77,17 @@ uint32_t PlanningLog_Reader::get_TotalSize() {
 
 std::pair<PlanningLog_Reader::const_iterator,
           PlanningLog_Reader::const_iterator>
-PlanningLog_Reader::get_PlanningMessage(uint32_t header, uint32_t tailer) {
+PlanningLog_Reader::get_PlanningMessage(uint32_t header,
+                                        uint32_t tailer) const {
   if (!this->good()) {
     return {};
   }
+  std::lock_guard<std::mutex> lock(content_mutex_);
   return {log_content_.cbegin() + header, log_content_.cbegin() + tailer};
 }
 
-bool PlanningLog_Reader::init() {
-  log_content_.clear();
+void PlanningLog_Reader::preprocess_LogFile() {
+  std::lock_guard<std::mutex> lock(content_mutex_);
   auto event_slice = ptr_file_->readNextEvent();
   while (event_slice) {
     if (event_slice->channel == "PlanningLog") {
@@ -95,6 +97,18 @@ bool PlanningLog_Reader::init() {
     }
     event_slice = ptr_file_->readNextEvent();
   }
+  flag_is_file_read_ = true;
+}
+
+bool PlanningLog_Reader::is_Done() const { return flag_is_file_read_; }
+
+bool PlanningLog_Reader::init() {
+  flag_is_file_read_ = false;
+  log_content_.clear();
+  if (thread_read_) {
+    delete thread_read_;
+  }
+  thread_read_ = new std::thread(&PlanningLog_Reader::preprocess_LogFile, this);
   return true;
 }
 
@@ -119,3 +133,25 @@ bool PlanningLog_Writer::init() { return true; }
 
 PlanningLog_Writer::PlanningLog_Writer(const std::string& name)
     : LCM_File_Handler(name, WRITE) {}
+
+/**
+ * @brief defination of class DataSeg4LCMLogger
+ */
+bool DataSeg4LCMLogger::update() { return inner_update(); }
+
+void DataSeg4LCMLogger::active(const std::string& name) {
+  file_reader_.open_LogFile(name);
+}
+
+bool DataSeg4LCMLogger::inner_update() {
+  if (!file_reader_.is_Done()) {
+    return false;
+  }
+  return file_reader_.good();
+}
+
+std::pair<PlanningLog_Reader::const_iterator,
+          PlanningLog_Reader::const_iterator>
+DataSeg4LCMLogger::get_PlanningMessage(uint32_t head, uint32_t tail) const {
+  return file_reader_.get_PlanningMessage(head, tail);
+}

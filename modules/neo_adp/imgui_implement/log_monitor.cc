@@ -6,9 +6,9 @@ void LogMonitor::render() {
   if (enable_) {
     atd::protocol::FRAME_HEADER header_msg;
     atd::protocol::LOG_CONTENT log_msg;
-    if (atd::utility::Singleton::instance<DataDispatcher>()->get_LatestHeader(
+    if (atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestHeader(
             header_msg)) {
-      if (atd::utility::Singleton::instance<DataDispatcher>()
+      if (atd::utility::Singleton::instance<RealTimeDataDispatcher>()
               ->get_LatestLogInfo(log_msg)) {
         parse_LogContent(header_msg, log_msg);
       }

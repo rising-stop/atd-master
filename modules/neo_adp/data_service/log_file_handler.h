@@ -1,5 +1,6 @@
 #pragma once
 
+#include "data_seg4data_monitor.h"
 #include "lcm/lcm-cpp.hpp"
 #include "modules/common/common_header.h"
 
@@ -14,10 +15,10 @@ class LCM_File_Handler {
   bool create_LogFile(const std::string&);
   LCMFILE_MODE get_Mode() const;
   const std::string& get_Name() const;
+  bool good() const;
 
  protected:
   virtual bool init() {}
-  bool good() const;
   bool file_init(const std::string&, LCMFILE_MODE);
 
   bool flag_is_initalized_ = false;
@@ -31,19 +32,25 @@ class LCM_File_Handler {
 };
 
 class PlanningLog_Reader : public LCM_File_Handler {
+ public:
   using const_iterator =
       std::vector<atd::protocol::MONITOR_MSG>::const_iterator;
 
  public:
   uint32_t get_TotalSize();
   std::pair<const_iterator, const_iterator> get_PlanningMessage(uint32_t,
-                                                                uint32_t);
+                                                                uint32_t) const;
+  bool is_Done() const;
 
  protected:
   virtual bool init() override;
+  void preprocess_LogFile();
 
  private:
+  std::thread* thread_read_ = nullptr;
+  mutable std::mutex content_mutex_;
   std::vector<atd::protocol::MONITOR_MSG> log_content_;
+  volatile bool flag_is_file_read_ = false;
 
  public:
   PlanningLog_Reader() = default;
@@ -62,4 +69,26 @@ class PlanningLog_Writer : public LCM_File_Handler {
  public:
   PlanningLog_Writer() = default;
   PlanningLog_Writer(const std::string& name);
+};
+
+/**
+ * @brief declearation of DataSeg4LCMLogger
+ */
+class DataSeg4LCMLogger : public DataSeg4DataMonitor {
+ public:
+  virtual bool update() override;
+  void active(const std::string&);
+  std::pair<PlanningLog_Reader::const_iterator,
+            PlanningLog_Reader::const_iterator>
+      get_PlanningMessage(uint32_t, uint32_t) const;
+
+ private:
+  bool inner_update();
+
+  std::string file_name_;
+  PlanningLog_Reader file_reader_;
+
+ public:
+  DataSeg4LCMLogger() = default;
+  ~DataSeg4LCMLogger() = default;
 };

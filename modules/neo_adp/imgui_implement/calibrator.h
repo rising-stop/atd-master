@@ -1,7 +1,8 @@
 #pragma once
 
 #include "imgui_basic_component.h"
-#include "modules/neo_adp/data_service/data_dispatcher.h"
+#include "modules/common/common_header.h"
+#include "modules/neo_adp/data_service/data_repository.h"
 #include "protobuf_msg/planning_log.pb.h"
 
 class Calibrator : public ImGui_Components {
@@ -15,11 +16,11 @@ class Calibrator : public ImGui_Components {
 
   void render_CalibConsole();
   void render_FloatConsole(const std::string&,
-                           const CalibrationVariable<float>*);
+                           const atd::utility::CalibrationVariable<float>*);
   void render_IntConsole(const std::string&,
-                         const CalibrationVariable<int>*);
+                         const atd::utility::CalibrationVariable<int>*);
   void render_UIntConsole(const std::string&,
-                          const CalibrationVariable<uint32_t>*);
+                          const atd::utility::CalibrationVariable<uint32_t>*);
 
   template <typename T>
   void fill_CalibrationSender(const std::string& name, const T& val);
@@ -39,7 +40,7 @@ class Calibrator : public ImGui_Components {
   atd::utility::Proto_Messages<atd::protocol::DISPLAY_CALIBRATION> cal_var_;
   atd::utility::LCM_Proxy<
       atd::utility::Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>>
-      calib_publisher_{LCM_MODE::SENDER, "PlanningCalib"};
+      calib_publisher_{atd::utility::LCM_MODE::SENDER, "PlanningCalib"};
 
  public:
   Calibrator() = default;

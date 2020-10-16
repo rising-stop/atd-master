@@ -1,5 +1,6 @@
 #include "data_monitor.h"
 
+#include "file_interface.h"
 #include "modules/common/common_header.h"
 
 const float
@@ -177,31 +178,53 @@ DataObserver::DataObserver(const std::string& id,
  * ********************************************
  */
 
-void DataMonitor::render() {
+void DataObserver_Manager::render() {
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("Mode")) {
+      flag_is_realtime_ = flag_is_display_;
+      ImGui::MenuItem("Realtime Mode", NULL, &flag_is_realtime_);
+      flag_is_display_ = flag_is_realtime_;
+      ImGui::MenuItem("Display Mode", NULL, &flag_is_display_);
+      ImGui::EndMenu();
+    }
+  }
+  if (flag_is_display_) {
+    std::string file_name;
+    atd::utility::Singleton::instance<ResourceInterface_Manager>()->set_Button(
+        "LogFile4DataMonitor", [&](const std::string& name) -> bool {
+          file_name = name;
+          return true;
+        });
+  }
+
   ImGui::SliderInt("Range: ", &sample_range_, DataMonitor_Min_BufferSize,
                    max_buffer_size_);
-  std::string focus_slider_name{};
+
+  if (sample_focus_ < sample_range_) {
+    sample_focus_ = sample_range_;
+  }
   ImGui::SliderInt("Focus: ", &sample_focus_, sample_range_, max_buffer_size_);
 
   if (ImGui::Button("Monitor - Add on")) {
     observer_set_.push_back(new DataObserver(
         atd::utility::CString::cstring_cat("%d", ++monitor_counter_),
-        data_repository_));
+        atd::utility::Singleton::instance<DataRepository>()
+            ->get_DataConstPointer<DataSeg4DataMonitor>(
+                Data_Seg_Name_DataMonitor)
+            ->get_ConstDataRef4Observer()));
   }
 
-  for (auto& ptr_observer : observer_set_) {
-    ptr_observer->set_DisplayHeader(sample_focus_ - sample_range_);
-    ptr_observer->set_DisplayTailer(sample_focus_);
+  if (enable_all_) {
+    for (auto& ptr_observer : observer_set_) {
+      ptr_observer->set_DisplayHeader(sample_focus_ - sample_range_);
+      ptr_observer->set_DisplayTailer(sample_focus_);
+    }
   }
 
   ImGui::SameLine();
   ImGui::Checkbox("Enable All", &enable_all_);
 
   ImGui::Separator();
-
-  if (enable_all_) {
-    update_data_base();
-  }
 
   for (auto single_monitor : observer_set_) {
     single_monitor->render();
@@ -215,28 +238,12 @@ void DataMonitor::render() {
   }
 }
 
-bool DataMonitor::update_data_base() {
-  std::map<std::string, float> frame_data;
-  if (!atd::utility::Singleton::instance<DataDispatcher>()
-           ->get_DataMonitor_LatestFrame(frame_data)) {
-    return false;
-  }
-  for (auto signal : frame_data) {
-    auto res_ins =
-        data_repository_.insert(std::make_pair(signal.first, line_frame()));
-    data_repository_[signal.first].data_.pop_front();
-    data_repository_[signal.first].data_.push_back(signal.second);
-    data_repository_[signal.first].upper_bound_ =
-        std::fmax(data_repository_[signal.first].upper_bound_, signal.second);
-    data_repository_[signal.first].lower_bound_ =
-        std::fmin(data_repository_[signal.first].lower_bound_, signal.second);
-  }
-  return true;
+void DataObserver_Manager::set_MaxBufferSize(uint32_t size) {
+  max_buffer_size_ = size;
+  sample_range_ = size;
+  sample_focus_ = size;
 }
 
-void DataMonitor::set_name(const std::string& name) { name_ = name; }
-
-void DataMonitor::set_MaxBufferSize(uint32_t size) { max_buffer_size_ = size; }
-
-DataMonitor::DataMonitor(const std::string& name, uint32_t size)
-    : name_(name), max_buffer_size_(size) {}
+DataObserver_Manager::DataObserver_Manager(uint32_t size) {
+  set_MaxBufferSize(size);
+}

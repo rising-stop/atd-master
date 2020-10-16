@@ -7,13 +7,9 @@
 #include <vector>
 
 #include "imgui_basic_component.h"
-#include "modules/neo_adp/data_service/data_dispatcher.h"
-
-struct line_frame {
-  std::deque<float> data_;
-  float upper_bound_ = 0.0f;
-  float lower_bound_ = 0.0f;
-};
+#include "modules/neo_adp/data_service/data_repository.h"
+#include "modules/neo_adp/data_service/data_seg4data_monitor.h"
+#include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
 
 class DataObserver : public ImGui_Components {
  public:
@@ -94,22 +90,14 @@ class DataObserver : public ImGui_Components {
   ~DataObserver() = default;
 };
 
-class DataMonitor : public ImGui_Components {
+class DataObserver_Manager : public ImGui_Components {
  public:
   /**
    * @brief main loop, render every registered data observer
    */
   virtual void render() override;
 
-  void set_name(const std::string&);
-
   void set_MaxBufferSize(uint32_t);
-
- private:
-  /**
-   * @brief receiving new data
-   */
-  bool update_data_base();
 
  private:
   uint32_t max_buffer_size_ = DataMonitor_Max_BufferSize;
@@ -119,15 +107,15 @@ class DataMonitor : public ImGui_Components {
 
   std::string name_;
 
-  std::map<std::string, line_frame> data_repository_;
-
   std::vector<DataObserver*> observer_set_;
 
   uint32_t monitor_counter_ = 0;
   bool enable_all_ = true;
+  bool flag_is_realtime_ = true;
+  bool flag_is_display_ = false;
 
  public:
-  DataMonitor() = default;
-  DataMonitor(const std::string&, uint32_t);
-  ~DataMonitor() = default;
+  DataObserver_Manager() = default;
+  DataObserver_Manager(uint32_t);
+  ~DataObserver_Manager() = default;
 };

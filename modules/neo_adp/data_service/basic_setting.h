@@ -33,3 +33,9 @@
  */
 #define Calibrator_AlterCommand_SendTime 3
 
+/**
+ * @brief define data seg names
+ */
+#define Data_Seg_Name_LCMProtocol "LCMSubscriber"
+#define Data_Seg_Name_DataMonitor "DataMonitor"
+

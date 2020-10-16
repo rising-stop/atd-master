@@ -39,7 +39,7 @@ class GL_Implement {
    */
   static void draw_PlanningElements(const ThreadData &td) {
     static atd::protocol::OPENGL_ELEMENT adp_msg;
-    atd::utility::Singleton::instance<DataDispatcher>()->get_LatestGLElement(
+    atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestGLElement(
         adp_msg);
 
     ddVec3 origin = {0.0f, 0.0f, 0.0f};
@@ -136,7 +136,7 @@ class GL_Implement {
     const ddVec3 displayPos2D = {10.0f, 45.0f, 0.0f};
 
     std::string display_text;
-    if (!atd::utility::Singleton::instance<DataDispatcher>()
+    if (!atd::utility::Singleton::instance<RealTimeDataDispatcher>()
              ->get_LatestDisplayContent(basic_info)) {
       display_text = "System OffLine";
     } else {

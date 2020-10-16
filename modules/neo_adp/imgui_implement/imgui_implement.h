@@ -9,6 +9,8 @@ struct Switches4SubWindows {
   bool show_log_window = false;
   bool show_data_monitor = false;
   bool show_calibration_console = false;
+  bool flag_real_time_mode = true;
+  bool flag_log_mode = false;
 };
 
 class ImGui_ComponentManager {

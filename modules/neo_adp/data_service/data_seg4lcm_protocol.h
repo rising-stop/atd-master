@@ -3,14 +3,14 @@
 #include <map>
 
 #include "basic_setting.h"
+#include "data_repository.h"
 #include "modules/common/common_header.h"
 #include "protobuf_msg/planning_log.pb.h"
 
 using namespace atd::utility;
 using namespace atd::protocol;
 
-class DataDispatcher final : public Singleton {
-  friend class Singleton;
+class RealTimeDataDispatcher {
 
  public:
   /**
@@ -30,7 +30,7 @@ class DataDispatcher final : public Singleton {
 
   bool get_LatestDisplayCalib(DISPLAY_CALIBRATION& frame) const;
 
-  bool get_DataMonitor_LatestFrame(std::map<std::string, float>& umap) const;
+  // bool get_DataMonitor_LatestFrame(std::map<std::string, float>& umap) const;
 
  private:
   bool msg_validity_checking() const;
@@ -43,18 +43,18 @@ class DataDispatcher final : public Singleton {
    */
   Proto_Messages<MONITOR_MSG> frame_msg_;
   LCM_Proxy<Proto_Messages<MONITOR_MSG>> msg_reciver_{LCM_MODE::READER,
-                                                   "PlanningLog"};
+                                                      "PlanningLog"};
 
   /**
    * @brief data base for data-monitor
    */
-  std::map<std::string, float> data_monitor_summary_;
+  // std::map<std::string, float> data_monitor_summary_;
 
  private:
   mutable WfirstRWLock rwlock_frame_msg_;
   mutable WfirstRWLock rwlock_cal_var_;
 
- private:
-  DataDispatcher() = default;
-  ~DataDispatcher() = default;
+ public:
+  RealTimeDataDispatcher() = default;
+  ~RealTimeDataDispatcher() = default;
 };

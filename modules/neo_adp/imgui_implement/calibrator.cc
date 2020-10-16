@@ -28,7 +28,7 @@ void Calibrator::render() {
 
 void Calibrator::udpate_Database() {
   static atd::protocol::DISPLAY_CALIBRATION calib_frame;
-  atd::utility::Singleton::instance<DataDispatcher>()->get_LatestDisplayCalib(
+  atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestDisplayCalib(
       calib_frame);
   for (const auto& float_var : calib_frame.calib_float()) {
     auto reg_res =
