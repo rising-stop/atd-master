@@ -1,64 +1,74 @@
 #include "data_seg4lcm_protocol.h"
 
-void RealTimeDataDispatcher::updata_Database() {
+bool RealTimeDataDispatcher::update() {
   unique_writeguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_reciver_.subscribe(frame_msg_)) {
-    return;
-  }
-}
-
-bool RealTimeDataDispatcher::get_LatestFrame(MONITOR_MSG& frame) const {
-  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
-  if (!msg_validity_checking()) {
     return false;
   }
-  frame = frame_msg_;
   return true;
 }
 
-bool RealTimeDataDispatcher::get_LatestHeader(FRAME_HEADER& frame) const {
+std::shared_ptr<MONITOR_MSG> RealTimeDataDispatcher::get_LatestFrame() const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
-    return false;
+    return nullptr;
   }
-  frame = frame_msg_.title();
-  return true;
+  auto res = std::make_shared<MONITOR_MSG>();
+  *res = frame_msg_;
+  return res;
 }
 
-bool RealTimeDataDispatcher::get_LatestLogInfo(LOG_CONTENT& frame) const {
+std::shared_ptr<FRAME_HEADER> RealTimeDataDispatcher::get_LatestHeader() const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
-    return false;
+    return nullptr;
   }
-  frame = frame_msg_.log();
-  return true;
+  auto res = std::make_shared<FRAME_HEADER>();
+  *res = frame_msg_.title();
+  return res;
 }
 
-bool RealTimeDataDispatcher::get_LatestGLElement(OPENGL_ELEMENT& frame) const {
+std::shared_ptr<LOG_CONTENT> RealTimeDataDispatcher::get_LatestLogInfo() const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
-    return false;
+    return nullptr;
   }
-  frame = frame_msg_.gl_element();
-  return true;
+  auto res = std::make_shared<LOG_CONTENT>();
+  *res = frame_msg_.log();
+  return res;
 }
 
-bool RealTimeDataDispatcher::get_LatestDisplayContent(DISPLAY_CONTENT& frame) const {
+std::shared_ptr<OPENGL_ELEMENT> RealTimeDataDispatcher::get_LatestGLElement()
+    const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
-    return false;
+    return nullptr;
   }
-  frame = frame_msg_.display_element();
-  return true;
+  auto res = std::make_shared<OPENGL_ELEMENT>();
+  *res = frame_msg_.gl_element();
+  return res;
 }
 
-bool RealTimeDataDispatcher::get_LatestDisplayCalib(DISPLAY_CALIBRATION& frame) const {
+std::shared_ptr<DISPLAY_CONTENT>
+RealTimeDataDispatcher::get_LatestDisplayContent() const {
   unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
   if (!msg_validity_checking()) {
-    return false;
+    return nullptr;
   }
-  frame = frame_msg_.calibrations();
-  return true;
+  auto res = std::make_shared<DISPLAY_CONTENT>();
+  *res = frame_msg_.display_element();
+  return res;
+}
+
+std::shared_ptr<DISPLAY_CALIBRATION>
+RealTimeDataDispatcher::get_LatestDisplayCalib() const {
+  unique_readguard<WfirstRWLock> rwguard(rwlock_frame_msg_);
+  if (!msg_validity_checking()) {
+    return nullptr;
+  }
+  auto res = std::make_shared<DISPLAY_CALIBRATION>();
+  *res = frame_msg_.calibrations();
+  return res;
 }
 
 bool RealTimeDataDispatcher::msg_validity_checking() const {

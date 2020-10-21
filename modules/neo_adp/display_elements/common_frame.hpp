@@ -4,8 +4,8 @@
 #define DEBUG_DRAW_EXPLICIT_CONTEXT
 
 #include <functional>
-#include <iostream>
 
+#include <iostream>
 #include "debug_draw.hpp"
 #include "modules/common/utility/utility.h"
 #include "modules/neo_adp/data_service/data_repository.h"
@@ -590,7 +590,6 @@ class OpenGL_Frame : public atd::utility::Singleton {
 
   void spin() {
     if (draw_task_.empty()) {
-      std::cout << "draw tasks are not registered yet" << std::endl;
       return;
     }
 

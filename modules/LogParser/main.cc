@@ -44,7 +44,6 @@ int main(int args, char** argv) {
   }
 
   if (args < 2) {
-    std::cout << "log file name required" << std::endl;
     return EXIT_SUCCESS;
   }
   char* log_name = argv[1];

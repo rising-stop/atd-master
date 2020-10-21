@@ -41,6 +41,15 @@ class DataRepository : public atd::utility::Singleton {
     return std::dynamic_pointer_cast<T>(citr_find->second);
   }
 
+  template <typename T>
+  std::shared_ptr<T> get_DataPointer(const std::string& name) const {
+    auto itr_find = ptr_map_.find(name);
+    if (itr_find == ptr_map_.end()) {
+      return {nullptr};
+    }
+    return std::dynamic_pointer_cast<T>(itr_find->second);
+  }
+
  private:
   std::unordered_map<std::string, std::shared_ptr<RepositorySegment>> ptr_map_;
 

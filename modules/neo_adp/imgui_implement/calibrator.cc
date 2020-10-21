@@ -2,6 +2,10 @@
 
 void Calibrator::render() {
   cal_var_.Clear();
+  flag_publish_trigger_ = false;
+
+  bool flag_is_update = udpate_Database();
+
   active_MenuItem();
 
   if (ImGui::Button("Calibration_Switch")) ImGui::OpenPopup("Calibration_List");
@@ -26,11 +30,12 @@ void Calibrator::render() {
   send_CalibrationAlternation();
 }
 
-void Calibrator::udpate_Database() {
-  static atd::protocol::DISPLAY_CALIBRATION calib_frame;
-  atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestDisplayCalib(
-      calib_frame);
-  for (const auto& float_var : calib_frame.calib_float()) {
+bool Calibrator::udpate_Database() {
+  auto ptr_calib_frame = PROTOCOL_POINTER->get_LatestDisplayCalib();
+  if (!ptr_calib_frame) {
+    return false;
+  }
+  for (const auto& float_var : ptr_calib_frame->calib_float()) {
     auto reg_res =
         calib_repository_
             .try_RegisterVar<atd::utility::CalibrationVariable<float>>(
@@ -41,7 +46,7 @@ void Calibrator::udpate_Database() {
       reg_res.first->set_Var(float_var.data());
     }
   }
-  for (const auto& int_var : calib_frame.calib_int()) {
+  for (const auto& int_var : ptr_calib_frame->calib_int()) {
     auto reg_res =
         calib_repository_
             .try_RegisterVar<atd::utility::CalibrationVariable<int>>(
@@ -51,7 +56,7 @@ void Calibrator::udpate_Database() {
       reg_res.first->set_Var(int_var.data());
     }
   }
-  for (const auto& uint_var : calib_frame.calib_uint()) {
+  for (const auto& uint_var : ptr_calib_frame->calib_uint()) {
     auto reg_res =
         calib_repository_
             .try_RegisterVar<atd::utility::CalibrationVariable<uint32_t>>(
@@ -61,6 +66,7 @@ void Calibrator::udpate_Database() {
       reg_res.first->set_Var(uint_var.data());
     }
   }
+  return true;
 }
 
 void Calibrator::render_CalibConsole() {
@@ -69,24 +75,27 @@ void Calibrator::render_CalibConsole() {
       continue;
     }
     auto float_item =
-        calib_repository_.get_RegisteredVar<CalibrationVariable<float>>(
-            calib_name.first);
+        calib_repository_
+            .get_RegisteredVar<atd::utility::CalibrationVariable<float>>(
+                calib_name.first);
     if (float_item.second) {
       render_FloatConsole(calib_name.first, float_item.first.get());
       continue;
     }
 
     auto int_item =
-        calib_repository_.get_RegisteredVar<CalibrationVariable<int>>(
-            calib_name.first);
+        calib_repository_
+            .get_RegisteredVar<atd::utility::CalibrationVariable<int>>(
+                calib_name.first);
     if (int_item.second) {
       render_IntConsole(calib_name.first, int_item.first.get());
       continue;
     }
 
     auto uint_item =
-        calib_repository_.get_RegisteredVar<CalibrationVariable<uint32_t>>(
-            calib_name.first);
+        calib_repository_
+            .get_RegisteredVar<atd::utility::CalibrationVariable<uint32_t>>(
+                calib_name.first);
     if (uint_item.second) {
       render_UIntConsole(calib_name.first, uint_item.first.get());
       continue;
@@ -94,8 +103,9 @@ void Calibrator::render_CalibConsole() {
   }
 }
 
-void Calibrator::render_FloatConsole(const std::string& name,
-                                     const CalibrationVariable<float>* var) {
+void Calibrator::render_FloatConsole(
+    const std::string& name,
+    const atd::utility::CalibrationVariable<float>* var) {
   std::string button_name = "Input ";
   button_name.append(name);
   button_name.append(" by keyboard");
@@ -125,8 +135,9 @@ void Calibrator::render_FloatConsole(const std::string& name,
   ImGui::Separator();
 }
 
-void Calibrator::render_IntConsole(const std::string& name,
-                                   const CalibrationVariable<int>* var) {
+void Calibrator::render_IntConsole(
+    const std::string& name,
+    const atd::utility::CalibrationVariable<int>* var) {
   std::string button_name = "Input ";
   button_name.append(name);
   button_name.append(" by keyboard");
@@ -154,8 +165,9 @@ void Calibrator::render_IntConsole(const std::string& name,
   ImGui::Separator();
 }
 
-void Calibrator::render_UIntConsole(const std::string& name,
-                                    const CalibrationVariable<uint32_t>* var) {
+void Calibrator::render_UIntConsole(
+    const std::string& name,
+    const atd::utility::CalibrationVariable<uint32_t>* var) {
   std::string button_name = "Input ";
   button_name.append(name);
   button_name.append(" by keyboard");
@@ -213,7 +225,9 @@ void Calibrator::remove_ZombieMenuItem() {
 }
 
 void Calibrator::send_CalibrationAlternation() {
-  for (int i = 0; i < Calibrator_AlterCommand_SendTime; i++) {
-    calib_publisher_.publish(cal_var_);
+  if (flag_publish_trigger_) {
+    for (int i = 0; i < Calibrator_AlterCommand_SendTime; i++) {
+      calib_publisher_.publish(cal_var_);
+    }
   }
 }

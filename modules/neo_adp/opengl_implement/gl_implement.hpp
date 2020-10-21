@@ -3,11 +3,29 @@
 #include <cmath>
 
 #include "modules/common/common_header.h"
+#include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
 #include "modules/neo_adp/display_elements/common_frame.hpp"
 #include "protobuf_msg/planning_log.pb.h"
 
 class GL_Implement {
  public:
+  static void init() {
+    atd::utility::Singleton::try_register<DataRepository>();
+    atd::utility::Singleton::try_register<Runtime_Calculator<>>();
+    atd::utility::Singleton::try_register<Runtime_Counter>();
+    atd::utility::Singleton::try_register<OpenGL_Frame>();
+
+    atd::utility::Singleton::instance<DataRepository>()
+        ->try_register<RealTimeDataDispatcher>(Data_Seg_Name_LCMProtocol);
+
+    atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+        &GL_Implement::drawGrid);
+    atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+        &GL_Implement::drawText);
+    atd::utility::Singleton::instance<OpenGL_Frame>()->register_CallBack(
+        &GL_Implement::draw_PlanningElements);
+  }
+
   /**
    * @brief draw item label in gl windows
    */
@@ -38,16 +56,18 @@ class GL_Implement {
    * @brief main planning elements display process
    */
   static void draw_PlanningElements(const ThreadData &td) {
-    static atd::protocol::OPENGL_ELEMENT adp_msg;
-    atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestGLElement(
-        adp_msg);
+    static std::shared_ptr<atd::protocol::OPENGL_ELEMENT> ptr_disp_msg;
+    auto ptr_gl_element = PROTOCOL_POINTER->get_LatestGLElement();
+    if (ptr_gl_element) {
+      ptr_disp_msg = ptr_gl_element;
+    }
 
     ddVec3 origin = {0.0f, 0.0f, 0.0f};
     drawLabel(td, origin, "ego vehicle");
     dd::box(td.ddContext, origin, dd::colors::BlueViolet, 1.8f, 1.5f, 4.68f);
     dd::point(td.ddContext, origin, dd::colors::White, 5.0f);
 
-    auto box_set = adp_msg.box_set();
+    auto box_set = ptr_disp_msg->box_set();
     for (auto single_box : box_set) {
       ddVec3 box_origin = {single_box.origin().y(), single_box.origin().z(),
                            single_box.origin().x()};
@@ -74,7 +94,7 @@ class GL_Implement {
       }
     }
 
-    auto line_set = adp_msg.line_set();
+    auto line_set = ptr_disp_msg->line_set();
     for (auto single_line : line_set) {
       auto point_size = single_line.sample_points().size();
       if (point_size > 2) {
@@ -126,7 +146,6 @@ class GL_Implement {
    * @brief draw text info in the window
    */
   static void drawText(const ThreadData &td) {
-    static atd::protocol::DISPLAY_CONTENT basic_info;
     // HUD text:
     const ddVec3 textColor = {1.0f, 1.0f, 1.0f};
     const ddVec3 textPos2D = {10.0f, 15.0f, 0.0f};
@@ -136,8 +155,8 @@ class GL_Implement {
     const ddVec3 displayPos2D = {10.0f, 45.0f, 0.0f};
 
     std::string display_text;
-    if (!atd::utility::Singleton::instance<RealTimeDataDispatcher>()
-             ->get_LatestDisplayContent(basic_info)) {
+    auto ptr_disp_msg = PROTOCOL_POINTER->get_LatestDisplayContent();
+    if (!ptr_disp_msg) {
       display_text = "System OffLine";
     } else {
       // "AutoDriving\nSpeed(kph): 11.0\nSteer(deg): 11.0"
@@ -148,7 +167,7 @@ class GL_Implement {
       std::string display_act_acc{"AtAcc(ms2): "};
       std::string display_DTC{"DTC code: "};
       std::string display_setting_spd{"DeSpd(kph): "};
-      for (auto single_content : basic_info.int_vars()) {
+      for (auto single_content : ptr_disp_msg->int_vars()) {
         auto content_name = single_content.name();
         if (content_name == DISPLAY_FLAG_AUTO) {
           int mode_code = single_content.data();
@@ -163,7 +182,7 @@ class GL_Implement {
           }
         }
       }
-      for (auto single_content : basic_info.float_vars()) {
+      for (auto single_content : ptr_disp_msg->float_vars()) {
         auto content_name = single_content.name();
         if (content_name == DISPLAY_SPEED) {
           float spd = single_content.data();

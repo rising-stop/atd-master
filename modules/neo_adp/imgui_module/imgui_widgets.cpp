@@ -7220,37 +7220,39 @@ int ImGui::MulitPlotEx(
       ref_vline_x += ref_line_interval;
     }
 
-    for (int index = 0; index < data_set_num; index++) {
-      float v0 = 0.0f;
-      if (!overlay_text.empty()) {
-        float v0 =
-            values_getter(overlay_text.at(index), values_offset);
-      }
-      float t0 = 0.0f;
-      ImVec2 tp0 = ImVec2(t0, 1.0f - ImSaturate((v0 - scale_bottom) * inv_scale));
-      ImU32 col_base = colors[index];
-      for (int n = 0; n < res_w; n++) {
-        const float t1 = t0 + t_step;
-        const int v1_idx = (int)(t0 * item_count + 0.5f);
-        IM_ASSERT(v1_idx >= 0 && v1_idx < values_count);
-        const float v1 =
-            values_getter(overlay_text.at(index), values_offset + (v1_idx + 1) % values_count);
-        const ImVec2 tp1 =
-            ImVec2(t1, 1.0f - ImSaturate((v1 - scale_bottom) * inv_scale));
+    if (!overlay_text.empty()) {
+      for (int index = 0; index < data_set_num; index++) {
+        float v0 = values_getter(overlay_text.at(index), values_offset);
 
-        // NB: Draw calls are merged together by the DrawList system. Still, we
-        // should render our batch are lower level to save a bit of CPU.
-        ImVec2 pos0 = ImLerp(inner_bb.Min, inner_bb.Max, tp0);
-        ImVec2 pos1 = ImLerp(inner_bb.Min, inner_bb.Max, tp1);
-        if (n == 0) {
-          pos0 = pos1;
+        float t0 = 0.0f;
+        ImVec2 tp0 =
+            ImVec2(t0, 1.0f - ImSaturate((v0 - scale_bottom) * inv_scale));
+
+        ImU32 col_base = colors[index];
+        for (int n = 0; n < res_w; n++) {
+          const float t1 = t0 + t_step;
+          const int v1_idx = (int)(t0 * item_count + 0.5f);
+          IM_ASSERT(v1_idx >= 0 && v1_idx < values_count);
+          const float v1 =
+              values_getter(overlay_text.at(index),
+                            values_offset + (v1_idx + 1) % values_count);
+          const ImVec2 tp1 =
+              ImVec2(t1, 1.0f - ImSaturate((v1 - scale_bottom) * inv_scale));
+
+          // NB: Draw calls are merged together by the DrawList system. Still,
+          // we should render our batch are lower level to save a bit of CPU.
+          ImVec2 pos0 = ImLerp(inner_bb.Min, inner_bb.Max, tp0);
+          ImVec2 pos1 = ImLerp(inner_bb.Min, inner_bb.Max, tp1);
+          if (n == 0) {
+            pos0 = pos1;
+          }
+
+          window->DrawList->AddLine(
+              pos0, pos1, idx_hovered == v1_idx ? col_hovered : col_base);
+
+          t0 = t1;
+          tp0 = tp1;
         }
-
-        window->DrawList->AddLine(
-            pos0, pos1, idx_hovered == v1_idx ? col_hovered : col_base);
-
-        t0 = t1;
-        tp0 = tp1;
       }
     }
   }

@@ -1,7 +1,5 @@
 #include "xml_parser.h"
 
-#include <iostream>
-
 namespace atd {
 namespace utility {
 

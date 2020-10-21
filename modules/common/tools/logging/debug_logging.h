@@ -177,3 +177,19 @@ class Writer {
         ->try_register_Calibration(#variable, variable, upper, lower, init); \
     flag_calibration_run_once_##variable = false;                            \
   }
+#define REGISTER_INT_AS_CALIBRATION(variable, upper, lower, init)            \
+  static int variable = init;                                                \
+  static bool flag_calibration_run_once_##variable = true;                   \
+  if (flag_calibration_run_once_##variable) {                                \
+    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
+        ->try_register_Calibration(#variable, variable, upper, lower, init); \
+    flag_calibration_run_once_##variable = false;                            \
+  }
+#define REGISTER_UINT_AS_CALIBRATION(variable, upper, lower, init)           \
+  static uint32_t variable = init;                                           \
+  static bool flag_calibration_run_once_##variable = true;                   \
+  if (flag_calibration_run_once_##variable) {                                \
+    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
+        ->try_register_Calibration(#variable, variable, upper, lower, init); \
+    flag_calibration_run_once_##variable = false;                            \
+  }

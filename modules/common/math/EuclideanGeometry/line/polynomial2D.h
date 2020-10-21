@@ -1,7 +1,6 @@
 #ifndef PLANNING_POLYNOMIAL2D_H_
 #define PLANNING_POLYNOMIAL2D_H_
 
-#include <iostream>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>

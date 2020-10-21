@@ -2,7 +2,7 @@
 
 #include "imgui_basic_component.h"
 #include "modules/common/common_header.h"
-#include "modules/neo_adp/data_service/data_repository.h"
+#include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
 #include "protobuf_msg/planning_log.pb.h"
 
 class Calibrator : public ImGui_Components {
@@ -10,7 +10,7 @@ class Calibrator : public ImGui_Components {
   virtual void render() override;
 
  private:
-  void udpate_Database();
+  bool udpate_Database();
   void active_MenuItem();
   void remove_ZombieMenuItem();
 
@@ -41,6 +41,8 @@ class Calibrator : public ImGui_Components {
   atd::utility::LCM_Proxy<
       atd::utility::Proto_Messages<atd::protocol::DISPLAY_CALIBRATION>>
       calib_publisher_{atd::utility::LCM_MODE::SENDER, "PlanningCalib"};
+
+  bool flag_publish_trigger_ = false;
 
  public:
   Calibrator() = default;

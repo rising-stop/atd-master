@@ -4,102 +4,84 @@
 
 void LogMonitor::render() {
   if (enable_) {
-    atd::protocol::FRAME_HEADER header_msg;
-    atd::protocol::LOG_CONTENT log_msg;
-    if (atd::utility::Singleton::instance<RealTimeDataDispatcher>()->get_LatestHeader(
-            header_msg)) {
-      if (atd::utility::Singleton::instance<RealTimeDataDispatcher>()
-              ->get_LatestLogInfo(log_msg)) {
-        parse_LogContent(header_msg, log_msg);
+    auto ptr_header = PROTOCOL_POINTER->get_LatestHeader();
+    if (ptr_header) {
+      auto ptr_log = PROTOCOL_POINTER->get_LatestLogInfo();
+      if (ptr_log) {
+        parse_LogContent(*ptr_header, *ptr_log);
       }
     }
   }
 
   HelpMarker("Log Info from Planning Module");
 
-  ImGui::Checkbox("Enable Output Text", &enable_);
-  ImGui::ColorEdit3("clear color", (float*)&text_color_);
-
-  // {
-  //   ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
-  //   ImGui::BeginChild("ChildL",
-  //                     ImVec2(ImGui::GetWindowContentRegionWidth() * 0.9f,
-  //                            ImGui::GetWindowContentRegionHeight() * 0.9f),
-  //                     false, window_flags);
-  //   for (const auto& log4loop : log_quene_) {
-  //     ImGui::TextColored(text_color_, log4loop.c_str());
-  //   }
-
-  // ImGui::EndChild();
   Draw();
 }
 
 void LogMonitor::parse_LogContent(const atd::protocol::FRAME_HEADER& header,
                                   const atd::protocol::LOG_CONTENT& log_msg) {
-  static int last_timestamp = 0;
-  std::stringstream sstm;
-  sstm << "########### "
-       << "FRAME NO. " << header.counter_no() << ", TIME STAMP "
-       << header.time_stamp() << ", ELAPSE "
-       << header.time_stamp() - last_timestamp << "ms ###########"
-       << "\n";
-  AddLog(sstm.str().c_str());
-  sstm.clear();
+  if (header.time_stamp() == last_frame_time_) {
+    return;
+  }
+  auto header_str = atd::utility::CString::cstring_cat(
+      "########### FRAME NO. %u,, TIME STAMP %u, ELAPSE %u ms ###########",
+      header.counter_no(), header.time_stamp(),
+      header.time_stamp() - last_frame_time_);
+  // std::stringstream sstm;
+  // sstm << "########### "
+  //      << "FRAME NO. " << header.counter_no() << ", TIME STAMP "
+  //      << header.time_stamp() << ", ELAPSE "
+  //      << header.time_stamp() - last_frame_time_ << "ms ###########"
+  //      << "\n";
+  AddLog(header_str.c_str());
+  // sstm.clear();
   for (uint32_t index = 0; index < log_msg.content_size(); index++) {
+    std::string str_single_log;
     switch (log_msg.content(index).level()) {
       case atd::protocol::SECURITY_INFO::INFO:
-        sstm << "> [INFO] > ";
+        str_single_log.append("> [INFO] > ");
         break;
       case atd::protocol::SECURITY_INFO::WARNING:
-        sstm << "> [WARNING] > ";
+        str_single_log.append("> [WARNING] > ");
         break;
       case atd::protocol::SECURITY_INFO::ERROR:
-        sstm << "> [ERROR] > ";
+        str_single_log.append("> [ERROR] > ");
         break;
       default:
-        sstm << "> [UNKNOW] > ";
+        str_single_log.append("> [UNKNOW] > ");
         break;
     }
-    sstm << log_msg.content(index).file_name() << " no. "
-         << log_msg.content(index).line_no() << ":"
-         << "\n";
+    str_single_log.append(atd::utility::CString::cstring_cat(
+        "%s no. %u:\n", log_msg.content(index).file_name().c_str(),
+        log_msg.content(index).line_no()));
     for (uint32_t str_index = 0;
          str_index < log_msg.content(index).str_msg_size(); str_index++) {
-      sstm << "   > " << log_msg.content(index).str_msg(str_index) << "\n";
+      str_single_log.append(atd::utility::CString::cstring_cat(
+          "   > %s\n", log_msg.content(index).str_msg(str_index).c_str()));
     }
     for (uint32_t var_index = 0;
          var_index < log_msg.content(index).float_vars_size(); var_index++) {
-      sstm << "   > " << log_msg.content(index).float_vars(var_index).name()
-           << " = "
-           << atd::utility::CString::cstring_cat(
-                  "%.3f", log_msg.content(index).float_vars(var_index).data())
-           << "\n";
+      str_single_log.append(atd::utility::CString::cstring_cat(
+          "   > %s = %.3f\n",
+          log_msg.content(index).float_vars(var_index).name().c_str(),
+          log_msg.content(index).float_vars(var_index).data()));
     }
     for (uint32_t var_index = 0;
          var_index < log_msg.content(index).int_vars_size(); var_index++) {
-      sstm << "   > " << log_msg.content(index).int_vars(var_index).name()
-           << " = "
-           << atd::utility::CString::cstring_cat(
-                  "%d", log_msg.content(index).int_vars(var_index).data())
-           << "\n";
+      str_single_log.append(atd::utility::CString::cstring_cat(
+          "   > %s = %d\n",
+          log_msg.content(index).int_vars(var_index).name().c_str(),
+          log_msg.content(index).int_vars(var_index).data()));
     }
     for (uint32_t var_index = 0;
          var_index < log_msg.content(index).uint_vars_size(); var_index++) {
-      sstm << "   > " << log_msg.content(index).uint_vars(var_index).name()
-           << " = "
-           << atd::utility::CString::cstring_cat(
-                  "%u", log_msg.content(index).uint_vars(var_index).data())
-           << "\n";
+      str_single_log.append(atd::utility::CString::cstring_cat(
+          "   > %s = %u\n",
+          log_msg.content(index).uint_vars(var_index).name().c_str(),
+          log_msg.content(index).uint_vars(var_index).data()));
     }
-    for (uint32_t var_index = 0;
-         var_index < log_msg.content(index).normal_vars_size(); var_index++) {
-      sstm << "   > " << log_msg.content(index).normal_vars(var_index).name()
-           << " = " << log_msg.content(index).normal_vars(var_index).data()
-           << "\n";
-    }
-    last_timestamp = header.time_stamp();
-    AddLog(sstm.str().c_str());
-    sstm.clear();
+    last_frame_time_ = header.time_stamp();
+    AddLog(str_single_log.c_str());
   }
 }
 
@@ -120,6 +102,8 @@ void LogMonitor::AddLog(const char* fmt, ...) {
 }
 
 void LogMonitor::Draw() {
+  ImGui::Checkbox("Enable Output Text", &enable_);
+  ImGui::ColorEdit3("clear color", (float*)&text_color_);
 
   // Options menu
   if (ImGui::BeginPopup("Options")) {

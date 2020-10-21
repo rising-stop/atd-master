@@ -1,7 +1,5 @@
 #include "csv_parser.h"
 
-#include <iostream>
-
 namespace atd {
 namespace utility {
 
@@ -216,7 +214,6 @@ void CSV_Observer::push_Item(const std::string& id, const std::string& data) {
     }
     *csv_.get_MutableElement(id, col_index_) = data;
   } catch (const CommonException& e) {
-    std::cout << e.what() << '\n' << std::endl;
   }
 }
 

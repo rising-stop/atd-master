@@ -54,12 +54,12 @@ message FLOAT_VAR {
 
 message INT_VAR {
   string name = 1;
-  float data = 2;
+  int32 data = 2;
 }
 
 message UINT_VAR {
   string name = 1;
-  float data = 2;
+  uint32 data = 2;
 }
 
 message NORMAL_VAR {

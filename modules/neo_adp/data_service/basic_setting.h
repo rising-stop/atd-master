@@ -15,7 +15,7 @@
 /**
  * @brief max buffer size for data monitor
  */
-#define DataMonitor_Max_BufferSize 1800
+#define DataMonitor_Max_BufferSize 3600
 
 /**
  * @brief max buffer size for data monitor
@@ -38,4 +38,5 @@
  */
 #define Data_Seg_Name_LCMProtocol "LCMSubscriber"
 #define Data_Seg_Name_DataMonitor "DataMonitor"
+#define Data_Seg_Name_LogMonitor "LogMonitor"
 

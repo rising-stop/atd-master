@@ -16,6 +16,7 @@ struct Switches4SubWindows {
 class ImGui_ComponentManager {
  public:
   static void Imgui_Drawing();
+  static void init();
 
  private:
   static void Show_Custom_Window();

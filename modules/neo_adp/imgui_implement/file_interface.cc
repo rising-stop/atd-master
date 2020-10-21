@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <iostream>
 
 const std::string& FileAddress::get_CurrentFolder() const {
   return addr_.top().current_name_;
@@ -41,9 +40,6 @@ void FileAddress::init(const std::string& full_path) {
     split_FullPath(full_path);
   }
   is_initialized_ = true;
-  std::cout << "full path = " << full_path << std::endl;
-  std::cout << "addr top current name " << addr_.top().current_name_
-            << "addr top full path " << addr_.top().full_path_ << std::endl;
 }
 
 bool FileAddress::is_DirAvailable(const std::string& name) const {
@@ -247,7 +243,7 @@ void FileInterface::set_ActiveFlag(bool* ptr_flag) {
   flag_is_activated_ = ptr_flag;
 }
 
-void ResourceInterface_Manager::set_Button(
+bool ResourceInterface_Manager::set_Button(
     const std::string& id, std::function<bool(const std::string&)> func) {
   if (ImGui::Button("Open")) {
     auto res_ins = source_repository_.insert(std::make_pair(
@@ -258,12 +254,14 @@ void ResourceInterface_Manager::set_Button(
     } else {
       *(res_ins.first->second.second) = true;
     }
+    return true;
   } else {
     auto itr_find = source_repository_.find(std::string(id));
     if (itr_find != source_repository_.end()) {
       source_repository_[id].first->render();
     }
   }
+  return false;
 }
 
 ResourceInterface_Manager::~ResourceInterface_Manager() {

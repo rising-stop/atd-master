@@ -1,10 +1,34 @@
 #include "imgui_implement.h"
 
 #include "calibrator.h"
-#include "data_monitor.h"
+#include "data_analyzer.h"
 #include "log_monitor.h"
+#include "modules/neo_adp/data_service/data_seg4data_monitor.h"
+#include "modules/neo_adp/imgui_implement/data_analyzer.h"
+#include "modules/neo_adp/imgui_implement/file_interface.h"
 
 Switches4SubWindows ImGui_ComponentManager::switches;
+
+void ImGui_ComponentManager::init() {
+  atd::utility::Singleton::try_register<ResourceInterface_Manager>();
+
+  atd::utility::Singleton::instance<DataRepository>()
+      ->try_register<DataSeg4DataMonitor>(
+          Data_Seg_Name_DataMonitor, DataMonitor_Max_BufferSize,
+          []() { return PROTOCOL_POINTER->get_LatestFrame(); });
+  atd::utility::Singleton::instance<DataRepository>()
+      ->try_register<PlanningLog_Reader>(Data_Seg_Name_LogMonitor);
+
+  atd::utility::Singleton::try_register<DataAnalyzer>();
+  atd::utility::Singleton::instance<DataAnalyzer>()
+      ->add_MonitorTab<LogDataObserver>(
+          "Log Mode", DataMonitor_Max_BufferSize,
+          []() { return LOG_READER_POINTER->get_ConstDataRef4Observer(); });
+  atd::utility::Singleton::instance<DataAnalyzer>()
+      ->add_MonitorTab<DataObserver_Manager>(
+          "Real Mode", DataMonitor_Max_BufferSize,
+          []() { return MONITOR_DATA_POINTER->get_ConstDataRef4Observer(); });
+}
 
 void ImGui_ComponentManager::Imgui_Drawing() {
   // Start the Dear ImGui frame
@@ -55,10 +79,9 @@ void ImGui_ComponentManager::Show_Log_Window(bool* swth) {
 
 void ImGui_ComponentManager::Show_DataMonitor(bool* swth) {
   if (!(*swth)) return;
-  static DataObserver_Manager monitor_;
   ImGui::Begin("Data Monitor", swth);
   ImGui::Separator();
-  monitor_.render();
+  atd::utility::Singleton::instance<DataAnalyzer>()->render();
   if (ImGui::Button("Close")) switches.show_data_monitor = false;
   ImGui::End();
 }

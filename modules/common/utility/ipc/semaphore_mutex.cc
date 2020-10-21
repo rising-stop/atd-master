@@ -1,6 +1,5 @@
 #include "semaphore_mutex.h"
 
-#include <iostream>
 #include <stdexcept>
 
 #include "modules/common/utility/exceptions.h"

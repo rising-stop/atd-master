@@ -10,25 +10,24 @@
 using namespace atd::utility;
 using namespace atd::protocol;
 
-class RealTimeDataDispatcher {
-
+class RealTimeDataDispatcher : public RepositorySegment {
  public:
   /**
    * @brief main loop for updating data base
    */
-  void updata_Database();
+  virtual bool update() override;
 
-  bool get_LatestFrame(MONITOR_MSG& frame) const;
+  std::shared_ptr<MONITOR_MSG> get_LatestFrame() const;
 
-  bool get_LatestHeader(FRAME_HEADER& frame) const;
+  std::shared_ptr<FRAME_HEADER> get_LatestHeader() const;
 
-  bool get_LatestLogInfo(LOG_CONTENT& frame) const;
+  std::shared_ptr<LOG_CONTENT> get_LatestLogInfo() const;
 
-  bool get_LatestGLElement(OPENGL_ELEMENT& frame) const;
+  std::shared_ptr<OPENGL_ELEMENT> get_LatestGLElement() const;
 
-  bool get_LatestDisplayContent(DISPLAY_CONTENT& frame) const;
+  std::shared_ptr<DISPLAY_CONTENT> get_LatestDisplayContent() const;
 
-  bool get_LatestDisplayCalib(DISPLAY_CALIBRATION& frame) const;
+  std::shared_ptr<DISPLAY_CALIBRATION> get_LatestDisplayCalib() const;
 
   // bool get_DataMonitor_LatestFrame(std::map<std::string, float>& umap) const;
 
@@ -58,3 +57,8 @@ class RealTimeDataDispatcher {
   RealTimeDataDispatcher() = default;
   ~RealTimeDataDispatcher() = default;
 };
+
+#define PROTOCOL_POINTER                              \
+  atd::utility::Singleton::instance<DataRepository>() \
+      ->get_DataConstPointer<RealTimeDataDispatcher>( \
+          Data_Seg_Name_LCMProtocol)

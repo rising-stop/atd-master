@@ -11,6 +11,19 @@ const float
         {92.0f / 255.0f, 167.0f / 255.0f, 186.0f / 255.0f, 0.7f},
         {175.0f / 255.0f, 215.0f / 255.0f, 237.0f / 255.0f, 0.7f}};
 
+void DataObserver::active() {
+  if (!flag_is_active_) {
+    flag_is_active_ = true;
+  }
+}
+
+void DataObserver::pause() {
+  if (flag_is_active_) {
+    backup_data_list_ = *data_list_;
+    flag_is_active_ = false;
+  }
+}
+
 void DataObserver::render() {
   std::string botton_name{"Sheet: "};
   botton_name.append(id_);
@@ -50,74 +63,81 @@ void DataObserver::set_DisplayTailer(uint32_t tailer) {
 }
 
 void DataObserver::menu_handler() {
-  for (auto signal : data_list_) {
-    if (ob_list_.insert(std::make_pair(std::string(signal.first), menu_info()))
-            .second) {
+  for (auto signal : *data_list_) {
+    if (ob_list_.insert(std::make_pair(signal.first, menu_info())).second) {
       register_signal(signal.first);
     }
   }
 
   for (auto& menu_item : ob_list_) {
-    bool detach_detect = menu_item.second.flag_activate_;
+    if (data_list_->find(menu_item.first) == data_list_->cend()) {
+      menu_item.second.flag_activate_ = false;
+    }
+    bool click_detect = menu_item.second.flag_activate_;
     ImGui::MenuItem(menu_item.first.c_str(), "",
                     &(menu_item.second.flag_activate_));
-    if (detach_detect && !menu_item.second.flag_activate_) {
+    if (click_detect && !menu_item.second.flag_activate_) {
       unregister_signal(menu_item.first);
-    }
-    if (data_list_.find(menu_item.first) == data_list_.cend()) {
-      menu_item.second.info_ = "offline";
-    } else {
-      menu_item.second.info_ = atd::utility::CString::cstring_cat(
-          "%3.f", data_list_.at(menu_item.first).data_.back());
     }
   }
 }
 
 void DataObserver::plot_render() {
-  std::vector<ImU32> line_colors(ob_list_.size(), ImU32());
-  std::vector<std::string> overlay_text(ob_list_.size(), std::string());
+  std::vector<ImU32> line_colors;
+  std::vector<std::string> overlay_text;
 
   float v_max = -FLT_MAX;
   float v_min = FLT_MAX;
+  bool plot_busy = false;
 
   for (auto& signal : ob_list_) {
     if (!signal.second.flag_activate_) {
       continue;
     }
-    ImGui::ColorEdit4(signal.first.c_str(),
+    if (data_list_->find(signal.first) == data_list_->cend()) {
+      signal.second.info_ = "offline";
+    } else {
+      signal.second.info_ = atd::utility::CString::cstring_cat(
+          "%.3f", data_list_->at(signal.first).data_.back());
+    }
+    std::string color_edit_name = signal.first;
+    color_edit_name.push_back(' ');
+    color_edit_name.append(signal.second.info_);
+    ImGui::ColorEdit4(color_edit_name.c_str(),
                       (float*)&color_dispatcher_[signal.first]);
-    ImGui::SameLine();
-    ImGui::Text(signal.second.info_.c_str());
     line_colors.push_back(
         ImGui::ColorConvertFloat4ToU32(color_dispatcher_.at(signal.first)));
     overlay_text.push_back(signal.first);
-    v_max = std::fmax(v_max, data_list_.at(signal.first).upper_bound_);
-    v_min = std::fmin(v_min, data_list_.at(signal.first).lower_bound_);
+    v_max = std::fmax(v_max, data_list_->at(signal.first).upper_bound_);
+    v_min = std::fmin(v_min, data_list_->at(signal.first).lower_bound_);
+    plot_busy = true;
   }
 
   if (flag_auto_zoom_) {
-    v_max = plot_limit_[0];
-    v_min = plot_limit_[1];
-  } else {
     if (ob_list_.empty()) {
       plot_limit_[0] = 0.1;
       plot_limit_[1] = -0.1;
     } else {
-      plot_limit_[0] = v_max;
-      plot_limit_[1] = v_min;
+      if (plot_busy) {
+        plot_limit_[0] = v_max;
+        plot_limit_[1] = v_min;
+      }
     }
+  } else {
+    v_max = plot_limit_[0];
+    v_min = plot_limit_[1];
   }
 
   uint32_t sample_range = DataMonitor_Min_BufferSize;
   if (header_ > tailer_) {
     CUSTOM_EXCEPTION("error setting of header and tailer");
   } else {
-    if (data_list_.empty()) {
+    if (data_list_->empty()) {
       header_ = 0;
       tailer_ = DataMonitor_Max_BufferSize;
     } else {
-      if (tailer_ > data_list_.begin()->second.data_.size()) {
-        tailer_ = data_list_.size();
+      if (tailer_ > data_list_->begin()->second.data_.size()) {
+        tailer_ = data_list_->size();
       }
     }
     sample_range = tailer_ - header_;
@@ -127,13 +147,23 @@ void DataObserver::plot_render() {
     }
   }
 
-  ImGui::MulitPlot(
-      id_,
-      [&](const std::string name, int idx) -> float {
-        return data_list_.at(name).data_.at(idx);
-      },
-      sample_range, header_, line_colors, overlay_text, v_min, v_max,
-      ImVec2(0, 160));
+  if (flag_is_active_) {
+    ImGui::MulitPlot(
+        id_,
+        [&](const std::string name, int idx) -> float {
+          return data_list_->at(name).data_.at(idx);
+        },
+        sample_range, header_, line_colors, overlay_text, v_min, v_max,
+        ImVec2(0, 160));
+  } else {
+    ImGui::MulitPlot(
+        id_,
+        [&](const std::string name, int idx) -> float {
+          return backup_data_list_.at(name).data_.at(idx);
+        },
+        sample_range, header_, line_colors, overlay_text, v_min, v_max,
+        ImVec2(0, 160));
+  }
 }
 
 const std::string& DataObserver::get_ID() { return id_; }
@@ -169,7 +199,7 @@ bool DataObserver::unregister_signal(const std::string& id) {
 }
 
 DataObserver::DataObserver(const std::string& id,
-                           const std::map<std::string, line_frame>& data)
+                           const std::map<std::string, line_frame>* data)
     : id_(id), data_list_(data) {}
 
 /**
@@ -177,26 +207,9 @@ DataObserver::DataObserver(const std::string& id,
  * @def  Class DataMonitor
  * ********************************************
  */
+void DataObserver_Manager::render() { draw(); }
 
-void DataObserver_Manager::render() {
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("Mode")) {
-      flag_is_realtime_ = flag_is_display_;
-      ImGui::MenuItem("Realtime Mode", NULL, &flag_is_realtime_);
-      flag_is_display_ = flag_is_realtime_;
-      ImGui::MenuItem("Display Mode", NULL, &flag_is_display_);
-      ImGui::EndMenu();
-    }
-  }
-  if (flag_is_display_) {
-    std::string file_name;
-    atd::utility::Singleton::instance<ResourceInterface_Manager>()->set_Button(
-        "LogFile4DataMonitor", [&](const std::string& name) -> bool {
-          file_name = name;
-          return true;
-        });
-  }
-
+void DataObserver_Manager::draw() {
   ImGui::SliderInt("Range: ", &sample_range_, DataMonitor_Min_BufferSize,
                    max_buffer_size_);
 
@@ -206,19 +219,14 @@ void DataObserver_Manager::render() {
   ImGui::SliderInt("Focus: ", &sample_focus_, sample_range_, max_buffer_size_);
 
   if (ImGui::Button("Monitor - Add on")) {
-    observer_set_.push_back(new DataObserver(
+    observer_set_.push_back(std::make_shared<DataObserver>(
         atd::utility::CString::cstring_cat("%d", ++monitor_counter_),
-        atd::utility::Singleton::instance<DataRepository>()
-            ->get_DataConstPointer<DataSeg4DataMonitor>(
-                Data_Seg_Name_DataMonitor)
-            ->get_ConstDataRef4Observer()));
+        data_source_()));
   }
 
-  if (enable_all_) {
-    for (auto& ptr_observer : observer_set_) {
-      ptr_observer->set_DisplayHeader(sample_focus_ - sample_range_);
-      ptr_observer->set_DisplayTailer(sample_focus_);
-    }
+  for (auto& ptr_observer : observer_set_) {
+    ptr_observer->set_DisplayHeader(sample_focus_ - sample_range_);
+    ptr_observer->set_DisplayTailer(sample_focus_);
   }
 
   ImGui::SameLine();
@@ -228,11 +236,15 @@ void DataObserver_Manager::render() {
 
   for (auto single_monitor : observer_set_) {
     single_monitor->render();
+    if (enable_all_) {
+      single_monitor->active();
+    } else {
+      single_monitor->pause();
+    }
   }
 
   if (ImGui::Button("Monitor - Remove")) {
     if (observer_set_.size()) {
-      delete observer_set_.back();
       observer_set_.pop_back();
     }
   }
@@ -244,6 +256,38 @@ void DataObserver_Manager::set_MaxBufferSize(uint32_t size) {
   sample_focus_ = size;
 }
 
-DataObserver_Manager::DataObserver_Manager(uint32_t size) {
-  set_MaxBufferSize(size);
+void DataObserver_Manager::set_ObserverDataSource(
+    std::function<const std::map<std::string, line_frame>*()> func) {
+  data_source_ = func;
 }
+
+DataObserver_Manager::DataObserver_Manager(
+    uint32_t size,
+    std::function<const std::map<std::string, line_frame>*()> func) {
+  set_MaxBufferSize(size);
+  set_ObserverDataSource(func);
+}
+
+void LogDataObserver::draw() {
+  std::string file_name;
+  if (atd::utility::Singleton::instance<ResourceInterface_Manager>()
+          ->set_Button("LogFile4DataMonitor",
+                       [&](const std::string& name) -> bool {
+                         file_name = name;
+                         return true;
+                       })) {
+    LOG_READER_POINTER->open_LogFile(file_name);
+  }
+  if (LOG_READER_POINTER->is_Done()) {
+    this->DataObserver_Manager::draw();
+  } else {
+    ImGui::Text("waiting for log file loading ...");
+  }
+}
+
+void LogDataObserver::render() { draw(); }
+
+LogDataObserver::LogDataObserver(
+    uint32_t size,
+    std::function<const std::map<std::string, line_frame>*()> source)
+    : DataObserver_Manager(size, source) {}

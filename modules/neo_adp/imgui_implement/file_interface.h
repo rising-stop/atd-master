@@ -95,7 +95,7 @@ class ResourceInterface_Manager : public atd::utility::Singleton {
   friend atd::utility::Singleton;
 
  public:
-  void set_Button(const std::string&, std::function<bool(const std::string&)>);
+  bool set_Button(const std::string&, std::function<bool(const std::string&)>);
 
  private:
   std::unordered_map<std::string, std::pair<FileInterface*, bool*>>

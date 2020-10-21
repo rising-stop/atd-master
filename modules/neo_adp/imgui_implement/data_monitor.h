@@ -1,7 +1,6 @@
 #pragma once
 
 #include <deque>
-#include <iostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -10,6 +9,7 @@
 #include "modules/neo_adp/data_service/data_repository.h"
 #include "modules/neo_adp/data_service/data_seg4data_monitor.h"
 #include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
+#include "modules/neo_adp/data_service/log_file_handler.h"
 
 class DataObserver : public ImGui_Components {
  public:
@@ -22,6 +22,9 @@ class DataObserver : public ImGui_Components {
 
   void set_DisplayHeader(uint32_t header);
   void set_DisplayTailer(uint32_t tailer);
+
+  void active();
+  void pause();
 
  private:
   /**
@@ -50,7 +53,8 @@ class DataObserver : public ImGui_Components {
    * names and all signal observation data
    */
   const std::string id_;
-  const std::map<std::string, line_frame>& data_list_;
+  const std::map<std::string, line_frame>* data_list_;
+  std::map<std::string, line_frame> backup_data_list_;
 
   /**
    * @brief user interested signal list, are selected by user
@@ -77,6 +81,7 @@ class DataObserver : public ImGui_Components {
   uint32_t header_ = 0;
   uint32_t tailer_ = DataMonitor_Min_BufferSize;
 
+  bool flag_is_active_ = true;
   bool flag_auto_zoom_ = true;
   float plot_limit_[2] = {0.1, -0.1};
 
@@ -86,7 +91,7 @@ class DataObserver : public ImGui_Components {
 
  public:
   DataObserver(const std::string& id,
-               const std::map<std::string, line_frame>& data);
+               const std::map<std::string, line_frame>* data);
   ~DataObserver() = default;
 };
 
@@ -98,6 +103,11 @@ class DataObserver_Manager : public ImGui_Components {
   virtual void render() override;
 
   void set_MaxBufferSize(uint32_t);
+  void set_ObserverDataSource(
+      std::function<const std::map<std::string, line_frame>*()>);
+
+ protected:
+  void draw();
 
  private:
   uint32_t max_buffer_size_ = DataMonitor_Max_BufferSize;
@@ -107,15 +117,33 @@ class DataObserver_Manager : public ImGui_Components {
 
   std::string name_;
 
-  std::vector<DataObserver*> observer_set_;
+  std::vector<std::shared_ptr<DataObserver>> observer_set_;
+
+  std::function<const std::map<std::string, line_frame>*()> data_source_;
 
   uint32_t monitor_counter_ = 0;
   bool enable_all_ = true;
-  bool flag_is_realtime_ = true;
-  bool flag_is_display_ = false;
 
  public:
   DataObserver_Manager() = default;
-  DataObserver_Manager(uint32_t);
+  DataObserver_Manager(
+      uint32_t, std::function<const std::map<std::string, line_frame>*()>);
   ~DataObserver_Manager() = default;
+};
+
+/**
+ * @brief class LogDataObserver
+ */
+class LogDataObserver : public DataObserver_Manager {
+ public:
+  virtual void render() override;
+
+ protected:
+  void draw();
+
+ public:
+  LogDataObserver() = default;
+  LogDataObserver(uint32_t,
+                  std::function<const std::map<std::string, line_frame>*()>);
+  ~LogDataObserver() = default;
 };

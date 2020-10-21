@@ -63,7 +63,7 @@ class LCM_Proxy {
   void publisher_spin();
 
  private:
-  lcm::LCM* ptr_lcm_;
+  lcm::LCM* ptr_lcm_ = nullptr;
   const std::string channel_;
   const LCM_MODE mode_;
 

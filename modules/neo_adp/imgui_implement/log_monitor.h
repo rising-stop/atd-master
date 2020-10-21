@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imgui_basic_component.h"
-#include "modules/neo_adp/data_service/data_repository.h"
+#include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
 
 class LogMonitor : public ImGui_Components {
  public:
@@ -27,6 +27,7 @@ class LogMonitor : public ImGui_Components {
   ImVector<int> LineOffsets_;  // Index to lines offset. We maintain this with
                                // AddLog() calls.
   bool AutoScroll_ = true;     // Keep scrolling if already at the bottom.
+  uint64_t last_frame_time_ = 0;
 
  public:
   LogMonitor() = default;

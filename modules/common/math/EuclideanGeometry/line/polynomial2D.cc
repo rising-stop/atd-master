@@ -1,6 +1,7 @@
 #include "polynomial2D.h"
 
 #include <cmath>
+#include <sstream>
 
 #include "modules/common/math/NumericalComputing/numerical_integration.h"
 #include "modules/common/math/mathcommon.h"
