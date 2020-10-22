@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <iostream>
 
 const std::string& FileAddress::get_CurrentFolder() const {
   return addr_.top().current_name_;
@@ -55,7 +56,9 @@ bool FileAddress::enter_NextFolder(const std::string& name) {
   }
   auto tmp_path = addr_.top();
   tmp_path.current_name_ = name;
-  tmp_path.full_path_.push_back('/');
+  if (tmp_path.deepth_ != 0) {
+    tmp_path.full_path_.push_back('/');
+  }
   tmp_path.full_path_.append(tmp_path.current_name_);
   ++tmp_path.deepth_;
   addr_.push(tmp_path);
@@ -165,8 +168,11 @@ void FileInterface::scan_FolderContent() {
             });
 }
 
+bool FileInterface::get_IsCalled() const { return flag_is_call_back_executed_; }
+
 void FileInterface::draw() {
   if (!*flag_is_activated_) {
+    flag_is_call_back_executed_ = false;
     return;
   }
 
@@ -178,13 +184,12 @@ void FileInterface::draw() {
     }
   }
   ImGui::SameLine();
-  bool click_confirm = ImGui::Button("Confirm");
-  ImGui::SameLine();
   if (ImGui::Button("Cancel")) {
     *flag_is_activated_ = false;
   }
   ImGui::SameLine();
   Filter_.Draw();
+  ImGui::Text(ptr_addr_->get_CurrentWorkDir().c_str());
 
   ImGui::BeginChild("file selector", ImVec2(0, 0), true);
   for (auto& item : current_file_) {
@@ -195,12 +200,6 @@ void FileInterface::draw() {
     }
     if (ImGui::Selectable(item.first.name_.c_str(), item.second,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
-      if (click_confirm) {
-        if (call_back_(
-                ptr_addr_->get_CurrentDirFileFullPath(item.first.name_))) {
-          *flag_is_activated_ = false;
-        }
-      }
       item.second = true;
       if (ImGui::IsMouseDoubleClicked(0)) {
         if (item.first.type_ == FileInfo::FILE_DT_DIR) {
@@ -214,6 +213,7 @@ void FileInterface::draw() {
           if (call_back_(
                   ptr_addr_->get_CurrentDirFileFullPath(item.first.name_))) {
             *flag_is_activated_ = false;
+            flag_is_call_back_executed_ = true;
           }
         }
       }
@@ -254,12 +254,15 @@ bool ResourceInterface_Manager::set_Button(
     } else {
       *(res_ins.first->second.second) = true;
     }
-    return true;
   } else {
     auto itr_find = source_repository_.find(std::string(id));
     if (itr_find != source_repository_.end()) {
       source_repository_[id].first->render();
     }
+  }
+  auto itr_find = source_repository_.find(std::string(id));
+  if (itr_find != source_repository_.end()) {
+    return source_repository_.at(id).first->get_IsCalled();
   }
   return false;
 }

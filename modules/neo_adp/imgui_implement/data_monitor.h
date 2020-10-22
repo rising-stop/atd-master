@@ -102,6 +102,7 @@ class DataObserver_Manager : public ImGui_Components {
    */
   virtual void render() override;
 
+  uint32_t get_MaxBufferSize() const;
   void set_MaxBufferSize(uint32_t);
   void set_ObserverDataSource(
       std::function<const std::map<std::string, line_frame>*()>);

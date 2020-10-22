@@ -69,6 +69,7 @@ class FileInterface : public ImGui_Components {
   virtual void render() override;
   void set_ActiveFlag(bool*);
   void set_ConfirmCallBack(std::function<bool(const std::string&)>);
+  bool get_IsCalled() const;
 
  private:
   size_t get_FileSize(const std::string&) const;
@@ -84,6 +85,7 @@ class FileInterface : public ImGui_Components {
   ImGuiTextFilter Filter_;
 
   std::function<bool(const std::string&)> call_back_;
+  bool flag_is_call_back_executed_ = false;
 
  public:
   FileInterface(bool*, std::function<bool(const std::string&)>);

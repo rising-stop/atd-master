@@ -10,6 +10,12 @@ class ImGui_Components {
 
  protected:
   void HelpMarker(const char* desc);
+  void set_BoxMessage(const std::string&);
+  void MessageBox();
+
+ protected:
+  bool flag_is_show_msgbox_ = false;
+  std::string box_message_;
 
  public:
   ImGui_Components() = default;

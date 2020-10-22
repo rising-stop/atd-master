@@ -1,12 +1,6 @@
 #include "log_file_handler.h"
 
-bool LCM_File_Handler::open_LogFile(const std::string& name) {
-  return file_init(name, READ);
-}
-
-bool LCM_File_Handler::create_LogFile(const std::string& name) {
-  return file_init(name, WRITE);
-}
+#include <iostream>
 
 LCMFILE_MODE LCM_File_Handler::get_Mode() const { return mode_; }
 
@@ -34,6 +28,8 @@ bool LCM_File_Handler::file_init(const std::string& name, LCMFILE_MODE mode) {
       name_ = name;
       mode_ = READ;
       ptr_file_.reset(new lcm::LogFile(name_, "r"));
+      std::cout << "test for file read:   ptr_->good() = " << ptr_file_->good()
+                << std::endl;
       if (!ptr_file_->good()) {
         name_.clear();
         mode_ = DEFAULT;
@@ -46,9 +42,7 @@ bool LCM_File_Handler::file_init(const std::string& name, LCMFILE_MODE mode) {
       CUSTOM_EXCEPTION("mode error, static_cast<int>(mode): %d",
                        static_cast<int>(mode));
   }
-  if (!init()) {
-    return false;
-  }
+  std::cout << "test for init. " << std::endl;
   flag_is_initalized_ = true;
   return true;
 }
@@ -68,16 +62,19 @@ bool LCM_File_Handler::good() const {
   return false;
 }
 
-uint32_t PlanningLog_Reader::get_TotalSize() {
-  if (!this->good()) {
-    return 0u;
+bool PlanningLog_Reader::open_LogFile(const std::string& name) {
+  this->file_init(name, READ);
+  if (this->flag_is_initalized_) {
+    if (init()) {
+      return true;
+    }
   }
-  return size_;
+  return false;
 }
 
 void PlanningLog_Reader::preprocess_LogFile() {
   std::vector<atd::protocol::MONITOR_MSG> tmp_container;
-
+  std::cout << "test for preprocess" << std::endl;
   auto event_slice = ptr_file_->readNextEvent();
   while (event_slice) {
     if (event_slice->channel == "PlanningLog") {
@@ -88,22 +85,17 @@ void PlanningLog_Reader::preprocess_LogFile() {
     }
     event_slice = ptr_file_->readNextEvent();
   }
-  size_ = tmp_container.size();
-  this->set_MaxBufferSize(size_);
+  this->set_MaxBufferSize(tmp_container.size());
   for (const auto& item : tmp_container) {
     parse_ProtocolMessage(item);
   }
 
   flag_is_file_read_ = true;
+  std::cout << "test for preprocess, flag_is_read = " << flag_is_file_read_
+            << std::endl;
 }
 
 bool PlanningLog_Reader::is_Done() const {
-  if (!thread_read_) {
-    return false;
-  }
-  if (thread_read_->joinable()) {
-    return false;
-  }
   return flag_is_file_read_;
 }
 
@@ -120,6 +112,16 @@ PlanningLog_Reader::PlanningLog_Reader(const std::string& name)
     : LCM_File_Handler(name, READ) {}
 
 bool PlanningLog_Reader::update() { return true; }
+
+bool PlanningLog_Writer::create_LogFile(const std::string& name) {
+  this->file_init(name, WRITE);
+  if (this->flag_is_initalized_) {
+    if (init()) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void PlanningLog_Writer::listening(const atd::protocol::MONITOR_MSG& msg) {
   if (!this->good()) {

@@ -1,5 +1,7 @@
 #include "data_monitor.h"
 
+#include <iostream>
+
 #include "file_interface.h"
 #include "modules/common/common_header.h"
 
@@ -250,10 +252,18 @@ void DataObserver_Manager::draw() {
   }
 }
 
+uint32_t DataObserver_Manager::get_MaxBufferSize() const {
+  return max_buffer_size_;
+}
+
 void DataObserver_Manager::set_MaxBufferSize(uint32_t size) {
-  max_buffer_size_ = size;
-  sample_range_ = size;
-  sample_focus_ = size;
+  if (size < DataMonitor_Min_BufferSize) {
+    max_buffer_size_ = DataMonitor_Min_BufferSize;
+  } else {
+    max_buffer_size_ = size;
+  }
+  sample_range_ = max_buffer_size_;
+  sample_focus_ = max_buffer_size_;
 }
 
 void DataObserver_Manager::set_ObserverDataSource(
@@ -276,16 +286,26 @@ void LogDataObserver::draw() {
                          file_name = name;
                          return true;
                        })) {
-    LOG_READER_POINTER->open_LogFile(file_name);
+    std::cout << "test for set button:  " << file_name << std::endl;
+    if (!LOG_READER_POINTER->open_LogFile(file_name)) {
+      this->set_BoxMessage(atd::utility::CString::cstring_cat(
+          "can not open file at addr: %s", file_name.c_str()));
+    }
   }
   if (LOG_READER_POINTER->is_Done()) {
+    if (this->get_MaxBufferSize() != LOG_READER_POINTER->get_MaxBufferSize()) {
+      this->set_MaxBufferSize(LOG_READER_POINTER->get_MaxBufferSize());
+    }
     this->DataObserver_Manager::draw();
   } else {
     ImGui::Text("waiting for log file loading ...");
   }
 }
 
-void LogDataObserver::render() { draw(); }
+void LogDataObserver::render() {
+  this->MessageBox();
+  draw();
+}
 
 LogDataObserver::LogDataObserver(
     uint32_t size,
