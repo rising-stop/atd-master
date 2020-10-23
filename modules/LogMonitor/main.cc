@@ -9,62 +9,50 @@ using namespace atd::protocol;
 
 /* main function */
 int main(int args, char** argv) {
-  Proto_Messages<MONITOR_MSG> frame;
-  LCM_Proxy<Proto_Messages<MONITOR_MSG>> sender_(LCM_MODE::SENDER,
-                                                 "PlanningLog");
+  atd::utility::Singleton::try_register<atd::utility::Runtime_Calculator<>>();
+  atd::utility::Singleton::try_register<atd::utility::Runtime_Counter>();
+  atd::utility::Singleton::try_register<atd::utility::DebugLogging>();
 
-  uint32_t counter = 0;
+  int counter = 0;
 
   while (true) {
-    ++counter;
-    frame.Clear();
-    frame.mutable_title()->set_time_stamp(counter);
-    frame.mutable_title()->set_counter_no(counter);
+    atd::utility::Singleton::instance<atd::utility::DebugLogging>()
+        ->reset_Frame();
 
-    /* calibration test */
-    auto ptr_float_1 = frame.mutable_calibrations()->add_calib_float();
-    ptr_float_1->set_data(1.0f);
-    ptr_float_1->set_data_init(1.0f);
-    ptr_float_1->set_data_lower_bound(0.0f);
-    ptr_float_1->set_data_upper_bound(2.0f);
-    ptr_float_1->set_name("calib float 1");
+    float signal_float = sin(static_cast<float>(counter) / 10.0f);
+    int signal_int = static_cast<int>(counter);
+    uint32_t signal_uint = signal_int > 0 ? signal_int : -signal_int;
+    std::cout << "signal_float = " << signal_float << std::endl;
+    std::cout << "signal_int = " << signal_int << std::endl;
+    std::cout << "signal_uint = " << signal_uint << std::endl;
 
-    auto ptr_float_2 = frame.mutable_calibrations()->add_calib_float();
-    ptr_float_2->set_data(2.0f);
-    ptr_float_2->set_data_init(2.0f);
-    ptr_float_2->set_data_lower_bound(0.0f);
-    ptr_float_2->set_data_upper_bound(4.0f);
-    ptr_float_2->set_name("calib float 2");
+    LCM_LOG_INFO.LogInfo("LogTest: Log title")
+        .LogFloat("LogFloat_1", signal_float)
+        .LogInt("LogInt_1", signal_int)
+        .LogUInt("LogUint_1", signal_uint);
 
-    auto ptr_int_1 = frame.mutable_calibrations()->add_calib_int();
-    ptr_int_1->set_data(2);
-    ptr_int_1->set_data_init(2);
-    ptr_int_1->set_data_lower_bound(0);
-    ptr_int_1->set_data_upper_bound(4);
-    ptr_int_1->set_name("calib int 1");
+    REGISTER_FLOAT_AS_CALIBRATION(calib_float, 2.0f, 0.0f, 1.0f);
+    REGISTER_INT_AS_CALIBRATION(calib_int, 10, -10, 1);
+    REGISTER_UINT_AS_CALIBRATION(calib_uint, 10, 0, 1);
 
-    auto ptr_disp_float = frame.mutable_display_element()->add_float_vars();
-    ptr_disp_float->set_name("disp float 1");
-    ptr_disp_float->set_data(sin(static_cast<float>(counter % 125) / 3.0f));
+    auto disp_float = GET_FLOAT_DISPLAY_POINTER;
+    disp_float->set_name("float_display_1");
+    disp_float->set_data(signal_float);
 
-    auto ptr_disp_int = frame.mutable_display_element()->add_int_vars();
-    ptr_disp_int->set_name("disp int 1");
-    ptr_disp_int->set_data(counter % 16);
+    auto disp_int = GET_INT_DISPLAY_POINTER;
+    disp_int->set_name("int_display_1");
+    disp_int->set_data(signal_int);
 
-    auto single_log_frame = frame.mutable_log()->add_content();
-    single_log_frame->add_str_msg("test str");
-    auto int_var = single_log_frame->add_int_vars();
-    int_var->set_name("test log int");
-    int_var->set_data(counter % 16);
+    auto disp_uint = GET_UINT_DISPLAY_POINTER;
+    disp_uint->set_name("uint_display_1");
+    disp_uint->set_data(signal_uint);
 
-    auto single_log_frame_2 = frame.mutable_log()->add_content();
-    single_log_frame_2->add_str_msg("test str");
-    auto int_var_2 = single_log_frame_2->add_int_vars();
-    int_var_2->set_name("test log int 2");
-    int_var_2->set_data(counter % 26);
+    if (++counter > 47) {
+      counter = 0;
+    }
 
-    sender_.publish(frame);
-
+    atd::utility::Singleton::instance<atd::utility::DebugLogging>()
+        ->publish_Frame();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 

@@ -60,11 +60,15 @@ class DebugLogging : public Singleton {
   atd::protocol::UINT_VAR* get_PtrElementDisplay_As_UInt();
   atd::protocol::NORMAL_VAR* get_PtrElementDisplay_As_String();
 
+  std::pair<float, bool> get_FloatCalibVariables(const std::string&);
+  std::pair<int, bool> get_IntCalibVariables(const std::string&);
+  std::pair<uint32_t, bool> get_UintCalibVariables(const std::string&);
+
   atd::protocol::FRAME_CONTENT* get_PtrLogFrame();
 
   template <typename T>
-  bool try_register_Calibration(const std::string&, const T&, const T&,
-                                const T&);
+  std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
+  try_register_Calibration(const std::string&, const T&, const T&, const T&);
   template <typename T>
   const std::pair<std::shared_ptr<CalibrationVariable<T>>, bool>
   try_fetch_Calibration(const std::string&) const;
@@ -151,6 +155,8 @@ class Writer {
 }  // namespace utility
 }  // namespace atd
 
+#include "debug_logging.tcc"
+
 #define LOG_DEBUG_INFO(file, line, level) \
   atd::utility::Writer(file, line, level).construct()
 #define LCM_LOG_INFO LOG_DEBUG_INFO(__FILE__, __LINE__, atd::utility::INFO)
@@ -166,30 +172,30 @@ class Writer {
 #define GET_OPENGL_POLY                                           \
   atd::utility::Singleton::instance<atd::utility::DebugLogging>() \
       ->get_PtrElementPoly()
-#define GET_DISPLAY_POINTER                                       \
+#define GET_FLOAT_DISPLAY_POINTER                                 \
   atd::utility::Singleton::instance<atd::utility::DebugLogging>() \
-      ->get_PtrElementDisplay()
-#define REGISTER_FLOAT_AS_CALIBRATION(variable, upper, lower, init)          \
-  static float variable = init;                                              \
-  static bool flag_calibration_run_once_##variable = true;                   \
-  if (flag_calibration_run_once_##variable) {                                \
-    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
-        ->try_register_Calibration(#variable, variable, upper, lower, init); \
-    flag_calibration_run_once_##variable = false;                            \
-  }
-#define REGISTER_INT_AS_CALIBRATION(variable, upper, lower, init)            \
-  static int variable = init;                                                \
-  static bool flag_calibration_run_once_##variable = true;                   \
-  if (flag_calibration_run_once_##variable) {                                \
-    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
-        ->try_register_Calibration(#variable, variable, upper, lower, init); \
-    flag_calibration_run_once_##variable = false;                            \
-  }
-#define REGISTER_UINT_AS_CALIBRATION(variable, upper, lower, init)           \
-  static uint32_t variable = init;                                           \
-  static bool flag_calibration_run_once_##variable = true;                   \
-  if (flag_calibration_run_once_##variable) {                                \
-    atd::utility::Singleton::instance<atd::utility::DebugLogging>()          \
-        ->try_register_Calibration(#variable, variable, upper, lower, init); \
-    flag_calibration_run_once_##variable = false;                            \
-  }
+      ->get_PtrElementDisplay_As_Float()
+#define GET_INT_DISPLAY_POINTER                                   \
+  atd::utility::Singleton::instance<atd::utility::DebugLogging>() \
+      ->get_PtrElementDisplay_As_Int()
+#define GET_UINT_DISPLAY_POINTER                                  \
+  atd::utility::Singleton::instance<atd::utility::DebugLogging>() \
+      ->get_PtrElementDisplay_As_UInt()
+
+#define REGISTER_CALIBRATION(type, variable, upper, lower, init)          \
+  type variable = init;                                                   \
+  auto res##variable =                                                    \
+      atd::utility::Singleton::instance<atd::utility::DebugLogging>()     \
+          ->try_register_Calibration(#variable, static_cast<type>(upper), \
+                                     static_cast<type>(lower),            \
+                                     static_cast<type>(init));            \
+  if (!res##variable.second) variable = res##variable.first->get_Var();
+
+#define REGISTER_FLOAT_AS_CALIBRATION(variable, upper, lower, init) \
+  REGISTER_CALIBRATION(float, variable, upper, lower, init)
+
+#define REGISTER_INT_AS_CALIBRATION(variable, upper, lower, init) \
+  REGISTER_CALIBRATION(int, variable, upper, lower, init)
+
+#define REGISTER_UINT_AS_CALIBRATION(variable, upper, lower, init) \
+  REGISTER_CALIBRATION(uint32_t, variable, upper, lower, init)

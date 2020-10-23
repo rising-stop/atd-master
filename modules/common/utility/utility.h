@@ -150,6 +150,17 @@ class CString {
   template <typename... ARG>
   static std::string cstring_cat(const char *, ARG &&...);
 
+  template <typename... ARG>
+  static int cstring_length_estimate(const char *, ARG &&...);
+
+  template <typename T, typename... ARG>
+  static int cstring_length_estimate(const T &, ARG &&...);
+
+  template <typename T>
+  static int cstring_length_estimate(const T &);
+  
+  static int cstring_length_estimate(const char*);
+
   template <typename METHOD>
   static void cstring_split(const std::string &split_line, const char comma,
                             METHOD substring_handler, int op_times = -1);

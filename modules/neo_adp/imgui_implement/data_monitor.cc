@@ -1,7 +1,5 @@
 #include "data_monitor.h"
 
-#include <iostream>
-
 #include "file_interface.h"
 #include "modules/common/common_header.h"
 
@@ -79,7 +77,7 @@ void DataObserver::menu_handler() {
     ImGui::MenuItem(menu_item.first.c_str(), "",
                     &(menu_item.second.flag_activate_));
     if (click_detect && !menu_item.second.flag_activate_) {
-      unregister_signal(menu_item.first);
+      //  unregister_signal(menu_item.first);
     }
   }
 }
@@ -103,10 +101,11 @@ void DataObserver::plot_render() {
           "%.3f", data_list_->at(signal.first).data_.back());
     }
     std::string color_edit_name = signal.first;
-    color_edit_name.push_back(' ');
-    color_edit_name.append(signal.second.info_);
+    // color_edit_name.push_back(' ');
     ImGui::ColorEdit4(color_edit_name.c_str(),
                       (float*)&color_dispatcher_[signal.first]);
+    // ImGui::SameLine();
+    // ImGui::Text(signal.second.info_.c_str());
     line_colors.push_back(
         ImGui::ColorConvertFloat4ToU32(color_dispatcher_.at(signal.first)));
     overlay_text.push_back(signal.first);
@@ -286,7 +285,6 @@ void LogDataObserver::draw() {
                          file_name = name;
                          return true;
                        })) {
-    std::cout << "test for set button:  " << file_name << std::endl;
     if (!LOG_READER_POINTER->open_LogFile(file_name)) {
       this->set_BoxMessage(atd::utility::CString::cstring_cat(
           "can not open file at addr: %s", file_name.c_str()));

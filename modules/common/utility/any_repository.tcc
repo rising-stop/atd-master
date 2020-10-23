@@ -27,7 +27,7 @@ std::pair<std::shared_ptr<T>, bool> Any_Repository::try_RegisterVar(
 }
 
 template <typename T>
-const std::pair<std::shared_ptr<T>, bool> Any_Repository::get_RegisteredVar(
+std::pair<std::shared_ptr<T> const, bool> Any_Repository::get_RegisteredVar(
     const std::string &name) const {
   auto itr_name = var_repository_.find(name);
   if (itr_name == var_repository_.end()) {

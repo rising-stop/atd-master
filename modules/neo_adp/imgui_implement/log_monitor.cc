@@ -24,7 +24,7 @@ void LogMonitor::parse_LogContent(const atd::protocol::FRAME_HEADER& header,
     return;
   }
   auto header_str = atd::utility::CString::cstring_cat(
-      "########### FRAME NO. %u,, TIME STAMP %u, ELAPSE %u ms ###########",
+      "########### FRAME NO. %u, TIME STAMP %u, ELAPSE %u ms ###########\n",
       header.counter_no(), header.time_stamp(),
       header.time_stamp() - last_frame_time_);
   // std::stringstream sstm;
@@ -103,6 +103,7 @@ void LogMonitor::AddLog(const char* fmt, ...) {
 
 void LogMonitor::Draw() {
   ImGui::Checkbox("Enable Output Text", &enable_);
+
   ImGui::ColorEdit3("clear color", (float*)&text_color_);
 
   // Options menu
@@ -179,7 +180,6 @@ void LogMonitor::Draw() {
 
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
-
   if (AutoScroll_ && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
     ImGui::SetScrollHereY(1.0f);
 

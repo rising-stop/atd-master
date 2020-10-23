@@ -1,19 +1,35 @@
-#include "utility.h"
 #include <cstring>
+
+#include "utility.h"
 
 namespace atd {
 namespace utility {
 
 template <typename... ARG>
+int CString::cstring_length_estimate(const char *str, ARG &&... args) {
+  return cstring_length_estimate(str) +
+         cstring_length_estimate(std::forward<ARG>(args)...);
+}
+
+template <typename T>
+int CString::cstring_length_estimate(const T &num) {
+  return 25;
+}
+
+template <typename T, typename... ARG>
+int CString::cstring_length_estimate(const T &num, ARG &&... args) {
+  return cstring_length_estimate(num) +
+         cstring_length_estimate(std::forward<ARG>(args)...);
+}
+
+template <typename... ARG>
 std::string CString::cstring_cat(const char *str_cat, ARG &&... args) {
-  int char_num = strlen(str_cat) + 12 * sizeof...(ARG);
-  char *str_container = new char[char_num];
-  while (!sprintf(str_container, str_cat, std::forward<ARG>(args)...)) {
-    delete[] str_container;
-    char_num += 12 * sizeof...(ARG);
-    str_container = new char[char_num];
-  }
-  return std::string(str_container);
+  int char_num =
+      strlen(str_cat) + cstring_length_estimate(std::forward<ARG>(args)...);
+  std::shared_ptr<char> str_container;
+  str_container.reset(new char[char_num]);
+  sprintf(str_container.get(), str_cat, std::forward<ARG>(args)...);
+  return std::string(str_container.get());
 }
 
 template <typename METHOD>

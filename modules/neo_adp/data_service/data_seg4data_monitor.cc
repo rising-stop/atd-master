@@ -1,5 +1,4 @@
 #include "data_seg4data_monitor.h"
-#include <iostream>
 #include "data_seg4lcm_protocol.h"
 
 line_frame::line_frame(uint32_t size, float init_value) {
@@ -7,7 +6,6 @@ line_frame::line_frame(uint32_t size, float init_value) {
 }
 
 void DataSeg4DataMonitor::set_MaxBufferSize(uint32_t size) {
-  std::cout << "test for set_MaxBufferSize size = " << size << std::endl;
   if (size < DataMonitor_Min_BufferSize) {
     max_buffer_size_ = DataMonitor_Min_BufferSize;
     return;

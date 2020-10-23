@@ -6,7 +6,6 @@
 #include "modules/neo_adp/data_service/data_seg4data_monitor.h"
 #include "modules/neo_adp/imgui_implement/data_analyzer.h"
 #include "modules/neo_adp/imgui_implement/file_interface.h"
-
 Switches4SubWindows ImGui_ComponentManager::switches;
 
 void ImGui_ComponentManager::init() {
@@ -70,10 +69,15 @@ void ImGui_ComponentManager::Show_Custom_Window() {
 void ImGui_ComponentManager::Show_Log_Window(bool* swth) {
   if (!(*swth)) return;
   static LogMonitor monitor;
+
   ImGui::Begin("Log Info", swth);
+
   ImGui::Separator();
+
   monitor.render();
+
   if (ImGui::Button("Close")) switches.show_log_window = false;
+
   ImGui::End();
 }
 

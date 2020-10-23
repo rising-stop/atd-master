@@ -83,5 +83,9 @@ void FinateStateMachine::run() {
   }
 }
 
+int CString::cstring_length_estimate(const char *str) {
+  return strlen(str) + 10;
+}
+
 }  // namespace utility
 }  // namespace atd

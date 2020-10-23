@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 namespace atd {
@@ -62,7 +64,7 @@ class Any_Repository {
                                                       ARGS &&... args);
 
   template <typename T>
-  const std::pair<std::shared_ptr<T>, bool> get_RegisteredVar(
+  std::pair<std::shared_ptr<T> const, bool> get_RegisteredVar(
       const std::string &name) const;
 
   template <typename T>

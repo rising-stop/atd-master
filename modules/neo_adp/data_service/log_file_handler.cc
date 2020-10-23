@@ -1,6 +1,5 @@
 #include "log_file_handler.h"
 
-#include <iostream>
 
 LCMFILE_MODE LCM_File_Handler::get_Mode() const { return mode_; }
 
@@ -28,8 +27,6 @@ bool LCM_File_Handler::file_init(const std::string& name, LCMFILE_MODE mode) {
       name_ = name;
       mode_ = READ;
       ptr_file_.reset(new lcm::LogFile(name_, "r"));
-      std::cout << "test for file read:   ptr_->good() = " << ptr_file_->good()
-                << std::endl;
       if (!ptr_file_->good()) {
         name_.clear();
         mode_ = DEFAULT;
@@ -42,7 +39,6 @@ bool LCM_File_Handler::file_init(const std::string& name, LCMFILE_MODE mode) {
       CUSTOM_EXCEPTION("mode error, static_cast<int>(mode): %d",
                        static_cast<int>(mode));
   }
-  std::cout << "test for init. " << std::endl;
   flag_is_initalized_ = true;
   return true;
 }
@@ -74,7 +70,6 @@ bool PlanningLog_Reader::open_LogFile(const std::string& name) {
 
 void PlanningLog_Reader::preprocess_LogFile() {
   std::vector<atd::protocol::MONITOR_MSG> tmp_container;
-  std::cout << "test for preprocess" << std::endl;
   auto event_slice = ptr_file_->readNextEvent();
   while (event_slice) {
     if (event_slice->channel == "PlanningLog") {
@@ -91,8 +86,6 @@ void PlanningLog_Reader::preprocess_LogFile() {
   }
 
   flag_is_file_read_ = true;
-  std::cout << "test for preprocess, flag_is_read = " << flag_is_file_read_
-            << std::endl;
 }
 
 bool PlanningLog_Reader::is_Done() const {

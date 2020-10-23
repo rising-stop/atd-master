@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <iostream>
 
 const std::string& FileAddress::get_CurrentFolder() const {
   return addr_.top().current_name_;
