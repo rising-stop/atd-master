@@ -35,8 +35,12 @@ void DataObserver::render() {
     ImGui::EndPopup();
   }
   ImGui::SameLine();
-  ImGui::Checkbox("Auto Zoom", &flag_auto_zoom_);
-  ImGui::InputFloat2("Plot Bounds", plot_limit_);
+  std::string check_box_id = "Auto Zoom ";
+  check_box_id.append(id_);
+  ImGui::Checkbox(check_box_id.c_str(), &flag_auto_zoom_);
+  std::string input_float_id = "Plot Bounds ";
+  input_float_id.append(id_);
+  ImGui::InputFloat2(input_float_id.c_str(), plot_limit_);
   if (plot_limit_[0] < plot_limit_[1]) {
     plot_limit_[0] = plot_limit_[1] + 0.1;
   }
@@ -100,8 +104,9 @@ void DataObserver::plot_render() {
       signal.second.info_ = atd::utility::CString::cstring_cat(
           "%.3f", data_list_->at(signal.first).data_.back());
     }
-    std::string color_edit_name = signal.first;
-    // color_edit_name.push_back(' ');
+    std::string color_edit_name = id_;
+    color_edit_name.push_back(' ');
+    color_edit_name.append(signal.first);
     ImGui::ColorEdit4(color_edit_name.c_str(),
                       (float*)&color_dispatcher_[signal.first]);
     // ImGui::SameLine();
