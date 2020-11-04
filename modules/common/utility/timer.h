@@ -52,9 +52,32 @@ class Runtime_Calculator : public Singleton {
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
   }
 
+  bool set_CountDown(const std::string &name, uint64_t mill_sec) {
+    time_stick now_stick = Now();
+    return countdown_probe_.try_insert(
+        name, std::make_pair(now_stick,
+                             duration_cast<Duration>(milliseconds(mill_sec))));
+  }
+
+  bool is_CountDownOver(const std::string &name) {
+    auto read_ins = countdown_probe_.read_value(name);
+    if (read_ins.second) {
+      time_stick now_stick = Now();
+      Duration time_gap = now_stick - read_ins.first.first;
+      if (time_gap.count() > read_ins.first.second.count()) {
+        countdown_probe_.remove_key(name);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
  private:
   ThreadSafe_HashMap<std::string, time_stick> time_probe_;
   ThreadSafe_HashMap<std::string, Duration> storage_duration_;
+  ThreadSafe_HashMap<std::string, std::pair<time_stick, milliseconds>>
+      countdown_probe_;
 
  private:
   Runtime_Calculator() = default;

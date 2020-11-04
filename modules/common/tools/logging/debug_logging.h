@@ -48,6 +48,12 @@ class DebugLogging : public Singleton {
   friend class Singleton;
 
  public:
+  static void DebugInit();
+
+ private:
+  static bool is_init_;
+
+ public:
   void reset_Frame();
   void publish_Frame();
   atd::protocol::FRAME_CONTENT* get_PtrFrame();
@@ -156,6 +162,8 @@ class Writer {
 }  // namespace atd
 
 #include "debug_logging.tcc"
+
+#define DEBUG_LOGGING_INIT atd::utility::DebugLogging::DebugInit();
 
 #define LOG_DEBUG_INFO(file, line, level) \
   atd::utility::Writer(file, line, level).construct()

@@ -3,6 +3,17 @@
 namespace atd {
 namespace utility {
 
+void DebugLogging::DebugInit() {
+  if (!is_init_) {
+    atd::utility::Singleton::try_register<atd::utility::Runtime_Calculator<>>();
+    atd::utility::Singleton::try_register<atd::utility::Runtime_Counter>();
+    atd::utility::Singleton::try_register<atd::utility::DebugLogging>();
+    is_init_ = true;
+  }
+}
+
+bool DebugLogging::is_init_ = false;
+
 DebugLogging::DebugLogging() { TIMER->set_BeginStick("mile_stone"); }
 
 void DebugLogging::reset_Frame() {
