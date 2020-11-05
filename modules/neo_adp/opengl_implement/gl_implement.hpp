@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <functional>
 
 #include "modules/common/common_header.h"
 #include "modules/neo_adp/data_service/data_seg4lcm_protocol.h"
@@ -69,74 +70,142 @@ class GL_Implement {
 
     auto box_set = ptr_disp_msg->box_set();
     for (auto single_box : box_set) {
-      ddVec3 box_origin = {single_box.origin().y(), single_box.origin().z(),
-                           single_box.origin().x()};
+      ddVec3 box_origin = {single_box.origin().x(), single_box.origin().y(),
+                           single_box.origin().z()};
       ddVec3 corner_points[8];
       convert_BoxData(corner_points, box_origin, single_box.width(),
                       single_box.height(), single_box.deepth(),
                       single_box.heading());
-      if (single_box.discription() == "CIPV") {
-        drawLabel(td, box_origin, "CIPV");
+      std::string display_content;
+      display_content.append(single_box.name());
+      display_content.push_back('\n');
+      display_content.append(single_box.discription());
+      if (single_box.name() == "CIPV") {
+        drawLabel(td, box_origin, display_content.c_str());
         dd::box(td.ddContext, corner_points, dd::colors::Green);
-        dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
-      } else if (single_box.discription() == "TOS") {
-        drawLabel(td, box_origin, "TOS");
+        // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+      } else if (single_box.name() == "TOS") {
+        drawLabel(td, box_origin, display_content.c_str());
         dd::box(td.ddContext, corner_points, dd::colors::Yellow);
-        dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
-      } else if (single_box.discription() == "Selected") {
-        drawLabel(td, box_origin, "Selected");
+        // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+      } else if (single_box.name() == "Selected") {
+        drawLabel(td, box_origin, display_content.c_str());
         dd::box(td.ddContext, corner_points, dd::colors::Red);
-        dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+        // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+      } else if (single_box.name() == "CCIV") {
+        drawLabel(td, box_origin, display_content.c_str());
+        dd::box(td.ddContext, corner_points, dd::colors::Orange);
+        // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       } else {
-        drawLabel(td, box_origin, single_box.discription().c_str());
+        drawLabel(td, box_origin, display_content.c_str());
         dd::box(td.ddContext, corner_points, dd::colors::White);
-        dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
+        // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       }
     }
 
     auto line_set = ptr_disp_msg->line_set();
     for (auto single_line : line_set) {
+      std::string display_content;
+      display_content.append(single_line.name());
+      display_content.push_back('\n');
+      display_content.append(single_line.discription());
       auto point_size = single_line.sample_points().size();
       if (point_size > 2) {
-        ddVec3 point_ori{single_line.sample_points(point_size / 2).y(),
-                         single_line.sample_points(point_size / 2).z(),
-                         single_line.sample_points(point_size / 2).x()};
-        if (single_line.discription() == "Planning_Line") {
-          drawLabel(td, point_ori, single_line.discription().c_str());
-          dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
-          for (uint32_t index = 0; index < (point_size - 1); index++) {
-            ddVec3 seg_start{single_line.sample_points(index).y(),
-                             single_line.sample_points(index).z(),
-                             single_line.sample_points(index).x()};
-            ddVec3 seg_end{single_line.sample_points(index + 1).y(),
-                           single_line.sample_points(index + 1).z(),
-                           single_line.sample_points(index + 1).x()};
-            dd::line(td.ddContext, seg_start, seg_end, dd::colors::Yellow);
-          }
-        } else if (single_line.discription() == "RawRate_Line") {
-          drawLabel(td, point_ori, single_line.discription().c_str());
-          dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
-          for (uint32_t index = 0; index < (point_size - 1); index++) {
-            ddVec3 seg_start{single_line.sample_points(index).y(),
-                             single_line.sample_points(index).z(),
-                             single_line.sample_points(index).x()};
-            ddVec3 seg_end{single_line.sample_points(index + 1).y(),
-                           single_line.sample_points(index + 1).z(),
-                           single_line.sample_points(index + 1).x()};
-            dd::line(td.ddContext, seg_start, seg_end, dd::colors::DeepPink);
-          }
+        if (single_line.name() == "Planning_Line") {
+          draw_Line(
+              td,
+              [&](int index) { return single_line.sample_points(index).x(); },
+              [&](int index) { return single_line.sample_points(index).y(); },
+              [&](int index) { return single_line.sample_points(index).z(); },
+              point_size, display_content, dd::colors::Yellow);
+        } else if (single_line.name() == "RawRate_Line") {
+          draw_Line(
+              td,
+              [&](int index) { return single_line.sample_points(index).x(); },
+              [&](int index) { return single_line.sample_points(index).y(); },
+              [&](int index) { return single_line.sample_points(index).z(); },
+              point_size, display_content, dd::colors::DarkGreen);
         } else {
-          drawLabel(td, point_ori, single_line.discription().c_str());
-          dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
-          for (uint32_t index = 0; index < (point_size - 1); index++) {
-            ddVec3 seg_start{single_line.sample_points(index).y(),
-                             single_line.sample_points(index).z(),
-                             single_line.sample_points(index).x()};
-            ddVec3 seg_end{single_line.sample_points(index + 1).y(),
-                           single_line.sample_points(index + 1).z(),
-                           single_line.sample_points(index + 1).x()};
-            dd::line(td.ddContext, seg_start, seg_end, dd::colors::White);
-          }
+          draw_Line(
+              td,
+              [&](int index) { return single_line.sample_points(index).x(); },
+              [&](int index) { return single_line.sample_points(index).y(); },
+              [&](int index) { return single_line.sample_points(index).z(); },
+              point_size, display_content, dd::colors::White);
+        }
+      }
+    }
+
+    auto ploy_set = ptr_disp_msg->ploy_set();
+    for (auto single_ploy : ploy_set) {
+      std::string display_content;
+      display_content.append(single_ploy.name());
+      display_content.push_back('\n');
+      display_content.append(single_ploy.discription());
+      int point_size = static_cast<int>(single_ploy.upper_bound() -
+                                        single_ploy.lower_bound());
+      if (point_size > 2) {
+        float ploy_step =
+            (single_ploy.upper_bound() - single_ploy.lower_bound()) /
+            point_size;
+        if (single_ploy.name() == "PlannedTraj") {
+          draw_Line(
+              td,
+              [&](int index) {
+                return index * ploy_step + single_ploy.lower_bound();
+              },
+              [&](int index) {
+                float local_x = index * ploy_step + single_ploy.lower_bound();
+                atd::utility::Polynomial tmp_ploy;
+                std::vector<double> param_list;
+                for (auto item : single_ploy.coeffients()) {
+                  param_list.push_back(item);
+                }
+
+                tmp_ploy.set_PolynomialParameters(param_list);
+                return tmp_ploy.get_PolynomialValue(local_x);
+              },
+              [&](int index) { return 0.0f; }, point_size, display_content,
+              dd::colors::Yellow);
+        } else if (single_ploy.name() == "PredictedTraj") {
+          draw_Line(
+              td,
+              [&](int index) {
+                return index * ploy_step + single_ploy.lower_bound();
+              },
+              [&](int index) {
+                float local_x = index * ploy_step + single_ploy.lower_bound();
+                float base = 1.0f;
+                int ploy_size = single_ploy.coeffients_size();
+                float res = single_ploy.coeffients(ploy_size - 1);
+                for (int index4loop = ploy_size - 2; index4loop >= 0;
+                     --index4loop) {
+                  base *= local_x;
+                  res += base * single_ploy.coeffients(index4loop);
+                }
+                return res;
+              },
+              [&](int index) { return 0.0f; }, point_size, display_content,
+              dd::colors::DarkGreen);
+        } else {
+          draw_Line(
+              td,
+              [&](int index) {
+                return index * ploy_step + single_ploy.lower_bound();
+              },
+              [&](int index) {
+                float local_x = index * ploy_step + single_ploy.lower_bound();
+                atd::utility::Polynomial tmp_ploy;
+                std::vector<double> param_list;
+                for (auto item : single_ploy.coeffients()) {
+                  param_list.push_back(item);
+                }
+
+                tmp_ploy.set_PolynomialParameters(param_list);
+                return tmp_ploy.get_PolynomialValue(local_x);
+              },
+              [&](int index) { return 0.0f; }, point_size, display_content,
+              dd::colors::White);
         }
       }
     }
@@ -254,20 +323,30 @@ class GL_Implement {
   static void convert_BoxData(ddVec3 *corner_points, ddVec3 origin,
                               const float width, const float height,
                               const float deepth, const float heading) {
-    float init_ang = atan2(height, width);
-    float diag_length = sqrt(width * width + height * height) / 2.0f;
-    corner_points[0][0] = origin[0] + diag_length * sin(heading + init_ang);
-    corner_points[0][1] = origin[1];
-    corner_points[0][2] = origin[2] + diag_length * cos(heading + init_ang);
-    corner_points[1][0] = origin[0] - diag_length * sin(heading + init_ang);
-    corner_points[1][1] = origin[1];
-    corner_points[1][2] = origin[2] + diag_length * cos(heading + init_ang);
-    corner_points[2][0] = origin[0] - diag_length * sin(heading + init_ang);
-    corner_points[2][1] = origin[1];
-    corner_points[2][2] = origin[2] - diag_length * cos(heading + init_ang);
-    corner_points[3][0] = origin[0] + diag_length * sin(heading + init_ang);
-    corner_points[3][1] = origin[1];
-    corner_points[3][2] = origin[2] - diag_length * cos(heading + init_ang);
+    corner_points[0][0] =
+        (origin[1] + width * sinf(heading) + height * cosf(heading));
+    corner_points[0][1] = origin[2];
+    corner_points[0][2] =
+        origin[0] + width * cosf(heading) - height * sinf(heading);
+
+    corner_points[1][0] =
+        (origin[1] - width * sinf(heading) + height * cosf(heading));
+    corner_points[1][1] = origin[2];
+    corner_points[1][2] =
+        origin[0] - width * cosf(heading) - height * sinf(heading);
+
+    corner_points[2][0] =
+        (origin[1] - width * sinf(heading) - height * cosf(heading));
+    corner_points[2][1] = origin[2];
+    corner_points[2][2] =
+        origin[0] - width * cosf(heading) + height * sinf(heading);
+
+    corner_points[3][0] =
+        (origin[1] + width * sinf(heading) - height * cosf(heading));
+    corner_points[3][1] = origin[2];
+    corner_points[3][2] =
+        origin[0] + width * cosf(heading) + height * sinf(heading);
+
     corner_points[4][0] = corner_points[0][0];
     corner_points[4][1] = corner_points[0][1] + deepth;
     corner_points[4][2] = corner_points[0][2];
@@ -280,5 +359,24 @@ class GL_Implement {
     corner_points[7][0] = corner_points[3][0];
     corner_points[7][1] = corner_points[3][1] + deepth;
     corner_points[7][2] = corner_points[3][2];
+  }
+
+  static void draw_Line(const ThreadData &handler,
+                        std::function<float(int)> func_x,
+                        std::function<float(int)> func_y,
+                        std::function<float(int)> func_z, int size,
+                        const std::string &info, const ddVec3 &color) {
+    if (!size) {
+      return;
+    }
+    for (uint32_t index = 0; index < (size - 1); index++) {
+      ddVec3 seg_start{func_y(index), func_z(index), func_x(index)};
+      ddVec3 seg_end{func_y(index + 1), func_z(index + 1), func_x(index + 1)};
+      dd::line(handler.ddContext, seg_start, seg_end, color);
+    }
+    ddVec3 center{func_y(size / 2), func_z(size / 2), func_x(size / 2)};
+    drawLabel(handler, center, info.c_str());
+
+    // dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
   }
 };

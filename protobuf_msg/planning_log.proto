@@ -9,29 +9,35 @@ message FRAME_HEADER {
 }
 
 message DISPLAY_POINT {
-  float x = 1;
-  float y = 2;
-  float z = 3;
-  string discription = 4;
+  string name = 1;
+  float x = 2;
+  float y = 3;
+  float z = 4;
+  string discription = 5;
 }
 
 message DISPLAY_PLOYNOMIAL {
-  repeated float coeffients = 1;
-  string discription = 2;
+  string name = 1;
+  repeated float coeffients = 2;
+  float lower_bound = 3;
+  float upper_bound = 4;
+  string discription = 5;
 }
 
 message DISPLAY_LINE {
-  repeated DISPLAY_POINT sample_points = 1;
-  string discription = 2;
+  string name = 1;
+  repeated DISPLAY_POINT sample_points = 2;
+  string discription = 3;
 }
 
 message DISPLAY_BOX {
-  DISPLAY_POINT origin = 1;
-  float heading = 2;
-  float width = 3;
-  float height = 4;
-  float deepth = 5;
-  string discription = 6;
+  string name = 1;
+  DISPLAY_POINT origin = 2;
+  float heading = 3;
+  float width = 4;
+  float height = 5;
+  float deepth = 6;
+  string discription = 7;
 }
 
 message OPENGL_ELEMENT {
