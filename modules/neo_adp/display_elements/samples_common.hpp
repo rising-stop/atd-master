@@ -355,9 +355,9 @@ struct Camera {
 
   void checkKey1() {
     if (keys.default_eye) {
-      eye.setX(-90.0f);
-      eye.setY(150.0f);
-      eye.setZ(60.0f);
+      eye.setX(-50.0f);
+      eye.setY(130.0f);
+      eye.setZ(40.0f);
       right = Vector3(1.0f, 0.0f, 0.0f);
       up = Vector3(0.0f, 0.0f, 1.0f);
       forward = Vector3(0.0f, -1.0f, 0.0f);

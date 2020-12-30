@@ -82,6 +82,7 @@ void LCM_Proxy<MSG_TYPE>::publisher_spin() {
     } else {
       init();
     }
+    free(lcm_rbuf->data);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
 }

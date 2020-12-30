@@ -21,7 +21,7 @@ class Polynomial {
   Polynomial get_Integration(const double&) const;
 
   double get_Coefficient(const int&) const;
-  std::vector<double> get_Coefficient() const;
+  const std::vector<double>& get_Coefficient() const;
   std::vector<double>* get_Mutable_Parameters();
   double get_Length(const double&, const double&) const;
   int get_HighestDegree() const;

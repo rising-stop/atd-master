@@ -73,38 +73,45 @@ class GL_Implement {
     for (auto single_box : box_set) {
       ddVec3 box_origin = {single_box.origin().x(), single_box.origin().y(),
                            single_box.origin().z()};
-      ddVec3 label_origin = {-single_box.origin().y(), single_box.origin().z(),
+      ddVec3 label_origin = {single_box.origin().y(), single_box.origin().z(),
                              single_box.origin().x()};
-      ddVec3 corner_points[8];
-      convert_BoxData(corner_points, box_origin, single_box.width(),
-                      single_box.height(), single_box.deepth(),
-                      single_box.heading());
+
       std::string display_content;
       display_content.append(single_box.name());
       display_content.push_back('\n');
       display_content.append(single_box.discription());
       if (single_box.name() == "CIPV") {
         drawLabel(td, label_origin, display_content.c_str());
-        dd::box(td.ddContext, corner_points, dd::colors::Green);
+        draw_OrientedRect(td, box_origin, single_box.width(),
+                          single_box.height(), single_box.deepth(),
+                          single_box.heading(), dd::colors::Green);
         // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       } else if (single_box.name() == "TOS") {
         drawLabel(td, label_origin, display_content.c_str());
-        dd::box(td.ddContext, corner_points, dd::colors::Yellow);
+        draw_OrientedRect(td, box_origin, single_box.width(),
+                          single_box.height(), single_box.deepth(),
+                          single_box.heading(), dd::colors::Yellow);
         // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       } else if (single_box.name() == "Selected") {
         drawLabel(td, label_origin, display_content.c_str());
-        dd::box(td.ddContext, corner_points, dd::colors::Red);
+        draw_OrientedRect(td, box_origin, single_box.width(),
+                          single_box.height(), single_box.deepth(),
+                          single_box.heading(), dd::colors::Red);
         // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       } else if (single_box.name() == "CCIV") {
         drawLabel(td, label_origin, display_content.c_str());
-        dd::box(td.ddContext, corner_points, dd::colors::Orange);
+        draw_OrientedRect(td, box_origin, single_box.width(),
+                          single_box.height(), single_box.deepth(),
+                          single_box.heading(), dd::colors::Orange);
         // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
       } else {
         drawLabel(td, label_origin, display_content.c_str());
         // std::cout << display_content << std::endl;
-        dd::box(td.ddContext, corner_points, dd::colors::White);
+        draw_OrientedRect(td, box_origin, single_box.width(),
+                          single_box.height(), single_box.deepth(),
+                          single_box.heading(), dd::colors::AliceBlue);
         // dd::point(td.ddContext, box_origin, dd::colors::White, 3.0f);
-      }
+      } 
     }
 
     auto line_set = ptr_disp_msg->line_set();
@@ -135,7 +142,7 @@ class GL_Implement {
               [&](int index) { return single_line.sample_points(index).x(); },
               [&](int index) { return single_line.sample_points(index).y(); },
               [&](int index) { return single_line.sample_points(index).z(); },
-              point_size, display_content, dd::colors::White);
+              point_size, display_content, dd::colors::LawnGreen);
         }
       }
     }
@@ -190,7 +197,7 @@ class GL_Implement {
                 return res;
               },
               [&](int index) { return 0.0f; }, point_size, display_content,
-              dd::colors::DarkGreen);
+              dd::colors::LightPink);
         } else {
           draw_Line(
               td,
@@ -324,48 +331,55 @@ class GL_Implement {
    * @brief box data structure converter, convert standard heading included box
    * data to 8 conner points
    */
-  static void convert_BoxData(ddVec3 *corner_points, ddVec3 origin,
-                              const float width, const float height,
-                              const float deepth, const float heading) {
-    float heading_angle = 3.14159265f / 2.0f - heading;
+  static void draw_OrientedRect(const ThreadData &ctx, ddVec3 origin,
+                                const float width, const float height,
+                                const float deepth, const float heading,
+                                const ddVec3 &color) {
+    float heading_angle = 3.14159265f / 2.0f + heading;
     float box_width = width / 2.0f;
     float box_height = height / 2.0f;
-    corner_points[0][0] = -(origin[1] + box_width * sinf(heading_angle) +
-                            box_height * cosf(heading_angle));
+    ddVec3 corner_points[7];
+    corner_points[0][0] = (origin[1] + box_width * sinf(heading_angle) +
+                           box_height * cosf(heading_angle));
     corner_points[0][1] = origin[2];
     corner_points[0][2] = origin[0] + box_width * cosf(heading_angle) -
                           box_height * sinf(heading_angle);
-
-    corner_points[1][0] = -(origin[1] - box_width * sinf(heading_angle) +
-                            box_height * cosf(heading_angle));
+    corner_points[1][0] = (origin[1] - box_width * sinf(heading_angle) +
+                           box_height * cosf(heading_angle));
     corner_points[1][1] = origin[2];
     corner_points[1][2] = origin[0] - box_width * cosf(heading_angle) -
                           box_height * sinf(heading_angle);
+    dd::line(ctx.ddContext, corner_points[0], corner_points[1], color);
 
-    corner_points[2][0] = -(origin[1] - box_width * sinf(heading_angle) -
-                            box_height * cosf(heading_angle));
+    corner_points[2][0] = (origin[1] - box_width * sinf(heading_angle) -
+                           box_height * cosf(heading_angle));
     corner_points[2][1] = origin[2];
     corner_points[2][2] = origin[0] - box_width * cosf(heading_angle) +
                           box_height * sinf(heading_angle);
+    dd::line(ctx.ddContext, corner_points[1], corner_points[2], color);
 
-    corner_points[3][0] = -(origin[1] + box_width * sinf(heading_angle) -
-                            box_height * cosf(heading_angle));
+    corner_points[3][0] = (origin[1] + box_width * sinf(heading_angle) -
+                           box_height * cosf(heading_angle));
     corner_points[3][1] = origin[2];
     corner_points[3][2] = origin[0] + box_width * cosf(heading_angle) +
                           box_height * sinf(heading_angle);
+    dd::line(ctx.ddContext, corner_points[2], corner_points[3], color);
+    dd::line(ctx.ddContext, corner_points[3], corner_points[0], color);
 
-    corner_points[4][0] = corner_points[0][0];
-    corner_points[4][1] = corner_points[0][1] + deepth;
-    corner_points[4][2] = corner_points[0][2];
-    corner_points[5][0] = corner_points[1][0];
-    corner_points[5][1] = corner_points[1][1] + deepth;
-    corner_points[5][2] = corner_points[1][2];
-    corner_points[6][0] = corner_points[2][0];
-    corner_points[6][1] = corner_points[2][1] + deepth;
-    corner_points[6][2] = corner_points[2][2];
-    corner_points[7][0] = corner_points[3][0];
-    corner_points[7][1] = corner_points[3][1] + deepth;
-    corner_points[7][2] = corner_points[3][2];
+    corner_points[4][0] = (corner_points[2][0] + corner_points[3][0]) * 0.5f;
+    corner_points[4][1] = corner_points[0][1];
+    corner_points[4][2] = (corner_points[2][2] + corner_points[3][2]) * 0.5f;
+
+    corner_points[5][0] = (corner_points[2][0] + corner_points[1][0]) * 0.5f;
+    corner_points[5][1] = corner_points[1][1];
+    corner_points[5][2] = (corner_points[2][2] + corner_points[1][2]) * 0.5f;
+    dd::line(ctx.ddContext, corner_points[4], corner_points[5], color);
+
+    corner_points[6][0] = (corner_points[0][0] + corner_points[3][0]) * 0.5f;
+    corner_points[6][1] = corner_points[2][1];
+    corner_points[6][2] = (corner_points[0][2] + corner_points[3][2]) * 0.5f;
+    dd::line(ctx.ddContext, corner_points[5], corner_points[6], color);
+    dd::line(ctx.ddContext, corner_points[6], corner_points[4], color);
   }
 
   static void draw_Line(const ThreadData &handler,
@@ -377,12 +391,12 @@ class GL_Implement {
       return;
     }
     for (uint32_t index = 0; index < (size - 1); index++) {
-      ddVec3 seg_start{-func_y(index), func_z(index), func_x(index)};
-      ddVec3 seg_end{-func_y(index + 1), func_z(index + 1), func_x(index + 1)};
+      ddVec3 seg_start{func_y(index), func_z(index), func_x(index)};
+      ddVec3 seg_end{func_y(index + 1), func_z(index + 1), func_x(index + 1)};
       dd::line(handler.ddContext, seg_start, seg_end, color);
     }
-    ddVec3 center{-func_y(size / 2), func_z(size / 2), func_x(size / 2)};
-    drawLabel(handler, center, info.c_str());
+    ddVec3 center{func_y(size / 2), func_z(size / 2), func_x(size / 2)};
+    // drawLabel(handler, center, info.c_str());
 
     // dd::point(td.ddContext, point_ori, dd::colors::White, 5.0f);
   }

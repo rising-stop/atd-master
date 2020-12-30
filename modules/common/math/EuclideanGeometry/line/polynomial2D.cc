@@ -22,7 +22,7 @@ void Polynomial::set_has_param() { flag_has_param_ = true; }
 
 bool Polynomial::has_param() const { return flag_has_param_; }
 
-std::vector<double> Polynomial::get_Coefficient() const {
+const std::vector<double>& Polynomial::get_Coefficient() const {
   if (!has_param()) {
     throw std::logic_error("poly contains nothing");
   }
@@ -138,10 +138,10 @@ double Polynomial::get_Length(const double& lower, const double& upper) const {
     resolution = 0.5;
     dev_num = static_cast<int>((upper - lower) / resolution);
   }
-  if (dev_num > 100){
+  if (dev_num > 100) {
     dev_num = 100;
   }
-  if (dev_num < 3){
+  if (dev_num < 3) {
     dev_num = 3;
   }
   throw std::runtime_error("get_Length: function not be completed yet");
@@ -294,5 +294,5 @@ std::ostream& operator<<(std::ostream& ostm, const Polynomial& poly) {
   return ostm;
 }
 
-}  // namespace planning
+}  // namespace utility
 }  // namespace atd
