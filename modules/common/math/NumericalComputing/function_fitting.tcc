@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "modules/common/math/NumericalComputing/numerical_method/least_square.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -30,4 +30,4 @@ Polynomial FunctionFitting::LeastSquareFitting(
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

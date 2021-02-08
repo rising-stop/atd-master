@@ -3,7 +3,7 @@
 
 #include "discrete_line2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class MonotonicDiscreteLine2D : public DiscreteLine2D<Point2D> {
@@ -26,6 +26,6 @@ class MonotonicDiscreteLine2D : public DiscreteLine2D<Point2D> {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #endif

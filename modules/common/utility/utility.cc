@@ -1,6 +1,6 @@
 #include "utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 std::mutex Singleton::register_lock_;
@@ -88,4 +88,4 @@ int CString::cstring_length_estimate(const char *str) {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

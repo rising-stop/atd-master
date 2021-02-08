@@ -1,6 +1,6 @@
 #include "lcm_dispatcher.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename LCM_TYPE>
@@ -174,4 +174,4 @@ LCM_Proxy<MSG_TYPE>::~LCM_Proxy() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

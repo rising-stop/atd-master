@@ -8,7 +8,7 @@
 
 #include "modules/common/utility/utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class ShmDispatcher : public Singleton {
@@ -103,6 +103,6 @@ class ShmFactory : public Singleton {
 // ShmAsyncLink
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "shared_memory.tcc"

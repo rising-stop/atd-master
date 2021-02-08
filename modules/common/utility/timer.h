@@ -8,7 +8,7 @@
 #include "thread_safe.h"
 #include "utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 using namespace std::chrono;
@@ -105,7 +105,7 @@ class Runtime_Counter : public Singleton {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #define TIMER                        \
   atd::utility::Singleton::instance< \

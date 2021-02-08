@@ -15,7 +15,7 @@
 #define DISPLAY_DTC "DTC_code"
 #define DISPLAY_SETTING_SPEED "setting_spd_ms"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 enum SECURITY_INFO : int { INFO = 0, WARNING = 1, ERROR = 2 };
@@ -159,7 +159,7 @@ class Writer {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "debug_logging.tcc"
 

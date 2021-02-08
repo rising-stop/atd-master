@@ -14,7 +14,7 @@
 
 #include "exceptions.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 /**
@@ -217,6 +217,6 @@ class FinateStateMachine {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "utility.tcc"

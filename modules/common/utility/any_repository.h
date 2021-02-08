@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class Any_Repository_iterator;
@@ -154,6 +154,6 @@ class Any_Repository_iterator : public const_Any_Repository_iterator {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "any_repository.tcc"

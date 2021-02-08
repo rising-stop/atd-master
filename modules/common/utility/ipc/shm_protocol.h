@@ -4,7 +4,7 @@
 
 // #include "protobuf_msg/shm_dispatcher.pb.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 typedef struct {
@@ -31,4 +31,4 @@ typedef struct {
 } SHM_BASIC_FRAME;
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

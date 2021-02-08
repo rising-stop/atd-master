@@ -1,6 +1,6 @@
 #include "shm_data_handler.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 void ShmDataHandler::set_TargetShm(int id, size_t size) {
@@ -10,4 +10,4 @@ void ShmDataHandler::set_TargetShm(int id, size_t size) {
 ShmDataHandler::ShmDataHandler(int id, size_t size) { set_TargetShm(id, size); }
 
 }  // namespace common
-}  // namespace atd
+}  // namespace Themis

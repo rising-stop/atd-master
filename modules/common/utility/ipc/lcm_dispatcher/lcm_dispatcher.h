@@ -8,7 +8,7 @@
 #include "modules/common/utility/thread_safe.h"
 #include "modules/common/utility/utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class LCM_Messages_Adapter {
@@ -82,6 +82,6 @@ class LCM_Proxy {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "lcm_dispatcher.tcc"

@@ -3,7 +3,7 @@
 
 #include "modules/common/utility/ipc/lcm_dispatcher/lcm_dispatcher.h"
 
-using namespace atd::utility;
+using namespace Themis::utility;
 
 int main(int argc, char* argv[]) {
   while (1) {

@@ -5,7 +5,7 @@
 
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class Interpolation {
@@ -30,6 +30,6 @@ class Interpolation {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif  // INTERPOLATION_H

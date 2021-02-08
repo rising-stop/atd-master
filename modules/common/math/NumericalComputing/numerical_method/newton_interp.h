@@ -5,7 +5,7 @@
 
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class NewtonInterp2D {
@@ -23,6 +23,6 @@ class NewtonInterp2D {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif

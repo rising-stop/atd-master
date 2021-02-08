@@ -6,7 +6,7 @@
 #include "modules/common/math/EuclideanGeometry/line/polynomial2D.h"
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -40,7 +40,7 @@ class LeastSquare2D {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #include "least_square.tcc"
 

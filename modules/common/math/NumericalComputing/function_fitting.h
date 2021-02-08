@@ -7,7 +7,7 @@
 #include "modules/common/math/EuclideanGeometry/line/polynomial2D.h"
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class FunctionFitting {
@@ -22,7 +22,7 @@ class FunctionFitting {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #include "function_fitting.tcc"
 

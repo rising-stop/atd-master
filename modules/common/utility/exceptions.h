@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 /**
@@ -53,7 +53,7 @@ class CommonException : public std::exception {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #define CUSTOM_EXCEPTION(args...) \
   throw atd::utility::CommonException(__FILE__, __LINE__, args)

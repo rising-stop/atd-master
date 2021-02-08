@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class NumericalIntegration {
@@ -26,6 +26,6 @@ class NumericalIntegration {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif

@@ -1,6 +1,6 @@
 #include "xml_parser.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 int XMLParser::Insert2DTable(const char* xml_path, const char* table_ID,
@@ -56,4 +56,4 @@ int XMLParser::Import2DTable(const char* xml_path, const char* table_ID,
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

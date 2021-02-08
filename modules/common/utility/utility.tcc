@@ -2,7 +2,7 @@
 
 #include "utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename... ARG>
@@ -64,4 +64,4 @@ void CString::cstring_split(const std::string &split_line, const char comma,
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

@@ -2,8 +2,8 @@
 // #include "../protobuf_msg/debug_monitor_protocol.pb.h"
 #include "modules/common/common_header.h"
 
-using namespace atd::utility;
-using namespace atd::protocol;
+using namespace Themis::utility;
+using namespace Themis::protocol;
 
 void init() {
   atd::utility::Singleton::try_register<Runtime_Counter>();

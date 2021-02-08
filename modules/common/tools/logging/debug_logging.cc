@@ -1,6 +1,6 @@
 #include "debug_logging.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 void DebugLogging::DebugInit() {
@@ -191,4 +191,4 @@ void Writer::init() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

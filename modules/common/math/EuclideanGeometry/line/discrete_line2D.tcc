@@ -2,7 +2,7 @@
 
 #include "discrete_line2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename TYPE>
@@ -79,4 +79,4 @@ DiscreteLine2D<TYPE>::get_PointSet() const {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

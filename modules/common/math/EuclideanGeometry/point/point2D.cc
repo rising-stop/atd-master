@@ -3,7 +3,7 @@
 #include <cmath>
 #include "modules/common/math/mathcommon.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 Point2D::Point2D(const double& x, const double& y) : x_(x), y_(y) {}
@@ -48,4 +48,4 @@ std::ostream& operator<<(std::ostream& ostm, const Point2D& point2d) {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

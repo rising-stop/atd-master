@@ -3,7 +3,7 @@
 #include "modules/common/math/NumericalComputing/numerical_method/lagrange_interp.h"
 #include "modules/common/math/NumericalComputing/numerical_method/newton_interp.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 double Interpolation::NewtonInterp(const std::vector<Point2D>& source,
@@ -49,4 +49,4 @@ std::vector<double> Interpolation::QuadraticInterp(
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "modules/common/math/mathcommon.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 void Arrow2D::set_ThetaFromPoint(const Point2D& target) {
@@ -14,4 +14,4 @@ void Arrow2D::set_ThetaFromPoint(const Point2D& target) {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

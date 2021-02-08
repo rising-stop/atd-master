@@ -7,7 +7,7 @@
 #include "modules/common/utility/ipc/shared_memory.h"
 #include "modules/common/utility/ipc/shm_protocol.h"
 
-using namespace atd::utility;
+using namespace Themis::utility;
 
 void CtlC_Handler(int sig) {
   Singleton::instance<ShmDispatcher>()->release_all_shm();

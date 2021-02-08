@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class Polynomial {
@@ -69,6 +69,6 @@ class Polynomial {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #endif  // PLANNING_POLYNOMIAL_H

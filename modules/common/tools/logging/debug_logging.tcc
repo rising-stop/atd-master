@@ -1,6 +1,6 @@
 #include "debug_logging.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename T>
@@ -41,4 +41,4 @@ DebugLogging::try_fetch_MutableCalibration(const std::string &name) {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

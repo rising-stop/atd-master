@@ -4,7 +4,7 @@
 
 #include "vectorXD.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -178,4 +178,4 @@ VectorXD<ORDER>::VectorXD(const VectorXD<ORDER>& target) {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

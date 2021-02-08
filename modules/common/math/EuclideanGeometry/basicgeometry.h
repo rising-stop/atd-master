@@ -4,7 +4,7 @@
 #include "modules/common/math/EuclideanGeometry/line/discrete_line2D.h"
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class BasicGeometry {
@@ -28,6 +28,6 @@ class BasicGeometry {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #endif  // BASICGEOMETRY_H

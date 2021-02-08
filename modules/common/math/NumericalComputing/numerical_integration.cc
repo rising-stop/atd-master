@@ -5,7 +5,7 @@
 
 #include "modules/common/math/mathcommon.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 double Midpoint(const double& lower, const double& upper,
@@ -64,4 +64,4 @@ double Simpson(const double& lower, const double& upper,
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

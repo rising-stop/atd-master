@@ -1,6 +1,6 @@
 #include "file_handler.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 std::fstream& ReadWriteableFile::get_FileStream() {
@@ -71,4 +71,4 @@ ReadWriteableFile::~ReadWriteableFile() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

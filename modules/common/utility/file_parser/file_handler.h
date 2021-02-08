@@ -6,7 +6,7 @@
 #include "modules/common/utility/exceptions.h"
 #include "modules/common/utility/utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class ReadWriteableFile {
@@ -35,4 +35,4 @@ class ReadWriteableFile {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

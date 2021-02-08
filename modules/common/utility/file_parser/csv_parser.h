@@ -6,7 +6,7 @@
 #include "modules/common/utility/file_parser/file_handler.h"
 #include "modules/common/utility/utility.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class CSVFile : public ReadWriteableFile {
@@ -74,4 +74,4 @@ class CSV_Observer : public Singleton {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

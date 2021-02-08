@@ -1,6 +1,6 @@
 #include "csv_parser.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 void CSVFile::check_TitleRegistered(const std::string& title) const {
@@ -234,4 +234,4 @@ CSV_Observer::CSV_Observer(ReadWriteableFile::FILE_MODE mode,
     : csv_(mode, name.c_str(), path.c_str()) {}
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

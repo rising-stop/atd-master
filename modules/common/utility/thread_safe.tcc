@@ -1,6 +1,6 @@
 #include "thread_safe.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename TYPE, typename Container>
@@ -107,4 +107,4 @@ ThreadSafe_Deque<TYPE, Container>::ThreadSafe_Deque(
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

@@ -3,7 +3,7 @@
 
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class SLPoint2D : public Point2D {
@@ -16,6 +16,6 @@ class SLPoint2D : public Point2D {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif

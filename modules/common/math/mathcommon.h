@@ -5,7 +5,7 @@
 
 #define SYSTEM_PRECISION 1e-6
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class MathCommon {
@@ -26,6 +26,6 @@ class MathCommon {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif  // MATHCOMMON_H

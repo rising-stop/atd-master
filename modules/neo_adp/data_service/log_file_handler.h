@@ -5,8 +5,8 @@
 #include "lcm/lcm-cpp.hpp"
 #include "modules/common/common_header.h"
 
-using namespace atd::utility;
-using namespace atd::protocol;
+using namespace Themis::utility;
+using namespace Themis::protocol;
 
 enum LCMFILE_MODE : int { DEFAULT = 0, WRITE = 1, READ = 2 };
 

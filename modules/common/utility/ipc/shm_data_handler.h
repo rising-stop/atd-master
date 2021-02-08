@@ -3,7 +3,7 @@
 #include "semaphore_mutex.h"
 #include "shared_memory.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class ShmDataHandler {
@@ -20,4 +20,4 @@ class ShmDataHandler {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

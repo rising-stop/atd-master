@@ -1,7 +1,7 @@
 #include "lagrange_interp.h"
 #include <stdexcept>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -38,4 +38,4 @@ std::vector<double> LagrangeInterp<ORDER>::get_InterpRes(
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

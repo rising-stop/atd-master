@@ -2,7 +2,7 @@
 
 #include "shared_memory.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename TYPE>
@@ -41,4 +41,4 @@ void SharedMemory::read_Msg(TYPE& msg, size_t size) {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

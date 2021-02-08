@@ -11,7 +11,7 @@
 #define NONLINEAR_RELATION atd::utility::NonLinearRelation::get_Instance()
 #endif
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class NonLinearRelation {
@@ -37,6 +37,6 @@ class NonLinearRelation {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #endif

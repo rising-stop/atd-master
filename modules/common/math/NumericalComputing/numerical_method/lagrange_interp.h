@@ -4,7 +4,7 @@
 #include <vector>
 #include "modules/common/math/EuclideanGeometry/point/point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -22,7 +22,7 @@ class LagrangeInterp {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #include "lagrange_interp.tcc"
 

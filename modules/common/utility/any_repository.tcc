@@ -1,7 +1,7 @@
 #include "any_repository.h"
 #include "exceptions.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <typename T, typename... ARGS>
@@ -53,4 +53,4 @@ std::pair<std::shared_ptr<T>, bool> Any_Repository::get_MutableRegisteredVar(
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

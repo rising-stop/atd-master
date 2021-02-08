@@ -23,7 +23,7 @@ typedef union {
   unsigned short *array; /**/
 } semun;
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 /**
@@ -224,4 +224,4 @@ class shared_lock {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

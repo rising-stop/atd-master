@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -48,7 +48,7 @@ typedef VectorXD<2> Vector2D;
 typedef VectorXD<3> Vector3D;
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #include "vectorXD.tcc"
 

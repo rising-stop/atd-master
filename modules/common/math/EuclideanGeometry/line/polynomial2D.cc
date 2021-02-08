@@ -6,7 +6,7 @@
 #include "modules/common/math/NumericalComputing/numerical_integration.h"
 #include "modules/common/math/mathcommon.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 Polynomial::Polynomial(const std::initializer_list<double>& init_list) {
@@ -295,4 +295,4 @@ std::ostream& operator<<(std::ostream& ostm, const Polynomial& poly) {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

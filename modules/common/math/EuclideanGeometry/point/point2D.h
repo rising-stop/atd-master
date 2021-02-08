@@ -7,7 +7,7 @@
 #include "modules/common/utility/class_support.h"
 #include "modules/common/math/EuclideanGeometry/point/vectorXD.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class Point2D {
@@ -33,6 +33,6 @@ class Point2D {
 };
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
 
 #endif

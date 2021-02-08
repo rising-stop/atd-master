@@ -6,7 +6,7 @@
 
 #include "modules/common/math/mathcommon.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 double BasicGeometry::Distance2LineSegment2D(
@@ -198,4 +198,4 @@ Point2D BasicGeometry::IntersectedPoint(
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

@@ -3,7 +3,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 int ShmDispatcher::register_shm(::key_t key, int size) {
@@ -167,4 +167,4 @@ ShmFactory::ShmFactory() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

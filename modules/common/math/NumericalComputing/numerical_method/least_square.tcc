@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 template <int ORDER>
@@ -127,4 +127,4 @@ inline double LeastSquare2D<ORDER>::get_CoefficientA(
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

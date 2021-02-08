@@ -6,7 +6,7 @@
 #include "modules/common/3rd_party/tinyxml2/tinyxml2.h"
 #include "modules/common/math/EuclideanGeometry/line/monotonic_discrete_line2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 using namespace tinyxml2;
@@ -22,6 +22,6 @@ class XMLParser {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #endif

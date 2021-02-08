@@ -1,5 +1,5 @@
 #include "sl_point2D.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {}  // namespace utility
-}  // namespace atd
+}  // namespace Themis

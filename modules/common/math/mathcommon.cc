@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 static const double PI = 3.1415926535898;
@@ -78,4 +78,4 @@ std::vector<double> MathCommon::merge_vector_from_end(
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

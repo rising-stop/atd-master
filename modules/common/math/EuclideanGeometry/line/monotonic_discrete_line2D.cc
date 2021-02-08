@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 void MonotonicDiscreteLine2D::clear() {
@@ -59,4 +59,4 @@ std::string MonotonicDiscreteLine2D::get_DebugString() const {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis

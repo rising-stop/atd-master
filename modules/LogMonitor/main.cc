@@ -4,8 +4,8 @@
 #include "modules/common/common_header.h"
 #include "protobuf_msg/planning_log.pb.h"
 
-using namespace atd::utility;
-using namespace atd::protocol;
+using namespace Themis::utility;
+using namespace Themis::protocol;
 
 /* main function */
 int main(int args, char** argv) {

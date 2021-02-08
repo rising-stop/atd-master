@@ -6,7 +6,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 class WfirstRWLock {
@@ -180,6 +180,6 @@ class ThreadSafe_Deque final {
 };
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis
 
 #include "thread_safe.tcc"

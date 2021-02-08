@@ -1,6 +1,6 @@
 #include "any_repository.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 const_Any_Repository_iterator::const_Any_Repository_iterator(
@@ -97,4 +97,4 @@ Any_Repository::const_iterator Any_Repository::cbegin() const {
 Any_Repository::const_iterator Any_Repository::cend() const { return end(); }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

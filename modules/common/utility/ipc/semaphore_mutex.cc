@@ -4,7 +4,7 @@
 
 #include "modules/common/utility/exceptions.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 int SemDispatcher::register_sem(::key_t key, int sgnl_num) {
@@ -222,4 +222,4 @@ void SharedSemMutex::shared_unlock() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

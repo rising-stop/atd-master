@@ -5,7 +5,7 @@
 #include "modules/common/math/NumericalComputing/interpolation.h"
 #include "modules/common/utility/file_parser/xml_parser.h"
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 std::mutex NonLinearRelation::mutex_instance_;
@@ -57,4 +57,4 @@ NonLinearRelation* NonLinearRelation::get_Instance() {
 }
 
 }  // namespace utility
-}  // namespace atd
+}  // namespace Themis

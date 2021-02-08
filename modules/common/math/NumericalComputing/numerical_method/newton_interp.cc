@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace atd {
+namespace Themis {
 namespace utility {
 
 bool NewtonInterp2D::deal_DifferenceQuotient(
@@ -40,4 +40,4 @@ double NewtonInterp2D::get_InterpRes(const double& target) const {
 }
 
 }  // namespace planning
-}  // namespace atd
+}  // namespace Themis
